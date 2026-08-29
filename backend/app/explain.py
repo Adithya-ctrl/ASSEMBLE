@@ -18,6 +18,7 @@ from app.api_models import (
     BlockingFact,
     BlockingRequirementSet,
     ExplainResponse,
+    InitiativeAnalysisResult,
     RequirementGroup,
     SolverStatus,
 )
@@ -31,8 +32,9 @@ class Analyser(Protocol):
     ``relaxed_groups`` is empty for a normal solve.  A non-empty collection
     asks the authoritative analyser to omit those named hard-constraint groups
     for this bounded diagnostic run.  The return value may be an
-    ``InitiativeAnalysisResult``, a status string/enum, or a mapping/object
-    exposing a ``status`` field.
+    ``InitiativeAnalysisResult``, a bare status string/enum, or an exact
+    one-key mapping exposing ``status``.  Any richer result must satisfy the
+    full ``InitiativeAnalysisResult`` contract.
     """
 
     def __call__(
@@ -125,6 +127,71 @@ def _parameter_names(fn: AnalysisCallable) -> tuple[inspect.Parameter, ...] | No
         return None
 
 
+def _model_snapshot(model: CommunityState | InitiativeBlueprint) -> dict[str, object]:
+    """Return a stable value snapshot for analyser-boundary mutation checks."""
+
+    # Python-mode dumps retain sets, so value equality is independent of the
+    # iteration order a deep copy may assign to those sets.
+    return model.model_dump(mode="python")
+
+
+def _is_exact_status_only_result(result: object) -> bool:
+    """Whether ``result`` uses the documented lightweight analyser seam."""
+
+    if isinstance(result, (SolverStatus, StrEnum, str)):
+        return True
+    return isinstance(result, Mapping) and set(result) == {"status"}
+
+
+def _validate_rich_analyser_result(
+    result: object,
+    community: CommunityState,
+    initiative: InitiativeBlueprint,
+    *,
+    relaxed_groups: Collection[RequirementGroup],
+) -> InitiativeAnalysisResult:
+    """Validate source binding, status invariants, and any returned witness."""
+
+    payload = (
+        result.model_dump(mode="python")
+        if isinstance(result, InitiativeAnalysisResult)
+        else result
+    )
+    try:
+        validated = InitiativeAnalysisResult.model_validate(payload)
+    except (TypeError, ValueError) as exc:
+        raise AnalyserContractError(
+            "rich analyser result does not match InitiativeAnalysisResult"
+        ) from exc
+
+    if validated.initiative_id != initiative.id:
+        raise AnalyserContractError(
+            f"analyser result for {initiative.id} has a mismatched initiative"
+        )
+
+    if validated.status in (SolverStatus.OPTIMAL, SolverStatus.FEASIBLE):
+        # Import lazily so the explanation protocol remains importable without
+        # loading the CP-SAT implementation until a rich witness needs replay.
+        from app.solver import validate_analysis_witness
+
+        try:
+            valid = validate_analysis_witness(
+                community,
+                initiative,
+                validated,
+                relaxed_groups=relaxed_groups,
+            )
+        except Exception as exc:
+            raise AnalyserContractError(
+                f"feasible analyser result for {initiative.id} could not be replayed"
+            ) from exc
+        if not valid:
+            raise AnalyserContractError(
+                f"feasible analyser result for {initiative.id} failed canonical replay"
+            )
+    return validated
+
+
 def call_analyser(
     analyser: AnalysisCallable | None,
     community: CommunityState,
@@ -132,11 +199,12 @@ def call_analyser(
     *,
     relaxed_groups: Collection[RequirementGroup] = (),
 ) -> object:
-    """Invoke an analyser through the explicit M2 relaxation seam.
+    """Invoke and validate an analyser through the explicit M2 relaxation seam.
 
     The keyword is intentionally strict when relaxation is requested.  A
     two-argument solver cannot truthfully answer a relax-and-resolve query, so
-    this fails closed rather than silently claiming a blocking set.
+    this fails closed rather than silently claiming a blocking set.  Inputs are
+    isolated and rich results are source-bound and canonically replayed.
     """
 
     fn = resolve_analyser(analyser)
@@ -171,36 +239,107 @@ def call_analyser(
         if named_parameter is None and has_var_keyword:
             named_parameter = "relaxed_groups"
 
-    if groups:
+    def invoke(
+        analysis_community: CommunityState,
+        analysis_initiative: InitiativeBlueprint,
+    ) -> object:
+        if groups:
+            if named_parameter is not None:
+                return fn(
+                    analysis_community,
+                    analysis_initiative,
+                    **{named_parameter: frozenset(groups)},
+                )
+            if parameters is not None:
+                positional = [
+                    parameter
+                    for parameter in parameters
+                    if parameter.kind
+                    in (
+                        inspect.Parameter.POSITIONAL_ONLY,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                    )
+                ]
+                if len(positional) >= 3:
+                    return fn(
+                        analysis_community,
+                        analysis_initiative,
+                        frozenset(groups),
+                    )
+            raise AnalyserContractError(
+                "authoritative analyser must accept relaxed_groups "
+                "(or an equivalent third argument)"
+            )
+
+        # For baseline calls, a plain two-argument analyser is sufficient.  If
+        # it advertises the seam, passing an empty set keeps invocation uniform.
         if named_parameter is not None:
-            return fn(community, initiative, **{named_parameter: frozenset(groups)})
+            return fn(
+                analysis_community,
+                analysis_initiative,
+                **{named_parameter: frozenset()},
+            )
         if parameters is not None:
             positional = [
                 parameter
                 for parameter in parameters
-                if parameter.kind
-                in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+                if parameter.kind in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                )
             ]
             if len(positional) >= 3:
-                return fn(community, initiative, frozenset(groups))
-        raise AnalyserContractError(
-            "authoritative analyser must accept relaxed_groups (or an equivalent third argument)"
-        )
+                return fn(analysis_community, analysis_initiative, frozenset())
+        return fn(analysis_community, analysis_initiative)
 
-    # For baseline calls, a plain two-argument analyser is sufficient.  If it
-    # advertises the seam, passing an empty set keeps the invocation uniform.
-    if named_parameter is not None:
-        return fn(community, initiative, **{named_parameter: frozenset()})
-    if parameters is not None:
-        positional = [
-            parameter
-            for parameter in parameters
-            if parameter.kind
-            in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
-        ]
-        if len(positional) >= 3:
-            return fn(community, initiative, frozenset())
-    return fn(community, initiative)
+    # Third-party analysers receive disposable inputs.  Snapshotting both
+    # copies before and after the call makes mutation a contract breach while
+    # preventing it from leaking into the caller or witness validation state.
+    caller_community_snapshot = _model_snapshot(community)
+    caller_initiative_snapshot = _model_snapshot(initiative)
+    analysis_community = community.model_copy(deep=True)
+    analysis_initiative = initiative.model_copy(deep=True)
+    try:
+        raw_result = invoke(analysis_community, analysis_initiative)
+    except Exception as exc:
+        if _model_snapshot(analysis_community) != caller_community_snapshot:
+            raise AnalyserContractError(
+                "analysis state was mutated; authoritative analyser mutated its input "
+                "(community)"
+            ) from exc
+        if _model_snapshot(analysis_initiative) != caller_initiative_snapshot:
+            raise AnalyserContractError(
+                "analysis initiative was mutated; authoritative analyser mutated its input "
+                "(initiative)"
+            ) from exc
+        raise
+
+    if _model_snapshot(analysis_community) != caller_community_snapshot:
+        raise AnalyserContractError(
+            "analysis state was mutated; authoritative analyser mutated its input "
+            "(community)"
+        )
+    if _model_snapshot(analysis_initiative) != caller_initiative_snapshot:
+        raise AnalyserContractError(
+            "analysis initiative was mutated; authoritative analyser mutated its input "
+            "(initiative)"
+        )
+    if _model_snapshot(community) != caller_community_snapshot:
+        raise AnalyserContractError("authoritative analyser mutated the caller community")
+    if _model_snapshot(initiative) != caller_initiative_snapshot:
+        raise AnalyserContractError("authoritative analyser mutated the caller initiative")
+
+    if _is_exact_status_only_result(raw_result):
+        # Coercion here rejects unknown values before any caller can interpret
+        # the lightweight status as a valid solver outcome.
+        coerce_status(raw_result)
+        return raw_result
+    return _validate_rich_analyser_result(
+        raw_result,
+        community,
+        initiative,
+        relaxed_groups=groups,
+    )
 
 
 def _initiative_slot_options(initiative: InitiativeBlueprint) -> tuple[tuple[TimeSlot, ...], ...]:

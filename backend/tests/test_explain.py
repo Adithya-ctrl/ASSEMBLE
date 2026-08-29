@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 from collections.abc import Collection
+from enum import StrEnum
 
-from app.api_models import RequirementGroup
+import pytest
+
+from app.api_models import RequirementGroup, SolverStatus
+from app.errors import AnalyserContractError
 from app.explain import explain_infeasibility, inventory_facts
 from app.fixture import fresh_demo_fixture
 from app.models import CommunityState, InitiativeBlueprint
 from app.models import TimeSlot
+from app.solver import solve_initiative
 
 
 def _clinic_analyser(
@@ -93,3 +98,100 @@ def test_availability_explanation_names_resource_and_missing_slot() -> None:
     assert resource_fact.relevant_ids == ["LIBRARY_LAPTOPS"]
     assert resource_fact.note is not None
     assert "SAT_12" in resource_fact.note
+
+
+class _IndependentStatus(StrEnum):
+    FEASIBLE = "FEASIBLE"
+
+
+@pytest.mark.parametrize(
+    "status_only",
+    (
+        SolverStatus.FEASIBLE,
+        _IndependentStatus.FEASIBLE,
+        "FEASIBLE",
+        {"status": "FEASIBLE"},
+    ),
+)
+def test_exact_status_only_analyser_forms_remain_supported(status_only: object) -> None:
+    fixture = fresh_demo_fixture()
+    workshop = next(item for item in fixture.initiatives if item.id == "BASIC_WORKSHOP")
+
+    response = explain_infeasibility(
+        fixture.community,
+        workshop,
+        lambda _community, _initiative: status_only,
+    )
+
+    assert response.status is SolverStatus.FEASIBLE
+    assert response.blocking_requirement_sets == []
+    assert response.solver_runs == 1
+
+
+@pytest.mark.parametrize("mutated_input", ("community", "initiative"))
+def test_analyser_mutation_is_rejected_without_leaking_to_caller(
+    mutated_input: str,
+) -> None:
+    fixture = fresh_demo_fixture()
+    workshop = next(item for item in fixture.initiatives if item.id == "BASIC_WORKSHOP")
+    community_before = fixture.community.model_dump(mode="json")
+    initiative_before = workshop.model_dump(mode="json")
+
+    def mutating_analyser(community, initiative):
+        if mutated_input == "community":
+            community.people[0].name = "MUTATED"
+        else:
+            initiative.name = "MUTATED"
+        return {"status": "OPTIMAL"}
+
+    with pytest.raises(AnalyserContractError, match="mutated its input"):
+        explain_infeasibility(fixture.community, workshop, mutating_analyser)
+
+    assert fixture.community.model_dump(mode="json") == community_before
+    assert workshop.model_dump(mode="json") == initiative_before
+
+
+@pytest.mark.parametrize(
+    "malformation",
+    (
+        "mismatched_initiative",
+        "duplicate_assignments",
+        "truncated_trace",
+        "infeasible_with_witness",
+        "unknown_with_objective",
+    ),
+)
+def test_rich_analyser_results_fail_closed_on_contract_breaches(
+    malformation: str,
+) -> None:
+    fixture = fresh_demo_fixture()
+    workshop = next(item for item in fixture.initiatives if item.id == "BASIC_WORKSHOP")
+    valid = solve_initiative(fixture.community, workshop)
+
+    if malformation == "mismatched_initiative":
+        malformed: object = valid.model_copy(
+            deep=True,
+            update={"initiative_id": "OTHER_INITIATIVE"},
+        )
+    elif malformation == "duplicate_assignments":
+        malformed = valid.model_copy(deep=True)
+        malformed.assignments.append(malformed.assignments[0].model_copy(deep=True))
+    elif malformation == "truncated_trace":
+        malformed = valid.model_copy(deep=True)
+        malformed.assembly_trace.pop()
+    elif malformation == "infeasible_with_witness":
+        malformed = {
+            "status": "INFEASIBLE",
+            "assignments": [
+                {"role_instance_id": "HOST", "person_id": "PRIYA"}
+            ],
+        }
+    else:
+        malformed = {"status": "UNKNOWN", "objective_value": 12}
+
+    with pytest.raises(AnalyserContractError):
+        explain_infeasibility(
+            fixture.community,
+            workshop,
+            lambda _community, _initiative: malformed,
+        )
