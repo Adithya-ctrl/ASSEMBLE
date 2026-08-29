@@ -32,9 +32,9 @@ class Analyser(Protocol):
     ``relaxed_groups`` is empty for a normal solve.  A non-empty collection
     asks the authoritative analyser to omit those named hard-constraint groups
     for this bounded diagnostic run.  The return value may be an
-    ``InitiativeAnalysisResult``, a bare status string/enum, or an exact
-    one-key mapping exposing ``status``.  Any richer result must satisfy the
-    full ``InitiativeAnalysisResult`` contract.
+    ``InitiativeAnalysisResult``, a bare status string/enum, or an exact status
+    mapping with an optional matching ``initiative_id``.  Any richer result
+    must satisfy the full ``InitiativeAnalysisResult`` contract.
     """
 
     def __call__(
@@ -135,12 +135,30 @@ def _model_snapshot(model: CommunityState | InitiativeBlueprint) -> dict[str, ob
     return model.model_dump(mode="python")
 
 
-def _is_exact_status_only_result(result: object) -> bool:
+def _is_exact_status_only_result(
+    result: object,
+    initiative: InitiativeBlueprint,
+) -> bool:
     """Whether ``result`` uses the documented lightweight analyser seam."""
 
     if isinstance(result, (SolverStatus, StrEnum, str)):
         return True
-    return isinstance(result, Mapping) and set(result) == {"status"}
+    if not isinstance(result, Mapping):
+        return False
+    keys = set(result)
+    if keys == {"status"}:
+        return True
+    if keys == {"initiative_id", "status"}:
+        supplied_initiative_id = result["initiative_id"]
+        if (
+            not isinstance(supplied_initiative_id, str)
+            or supplied_initiative_id != initiative.id
+        ):
+            raise AnalyserContractError(
+                f"status receipt for {initiative.id} has a mismatched initiative"
+            )
+        return True
+    return False
 
 
 def _validate_rich_analyser_result(
@@ -329,7 +347,7 @@ def call_analyser(
     if _model_snapshot(initiative) != caller_initiative_snapshot:
         raise AnalyserContractError("authoritative analyser mutated the caller initiative")
 
-    if _is_exact_status_only_result(raw_result):
+    if _is_exact_status_only_result(raw_result, initiative):
         # Coercion here rejects unknown values before any caller can interpret
         # the lightweight status as a valid solver outcome.
         coerce_status(raw_result)

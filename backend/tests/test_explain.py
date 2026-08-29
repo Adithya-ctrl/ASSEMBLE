@@ -111,6 +111,7 @@ class _IndependentStatus(StrEnum):
         _IndependentStatus.FEASIBLE,
         "FEASIBLE",
         {"status": "FEASIBLE"},
+        {"initiative_id": "BASIC_WORKSHOP", "status": "FEASIBLE"},
     ),
 )
 def test_exact_status_only_analyser_forms_remain_supported(status_only: object) -> None:
@@ -126,6 +127,21 @@ def test_exact_status_only_analyser_forms_remain_supported(status_only: object) 
     assert response.status is SolverStatus.FEASIBLE
     assert response.blocking_requirement_sets == []
     assert response.solver_runs == 1
+
+
+def test_status_only_receipt_rejects_mismatched_initiative() -> None:
+    fixture = fresh_demo_fixture()
+    workshop = next(item for item in fixture.initiatives if item.id == "BASIC_WORKSHOP")
+
+    with pytest.raises(AnalyserContractError, match="mismatched initiative"):
+        explain_infeasibility(
+            fixture.community,
+            workshop,
+            lambda _community, _initiative: {
+                "initiative_id": "OTHER_INITIATIVE",
+                "status": "UNKNOWN",
+            },
+        )
 
 
 @pytest.mark.parametrize("mutated_input", ("community", "initiative"))
