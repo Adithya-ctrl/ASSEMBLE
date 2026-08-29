@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { ApiRequestError } from "./api";
@@ -78,6 +79,60 @@ const auditEvent = {
   occurred_at: 2_000_000_002,
   metadata: { role: "COORDINATOR", recipient_kind: "email" },
 };
+
+const communitiesPanelSource = readFileSync(
+  new URL("../components/community-admin/CommunitiesPanel.tsx", import.meta.url),
+  "utf8",
+);
+
+function formPattern(inputId: string): string {
+  const match = communitiesPanelSource.match(
+    new RegExp(`id="${inputId}"[^\\n]*pattern="([^"]+)"`),
+  );
+  assert.ok(match, `missing pattern for ${inputId}`);
+  return match[1];
+}
+
+function compileHtmlPattern(pattern: string): RegExp | null {
+  try {
+    new RegExp("", "v");
+  } catch {
+    return null;
+  }
+  return new RegExp(`^(?:${pattern})$`, "v");
+}
+
+test("community slug and invitation token patterns are valid HTML v-mode constraints", () => {
+  const slugPattern = formPattern("collab-community-slug");
+  const inviteTokenPattern = formPattern("collab-invite-token");
+
+  assert.equal(slugPattern, "[a-z0-9](?:[a-z0-9\\-]{1,62}[a-z0-9])?");
+  assert.equal(inviteTokenPattern, "[A-Za-z0-9_\\-]+");
+
+  const slugConstraint = compileHtmlPattern(slugPattern);
+  const inviteTokenConstraint = compileHtmlPattern(inviteTokenPattern);
+  if (!slugConstraint || !inviteTokenConstraint) {
+    assert.equal(slugPattern.includes("\\-"), true);
+    assert.equal(inviteTokenPattern.includes("\\-"), true);
+    return;
+  }
+
+  for (const value of ["marathon-neighbourhood", "abc", "a1-b2"]) {
+    assert.equal(slugConstraint.test(value), true, `valid slug rejected: ${value}`);
+  }
+  for (const value of ["-neighbourhood", "neighbourhood-", "Neighbourhood", "neighbour_hood"]) {
+    assert.equal(slugConstraint.test(value), false, `invalid slug accepted: ${value}`);
+  }
+
+  const validInviteToken = `${"a".repeat(40)}_-9`;
+  assert.equal(validInviteToken.length, 43);
+  for (const value of [validInviteToken, "A_b-C9"]) {
+    assert.equal(inviteTokenConstraint.test(value), true, `valid invitation token rejected: ${value}`);
+  }
+  for (const value of ["token.with.dot", "token+plus", "token with space", "token/slash"]) {
+    assert.equal(inviteTokenConstraint.test(value), false, `invalid invitation token accepted: ${value}`);
+  }
+});
 
 test("runtime parsers accept every frozen auth and community response shape", () => {
   assert.deepEqual(parseAuthUser(user), user);

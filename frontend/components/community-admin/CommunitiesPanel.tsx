@@ -153,7 +153,7 @@ export default function CommunitiesPanel() {
           <form className="collab-form" onSubmit={createCommunity}>
             <div className="collab-form-heading"><h2>Create a collaboration space</h2><p>You become its first Administrator.</p></div>
             <div className="collab-field"><label htmlFor="collab-community-name">Name</label><input id="collab-community-name" maxLength={120} onChange={(event) => setName(event.target.value)} required type="text" value={name} /></div>
-            <div className="collab-field"><label htmlFor="collab-community-slug">Slug</label><input aria-describedby="collab-slug-help" id="collab-community-slug" maxLength={64} minLength={3} onChange={(event) => setSlug(event.target.value)} pattern="[a-z0-9](?:[a-z0-9-]{1,62}[a-z0-9])?" required type="text" value={slug} /><span id="collab-slug-help">3-64 lowercase letters, numbers or hyphens. Start and end with a letter or number.</span></div>
+            <div className="collab-field"><label htmlFor="collab-community-slug">Slug</label><input aria-describedby="collab-slug-help" id="collab-community-slug" maxLength={64} minLength={3} onChange={(event) => setSlug(event.target.value)} pattern="[a-z0-9](?:[a-z0-9\-]{1,62}[a-z0-9])?" required type="text" value={slug} /><span id="collab-slug-help">3-64 lowercase letters, numbers or hyphens. Start and end with a letter or number.</span></div>
             {requestError ? <ErrorMessage error={requestError} /> : null}
             <Button className="collab-submit" disabled={working} size="3" type="submit">{working ? "Creating" : "Create space"}</Button>
           </form>
@@ -162,7 +162,7 @@ export default function CommunitiesPanel() {
         <Tabs.Content className="collab-tab-content" value="accept">
           <form className="collab-form" onSubmit={acceptInvitation}>
             <div className="collab-form-heading"><h2>Accept an invitation</h2><p>The token works only for the username or email named by the Administrator.</p></div>
-            <div className="collab-field"><label htmlFor="collab-invite-token">Invitation token</label><input autoComplete="off" id="collab-invite-token" maxLength={128} minLength={40} onChange={(event) => setInviteToken(event.target.value)} pattern="[A-Za-z0-9_-]+" required spellCheck="false" type="password" value={inviteToken} /><span>The token stays only in this form and is cleared when submitted.</span></div>
+            <div className="collab-field"><label htmlFor="collab-invite-token">Invitation token</label><input autoComplete="off" id="collab-invite-token" maxLength={128} minLength={40} onChange={(event) => setInviteToken(event.target.value)} pattern="[A-Za-z0-9_\-]+" required spellCheck="false" type="password" value={inviteToken} /><span>The token stays only in this form and is cleared when submitted.</span></div>
             {requestError ? <ErrorMessage error={requestError} /> : null}
             <Button className="collab-submit" disabled={working} size="3" type="submit">{working ? "Accepting" : "Accept invite"}</Button>
           </form>
