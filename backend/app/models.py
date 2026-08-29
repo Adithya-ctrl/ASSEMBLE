@@ -11,6 +11,18 @@ StableId = Annotated[str, Field(pattern=r"^[A-Z][A-Z0-9_]*$")]
 CapabilityId = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*$")]
 LanguageCode = Annotated[str, Field(pattern=r"^[a-z]{2}$")]
 
+MAX_ORGANISATIONS = 32
+MAX_PEOPLE = 128
+MAX_SPACES = 32
+MAX_RESOURCES = 64
+MAX_INITIATIVES = 32
+MAX_ACTIONS = 32
+MAX_CAPABILITIES = 32
+MAX_LANGUAGES = 16
+MAX_ROLES = 32
+MAX_REQUIREMENTS = 64
+MAX_EFFECTS = 64
+
 
 class ContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -35,10 +47,10 @@ class PersonBlock(ContractModel):
     id: StableId
     name: str = Field(min_length=1)
     organisation_id: StableId
-    capabilities: set[CapabilityId] = Field(default_factory=set)
-    languages: set[LanguageCode] = Field(default_factory=set)
-    willing_to_learn: set[CapabilityId] = Field(default_factory=set)
-    available_slots: set[TimeSlot] = Field(default_factory=set)
+    capabilities: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
+    languages: set[LanguageCode] = Field(default_factory=set, max_length=MAX_LANGUAGES)
+    willing_to_learn: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
+    available_slots: set[TimeSlot] = Field(default_factory=set, max_length=len(TimeSlot))
     max_contribution_slots: int = Field(ge=1)
 
     @model_validator(mode="after")
@@ -52,9 +64,9 @@ class SpaceBlock(ContractModel):
     id: StableId
     name: str = Field(min_length=1)
     organisation_id: StableId
-    available_slots: set[TimeSlot] = Field(default_factory=set)
+    available_slots: set[TimeSlot] = Field(default_factory=set, max_length=len(TimeSlot))
     capacity: int = Field(ge=0)
-    features: set[CapabilityId] = Field(default_factory=set)
+    features: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
 
 
 class ResourceBlock(ContractModel):
@@ -62,17 +74,17 @@ class ResourceBlock(ContractModel):
     name: str = Field(min_length=1)
     organisation_id: StableId
     quantity: int = Field(ge=0)
-    available_slots: set[TimeSlot] = Field(default_factory=set)
+    available_slots: set[TimeSlot] = Field(default_factory=set, max_length=len(TimeSlot))
     shareable: bool
 
 
 class CommunityState(ContractModel):
     state_id: StableId
     parent_state_id: StableId | None = None
-    organisations: list[OrganisationBlock] = Field(default_factory=list)
-    people: list[PersonBlock] = Field(default_factory=list)
-    spaces: list[SpaceBlock] = Field(default_factory=list)
-    resources: list[ResourceBlock] = Field(default_factory=list)
+    organisations: list[OrganisationBlock] = Field(default_factory=list, max_length=MAX_ORGANISATIONS)
+    people: list[PersonBlock] = Field(default_factory=list, max_length=MAX_PEOPLE)
+    spaces: list[SpaceBlock] = Field(default_factory=list, max_length=MAX_SPACES)
+    resources: list[ResourceBlock] = Field(default_factory=list, max_length=MAX_RESOURCES)
 
     @model_validator(mode="after")
     def references_resolve(self) -> "CommunityState":
@@ -88,14 +100,14 @@ class CommunityState(ContractModel):
 class RoleRequirement(ContractModel):
     id: StableId
     label: str = Field(min_length=1)
-    required_capabilities: set[CapabilityId] = Field(default_factory=set)
-    required_languages: set[LanguageCode] = Field(default_factory=set)
+    required_capabilities: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
+    required_languages: set[LanguageCode] = Field(default_factory=set, max_length=MAX_LANGUAGES)
     allow_shared_person: bool = False
 
 
 class VenueRequirement(ContractModel):
     minimum_capacity: int = Field(ge=0)
-    required_features: set[CapabilityId] = Field(default_factory=set)
+    required_features: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
 
 
 class ResourceRequirement(ContractModel):
@@ -106,10 +118,10 @@ class ResourceRequirement(ContractModel):
 class InitiativeBlueprint(ContractModel):
     id: StableId
     name: str = Field(min_length=1)
-    roles: list[RoleRequirement] = Field(default_factory=list)
+    roles: list[RoleRequirement] = Field(default_factory=list, max_length=MAX_ROLES)
     venue: VenueRequirement
-    resources: list[ResourceRequirement] = Field(default_factory=list)
-    candidate_start_slots: list[TimeSlot] = Field(min_length=1)
+    resources: list[ResourceRequirement] = Field(default_factory=list, max_length=MAX_REQUIREMENTS)
+    candidate_start_slots: list[TimeSlot] = Field(min_length=1, max_length=len(TimeSlot))
     duration_slots: int = Field(ge=1, le=len(ORDERED_TIME_SLOTS))
 
     @model_validator(mode="after")
@@ -134,13 +146,13 @@ class WillingLearnerPrecondition(ContractModel):
 
 class SpaceAvailabilityPrecondition(ContractModel):
     space_id: StableId
-    slots: set[TimeSlot] = Field(default_factory=set)
+    slots: set[TimeSlot] = Field(default_factory=set, max_length=len(TimeSlot))
 
 
 class ActionPreconditions(ContractModel):
-    person_capabilities: list[PersonCapabilityPrecondition] = Field(default_factory=list)
-    willing_learners: list[WillingLearnerPrecondition] = Field(default_factory=list)
-    space_availability: list[SpaceAvailabilityPrecondition] = Field(default_factory=list)
+    person_capabilities: list[PersonCapabilityPrecondition] = Field(default_factory=list, max_length=MAX_REQUIREMENTS)
+    willing_learners: list[WillingLearnerPrecondition] = Field(default_factory=list, max_length=MAX_REQUIREMENTS)
+    space_availability: list[SpaceAvailabilityPrecondition] = Field(default_factory=list, max_length=MAX_REQUIREMENTS)
 
 
 class AddCapabilityEffect(ContractModel):
@@ -171,14 +183,14 @@ class CatalystAction(ContractModel):
     name: str = Field(min_length=1)
     cost: int = Field(ge=0)
     preconditions: ActionPreconditions = Field(default_factory=ActionPreconditions)
-    effects: list[ActionEffect] = Field(min_length=1)
+    effects: list[ActionEffect] = Field(min_length=1, max_length=MAX_EFFECTS)
 
 
 class DemoFixture(ContractModel):
     fixture_version: str = Field(pattern=r"^assemble-demo-v[0-9]+$")
     community: CommunityState
-    initiatives: list[InitiativeBlueprint] = Field(min_length=1)
-    actions: list[CatalystAction] = Field(min_length=1)
+    initiatives: list[InitiativeBlueprint] = Field(min_length=1, max_length=MAX_INITIATIVES)
+    actions: list[CatalystAction] = Field(min_length=1, max_length=MAX_ACTIONS)
 
     @model_validator(mode="after")
     def all_references_resolve(self) -> "DemoFixture":
@@ -226,4 +238,3 @@ def _unique_ids(items: list[object], label: str) -> set[str]:
 def _require_reference(reference: str, available: object, context: str) -> None:
     if reference not in available:  # type: ignore[operator]
         raise ValueError(f"{context} references missing id {reference}")
-

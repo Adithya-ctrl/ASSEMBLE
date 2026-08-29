@@ -12,7 +12,7 @@ ASSEMBLE helps a community answer three concrete questions:
 
 The primary user is a community coordinator. The primary event-day observer is a judge. The decisive action is not a commercial conversion: it is completing the evidence-backed journey from community state `S0`, through a proven blocker and a valid catalyst, to verified state `S1`.
 
-## 2. Selected direction
+## 2. Current direction
 
 ### Assembly Table with Blueprint Evidence
 
@@ -27,16 +27,7 @@ Desired emotional sequence:
 - unlock: agency through a smallest valid intervention;
 - successor state: earned optimism because `S1` is independently solved.
 
-## 3. Explored directions
-
-| Direction | Best property | Main risk | Decision |
-| --- | --- | --- | --- |
-| Assembly Table | Community warmth and event-day clarity | Can become a card dashboard without discipline | Selected |
-| Constraint Blueprint | Strongest technical visibility | Can feel cold or infrastructure-like | Borrow sockets and evidence rows |
-| Evidence Story | Human, editorial explanation | Too much prose and annotation work | Borrow claim-adjacent proof |
-| Socket Assembly Board | Memorable blocks metaphor | Can become gamified or expensive responsively | Borrow shape-coded block types |
-
-## 4. Reference-role map
+## 3. Reference-role map
 
 References are used for principles and interaction mechanisms only. Do not reproduce their branding, assets, copy, or distinctive compositions.
 
@@ -61,9 +52,9 @@ References are used for principles and interaction mechanisms only. Do not repro
 
 Explicit negative reference: generic gradient SaaS dashboards with soft identical cards. They make the current system look like an AI wrapper and hide its strongest asset: a deterministic, inspectable solver journey.
 
-## 5. Application architecture
+## 4. Application architecture
 
-The core is a single judge-ready planning workspace, not a sales homepage.
+The core is a single judge-ready planning workspace followed by a proof-derived Project surface, not a sales homepage or disconnected project-management product.
 
 ### Persistent shell
 
@@ -72,6 +63,7 @@ The core is a single judge-ready planning workspace, not a sales homepage.
 - initiative rail: Basic Workshop, Multilingual Clinic, and Repair Skill-Share with status and requirement sockets;
 - decision workspace: assignment, blocker evidence, candidate interventions, applied catalyst, and successor proof;
 - technical inspector: collapsed by default, containing variable/constraint counts, solve status, objective, trace, state identifier, and exact state diff.
+- executable Project: appears only after a real feasible base proof or verified successor proof; contains editable metadata and server-derived operational detail.
 
 ### Judge journey
 
@@ -84,7 +76,9 @@ The core is a single judge-ready planning workspace, not a sales homepage.
 
 These labels and this order are frozen for the demo. Controls must never imply success before the backend response.
 
-## 6. Layout system
+After the six-action journey, `CREATE PROJECT` is a separate labelled form action. Basic Workshop may create from its feasible S0 proof with explicit path `[]`. Multilingual Clinic must not expose the form until successor verification; it creates from the authoritative `TRAIN_DIGITAL_HELPERS` path. The Project detail shows returned status, operational team, complete selected-person facts, readiness evidence, venue, time, resources, accessibility, languages, source-plan ID, and a control that opens and focuses the Technical Inspector.
+
+## 5. Layout system
 
 ### Desktop, 1280px and above
 
@@ -111,7 +105,7 @@ These labels and this order are frozen for the demo. Controls must never imply s
 - tap targets are at least 44 by 44 CSS pixels;
 - no hover-only meaning.
 
-## 7. Typography
+## 6. Typography
 
 - Geist: product identity, headings, labels, narrative, controls;
 - Geist Mono: state IDs, solver status, counts, costs, constraints, and trace values;
@@ -123,7 +117,7 @@ These labels and this order are frozen for the demo. Controls must never imply s
 - use sentence case. Reserve uppercase for the six explicit action buttons and tiny machine statuses where it aids scanning;
 - do not use a giant multi-line headline, repeated eyebrow labels, or monotonous heading scales.
 
-## 8. Colour, material, and graphic grammar
+## 7. Colour, material, and graphic grammar
 
 Authoritative palette:
 
@@ -159,7 +153,7 @@ Material rules:
 - blocker proof row: `required`, `available`, `shortfall`, source constraint, and solver-run count when applicable;
 - unrelated routes reduce contrast during explanation but remain discoverable.
 
-## 9. Motion grammar
+## 8. Motion grammar
 
 Motion communicates state, causality, or navigation only.
 
@@ -174,7 +168,7 @@ Motion communicates state, causality, or navigation only.
 
 No WebGL or true 3D is required. Shallow depth may distinguish the active decision surface from the quiet canvas. That is the only spatial signature in the core.
 
-## 10. Accessibility and resilience
+## 9. Accessibility and resilience
 
 - semantic landmarks and heading order;
 - keyboard access to every action, initiative, inspector control, and reset;
@@ -188,7 +182,7 @@ No WebGL or true 3D is required. Shallow depth may distinguish the active decisi
 - long IDs and constraint names wrap using `overflow-wrap: anywhere` and never expand the page width;
 - the workflow remains usable if animation is disabled or the connection layer fails.
 
-## 11. Performance budget
+## 10. Performance budget
 
 - use existing React/Next.js, native CSS layout, DOM blocks, and one restrained SVG layer;
 - no D3, force-layout, React Flow, WebGL, 3D, physics, video, or large image dependency;
@@ -197,7 +191,7 @@ No WebGL or true 3D is required. Shallow depth may distinguish the active decisi
 - preserve a responsive interaction target: controls visibly react within 100ms, with honest loading feedback during backend work;
 - test the production build, not only development mode.
 
-## 12. Always / never guardrails
+## 11. Always / never guardrails
 
 Always:
 
@@ -219,7 +213,7 @@ Never:
 - allow long hashes, traces, or error strings to create horizontal overflow;
 - add gamification, confetti, achievement badges, or playful bounce.
 
-## 13. Continuous browser acceptance protocol
+## 12. Continuous browser acceptance protocol
 
 Every UI sprint ends with a real-browser replay. A green build alone is insufficient.
 
@@ -243,9 +237,12 @@ At minimum, exercise these as a user:
 7. inspect each candidate and verify invalid/irrelevant options are visibly distinguished;
 8. `APPLY CATALYST` once, then verify a second application is rejected honestly;
 9. `VERIFY NEW STATE` and confirm the clinic is feasible only in `S1`;
-10. reset to `S0` and verify the initial state is restored;
-11. test invalid action/state handling where the UI exposes it;
-12. navigate every control with keyboard, including focus return from the inspector.
+10. confirm Project creation is now available, create the Clinic Project, and open its source proof;
+11. separately create Basic Workshop from explicit `[]` after its real S0 proof;
+12. compare Graph View and List View for equivalent community facts;
+13. reset to `S0` and verify the initial state is restored;
+14. test invalid action/state handling where the UI exposes it;
+15. navigate every control with keyboard, including Project fields, contrast, view choice, source proof, and focus return from the inspector.
 
 ### Viewport replay
 
@@ -281,7 +278,7 @@ At minimum, exercise these as a user:
 
 Any unexpected browser result places the UI sprint on HOLD. Create a narrowly scoped recovery lane with ownership of the exact defect, preserve the failing evidence, apply the smallest repair, then replay the failed path and the complete cumulative judge journey. A later successful step does not erase an earlier failure.
 
-## 14. Definition of visually accepted
+## 13. Definition of visually accepted
 
 The redesign is accepted only when:
 
@@ -291,5 +288,7 @@ The redesign is accepted only when:
 - all six actions complete the real backend journey;
 - desktop and mobile retain the same hierarchy and character;
 - keyboard, reduced-motion, error, and long-identifier paths work;
+- Basic empty-path and Clinic successor-path Project creation are truthful and complete;
+- graph and list views expose equivalent identity and capacity facts;
 - production build, typecheck, lint, browser console, network, and overflow gates are green;
 - screenshots show a coherent finished system across the opening, blocker, intervention, and verified-success states.

@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
+from app import compiler as compiler_module
 from app.api_models import (
     AnalyseRequest,
     AnalyseResponse,
@@ -23,7 +24,9 @@ from app.api_models import (
     UnlockResponse,
 )
 from app.fixture import load_demo_fixture
+from app.errors import AnalyserContractError
 from app.main import app
+from app.project_models import CreateProjectResponse
 from app.solver import replay_assignment
 
 
@@ -43,6 +46,17 @@ def _assert_error(response, status: int, code: str) -> None:
     assert response.status_code == status
     parsed = ErrorResponse.model_validate(response.json())
     assert parsed.error.code == code
+
+
+def _project_payload(initiative_id: str, catalyst_path: list[str]) -> dict[str, object]:
+    return {
+        "base_community": _community(),
+        "initiative_id": initiative_id,
+        "catalyst_path": catalyst_path,
+        "title": "Saturday community digital support",
+        "short_description": "A solver-verified community service assembled from shared local capacity.",
+        "objective": "Deliver accessible digital help with every operational dependency verified.",
+    }
 
 
 def test_request_examples_validate_against_fixture() -> None:
@@ -147,6 +161,27 @@ def test_analyse_uses_real_solver_counts_and_replayable_witness() -> None:
     assert replay_assignment(fixture.community, basic, results["BASIC_WORKSHOP"])
 
 
+def test_analyse_compiles_each_requested_initiative_exactly_once(monkeypatch) -> None:
+    compiled_ids: list[str] = []
+    original = compiler_module.compile_initiative
+
+    def counting_compile(community, initiative, **kwargs):
+        compiled_ids.append(initiative.id)
+        return original(community, initiative, **kwargs)
+
+    monkeypatch.setattr(compiler_module, "compile_initiative", counting_compile)
+    response = TestClient(app).post(
+        "/api/analyse",
+        json={
+            "community": _community(),
+            "initiative_ids": ["BASIC_WORKSHOP", "MULTILINGUAL_CLINIC", "REPAIR_SHARE"],
+        },
+    )
+
+    assert response.status_code == 200
+    assert compiled_ids == ["BASIC_WORKSHOP", "MULTILINGUAL_CLINIC", "REPAIR_SHARE"]
+
+
 def test_explain_reports_solver_confirmed_helper_shortage() -> None:
     response = TestClient(app).post(
         "/api/explain",
@@ -179,7 +214,7 @@ def test_real_unlock_transition_plan_and_successor_verification_journey() -> Non
     assert unlock.status_code == 200
     unlock_result = UnlockResponse.model_validate(unlock.json())
     assert unlock_result.interventions == ["TRAIN_DIGITAL_HELPERS"]
-    assert (unlock_result.total_cost, unlock_result.catalogue_size, unlock_result.candidate_subsets_evaluated) == (2, 4, 15)
+    assert (unlock_result.total_cost, unlock_result.catalogue_size, unlock_result.candidate_paths_evaluated) == (2, 4, 16)
 
     plan = client.post(
         "/api/plan",
@@ -220,6 +255,132 @@ def test_real_unlock_transition_plan_and_successor_verification_journey() -> Non
     assert verified.status_code == 200
     verified_result = AnalyseResponse.model_validate(verified.json()).results[0]
     assert (verified_result.status, verified_result.objective_value) == ("OPTIMAL", 48)
+
+
+def test_create_basic_project_from_real_base_state_proof() -> None:
+    response = TestClient(app).post(
+        "/api/projects/from-plan",
+        json=_project_payload("BASIC_WORKSHOP", []),
+    )
+    assert response.status_code == 201
+    parsed = CreateProjectResponse.model_validate(response.json())
+    assert parsed.verification.status == "OPTIMAL"
+    assert parsed.project.status == "READY"
+    assert parsed.project.catalyst_path == []
+    assert parsed.project.base_state_id == parsed.project.verified_state_id == "S0"
+    assert parsed.project.host_organisation_id == parsed.project.venue.organisation_id
+    assert "owner_organisation_id" not in response.json()["project"]
+
+
+def test_create_clinic_project_replays_authoritative_action_and_verifies_successor() -> None:
+    response = TestClient(app).post(
+        "/api/projects/from-plan",
+        json=_project_payload("MULTILINGUAL_CLINIC", ["TRAIN_DIGITAL_HELPERS"]),
+    )
+    assert response.status_code == 201
+    parsed = CreateProjectResponse.model_validate(response.json())
+    assert parsed.verification.status == "OPTIMAL"
+    assert parsed.project.status == "READY"
+    assert parsed.project.catalyst_path == ["TRAIN_DIGITAL_HELPERS"]
+    assert parsed.project.verified_state_id != "S0"
+    assert parsed.project.host_organisation_id == parsed.project.venue.organisation_id
+    assert "owner_organisation_id" not in response.json()["project"]
+    assert {item.person_id for item in parsed.project.operational_assignments} == {
+        "LEO", "PRIYA", "SAM", "AMIRA"
+    }
+
+
+@pytest.mark.parametrize(
+    ("initiative_id", "path"),
+    [
+        ("MULTILINGUAL_CLINIC", []),
+        ("MULTILINGUAL_CLINIC", ["BORROW_TWO_LAPTOPS"]),
+        ("REPAIR_SHARE", []),
+    ],
+)
+def test_create_project_rejects_nonfeasible_proof_without_project_object(
+    initiative_id: str,
+    path: list[str],
+) -> None:
+    response = TestClient(app).post(
+        "/api/projects/from-plan",
+        json=_project_payload(initiative_id, path),
+    )
+    _assert_error(response, 409, "PROJECT_PLAN_NOT_FEASIBLE")
+    assert "project" not in response.json()
+
+
+def test_create_project_path_validation_uses_stable_errors() -> None:
+    client = TestClient(app)
+    unknown = client.post(
+        "/api/projects/from-plan",
+        json=_project_payload("BASIC_WORKSHOP", ["UNKNOWN_ACTION"]),
+    )
+    _assert_error(unknown, 404, "INVALID_REFERENCE")
+
+    too_long = client.post(
+        "/api/projects/from-plan",
+        json=_project_payload(
+            "MULTILINGUAL_CLINIC",
+            ["TRAIN_DIGITAL_HELPERS", "RECRUIT_HELPER_A", "RECRUIT_HELPER_B"],
+        ),
+    )
+    _assert_error(too_long, 422, "INVALID_REQUEST")
+
+
+@pytest.mark.parametrize("mutation", ["omit_path", "extra_field"])
+def test_create_project_request_is_strict_and_requires_explicit_path(mutation: str) -> None:
+    payload = _project_payload("BASIC_WORKSHOP", [])
+    if mutation == "omit_path":
+        del payload["catalyst_path"]
+    else:
+        payload["client_readiness"] = "READY"
+    response = TestClient(app).post("/api/projects/from-plan", json=payload)
+    _assert_error(response, 422, "INVALID_REQUEST")
+
+
+@pytest.mark.parametrize("mutation", ["capability", "quantity", "availability", "lineage"])
+def test_create_project_rejects_forged_base_state_before_solver(mutation: str) -> None:
+    payload = _project_payload("MULTILINGUAL_CLINIC", [])
+    community = payload["base_community"]
+    assert isinstance(community, dict)
+    if mutation == "capability":
+        community["people"][1]["capabilities"].append("digital_support")
+        community["people"][2]["capabilities"].append("digital_support")
+    elif mutation == "quantity":
+        community["resources"][0]["quantity"] += 1
+    elif mutation == "availability":
+        community["spaces"][0]["available_slots"].remove("SAT_12")
+    else:
+        community["parent_state_id"] = "S_FAKE_PARENT"
+    assert community["state_id"] == "S0"
+    response = TestClient(app).post("/api/projects/from-plan", json=payload)
+    _assert_error(response, 409, "COMMUNITY_STATE_MISMATCH")
+    assert "project" not in response.json()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("title", "   "),
+        ("short_description", "                     "),
+        ("objective", "                     "),
+    ],
+)
+def test_create_project_rejects_whitespace_only_metadata(field: str, value: str) -> None:
+    payload = _project_payload("BASIC_WORKSHOP", [])
+    payload[field] = value
+    response = TestClient(app).post("/api/projects/from-plan", json=payload)
+    _assert_error(response, 422, "INVALID_REQUEST")
+
+
+def test_create_project_normalizes_metadata_before_storage_and_identity() -> None:
+    payload = _project_payload("BASIC_WORKSHOP", [])
+    payload["title"] = "  Saturday community digital support  "
+    response = TestClient(app).post("/api/projects/from-plan", json=payload)
+    assert response.status_code == 201
+    parsed = CreateProjectResponse.model_validate(response.json())
+    assert parsed.project.title == "Saturday community digital support"
 
 
 def test_invalid_ids_catalogue_mismatch_and_validation_use_stable_errors() -> None:
@@ -325,8 +486,136 @@ def test_plan_expansion_cap_requires_a_strict_integer(invalid_cap: object) -> No
     _assert_error(response, 422, "INVALID_REQUEST")
 
 
+@pytest.mark.parametrize("collection", ["organisations", "people", "spaces", "resources"])
+def test_analyse_rejects_community_collections_above_explicit_limits(collection: str) -> None:
+    limits = {"organisations": 32, "people": 128, "spaces": 32, "resources": 64}
+    community = _community()
+    template = deepcopy(community[collection][0])
+    while len(community[collection]) <= limits[collection]:
+        item = deepcopy(template)
+        item["id"] = f"EXTRA_{collection.upper()}_{len(community[collection]):03d}"
+        community[collection].append(item)
+
+    response = TestClient(app).post(
+        "/api/analyse",
+        json={"community": community, "initiative_ids": ["BASIC_WORKSHOP"]},
+    )
+
+    _assert_error(response, 422, "INVALID_REQUEST")
+
+
+@pytest.mark.parametrize("field", ["capabilities", "willing_to_learn"])
+def test_analyse_rejects_person_capability_sets_above_limit(field: str) -> None:
+    community = _community()
+    community["people"][0][field] = [f"cap_{index:02d}" for index in range(33)]
+
+    response = TestClient(app).post(
+        "/api/analyse",
+        json={"community": community, "initiative_ids": ["BASIC_WORKSHOP"]},
+    )
+
+    _assert_error(response, 422, "INVALID_REQUEST")
+
+
+def test_analyse_rejects_person_language_sets_above_limit() -> None:
+    community = _community()
+    community["people"][0]["languages"] = [f"a{letter}" for letter in "abcdefghijklmnopq"]
+
+    response = TestClient(app).post(
+        "/api/analyse",
+        json={"community": community, "initiative_ids": ["BASIC_WORKSHOP"]},
+    )
+
+    _assert_error(response, 422, "INVALID_REQUEST")
+
+
+@pytest.mark.parametrize("overflow", ["actions", "preconditions", "effects"])
+def test_unlock_rejects_action_contract_collections_above_limits(overflow: str) -> None:
+    actions = _actions()
+    if overflow == "actions":
+        template = deepcopy(actions[0])
+        actions = []
+        for index in range(33):
+            action = deepcopy(template)
+            action["id"] = f"ACTION_{index:02d}"
+            actions.append(action)
+    elif overflow == "preconditions":
+        actions[0]["preconditions"]["person_capabilities"] = [
+            {"person_id": "PRIYA", "capability_id": "digital_support"}
+            for _ in range(65)
+        ]
+    else:
+        actions[0]["effects"] = [deepcopy(actions[0]["effects"][0]) for _ in range(65)]
+
+    response = TestClient(app).post(
+        "/api/unlock",
+        json={
+            "community": _community(),
+            "initiative_id": "MULTILINGUAL_CLINIC",
+            "actions": actions,
+        },
+    )
+
+    _assert_error(response, 422, "INVALID_REQUEST")
+
+
+@pytest.mark.parametrize(
+    ("route", "target", "payload"),
+    [
+        (
+            "/api/analyse",
+            "app.main.analyse_compiled_initiatives",
+            lambda: {"community": _community(), "initiative_ids": ["BASIC_WORKSHOP"]},
+        ),
+        (
+            "/api/explain",
+            "app.main.explain_infeasibility",
+            lambda: {"community": _community(), "initiative_id": "MULTILINGUAL_CLINIC"},
+        ),
+        (
+            "/api/unlock",
+            "app.main.find_minimum_unlock",
+            lambda: {
+                "community": _community(),
+                "initiative_id": "MULTILINGUAL_CLINIC",
+                "actions": _actions(),
+            },
+        ),
+        (
+            "/api/plan",
+            "app.main.plan_catalyst",
+            lambda: {
+                "community": _community(),
+                "initiative_id": "MULTILINGUAL_CLINIC",
+                "actions": _actions(),
+                "max_depth": 2,
+                "max_expanded_states": 20,
+            },
+        ),
+        (
+            "/api/projects/from-plan",
+            "app.main.create_project_from_plan",
+            lambda: _project_payload("BASIC_WORKSHOP", []),
+        ),
+    ],
+)
+def test_solver_backed_routes_translate_analyser_contract_breaches(
+    monkeypatch,
+    route: str,
+    target: str,
+    payload,
+) -> None:
+    def breach(*_args, **_kwargs):
+        raise AnalyserContractError("malformed decoded witness")
+
+    monkeypatch.setattr(target, breach)
+    response = TestClient(app).post(route, json=payload())
+    _assert_error(response, 500, "ANALYSER_CONTRACT_ERROR")
+    assert "project" not in response.json()
+
+
 def test_openapi_contains_frozen_core_routes() -> None:
     assert set(app.openapi()["paths"]) == {
         "/api/health", "/api/demo", "/api/analyse", "/api/explain",
-        "/api/unlock", "/api/plan", "/api/transition",
+        "/api/unlock", "/api/plan", "/api/transition", "/api/projects/from-plan",
     }

@@ -1,41 +1,46 @@
-# ASSEMBLE Build Status
+# ASSEMBLE current build status
 
-Official implementation authority was confirmed on 2026-08-29 during the SYNCS HACK 2026 event window.
+Last independent acceptance: 2026-08-29 AEST.
 
-| Mission | Status | Acceptance |
+This page records current health only. Architectural history and superseded decisions belong in [`docs/adr/`](docs/adr/README.md).
+
+## Acceptance state
+
+| Current area | Status | Acceptance evidence |
 | --- | --- | --- |
-| M0 contracts and fixture | Accepted | Gate 0: 13 tests passed |
-| M1 CP-SAT engine | Accepted | Component gate: 12 focused tests passed after D1 repair |
-| M2 explanation/unlock/planner | Accepted for integration | 7 focused tests; cumulative backend 32 passed |
-| M3 community interface | Accepted for integration | Typecheck, lint and production build passed |
-| M4 serial integration | Accepted | Independent cumulative and real-browser replay completed |
-| D3-D10 defect repair | Accepted | 82 backend tests, 38 focused adversarial cases, production frontend gates, and real six-action journey independently passed |
-| Premium civic redesign | Accepted | Civic Assembly Table direction implemented; static, responsive, accessibility, and real-browser journey gates passed |
+| Deterministic solver, explanation, unlock, transition and planner core | Accepted | Independent cumulative tests and complete real six-action journey |
+| Evidence-first civic interface | Accepted | Independent production-browser, responsive, truthfulness and accessibility replay |
+| Solver-derived executable Projects | Accepted | Independent authoritative replay, cumulative tests, production build and both real Project journeys |
+| Living current documentation | Accepted | Independent Diátaxis navigation, current-state semantics, traceability and automated drift gate |
+
+Builder evidence must not be relabelled as independent acceptance.
 
 ## Current cumulative evidence
 
-- Backend: `82 passed` with one upstream Starlette `httpx` deprecation warning.
-- Interface: TypeScript check, ESLint and Next.js 16.3.3 production build pass.
-- Live production journey: compile, analyse, explain, unlock, plan, transition and successor verification all returned HTTP 200 from the real backend. The clinic finished `OPTIMAL` at objective 48 after the cost-2 training action; unlock evaluated 15 subsets and the plan returned 14 nodes.
-- Responsive evidence after verification with the technical inspector open: document and body widths matched at 1280px and 375px; the inspector's scroll width also matched its client width at both sizes.
-- D3 integrity now keeps unresolved resource references infeasible under strict solving and every singleton/pair relaxation. D4 availability evidence identifies the unavailable entity and missing slot. D7-D10 have stable framework errors, feasible-target unlock rejection, no-op action rejection and strict expansion-cap validation.
+- Backend: `144 passed`; one upstream Starlette `httpx` deprecation warning.
+- Latest ordered-path/API focused gate: `53 passed`.
+- Interface: TypeScript check passes; ESLint passes with zero warnings; Next.js 16.3.3 production build passes.
+- Core live journey: compile, analyse, explain, unlock, plan, ordered transition and successor verification use the real backend. The Clinic reaches `OPTIMAL` only after the cost-2 training action and successor verification. Four actions produce 16 ordered depth-two candidates.
+- Project API: `POST /api/projects/from-plan` creates only from the authoritative fixture plus an explicit 0–2 action path. Forged state content or lineage, unsafe client proof fields, invalid paths, whitespace metadata, INFEASIBLE and UNKNOWN all fail closed without a Project.
+- Project browser journey: Basic creates `READY` from explicit `[]`; Clinic exposes no Project form before successor verification and creates `READY` from `TRAIN_DIGITAL_HELPERS` afterward.
+- Accessibility: graph/list eight-block fact parity; one journey announcement; source-proof inspector focus; high contrast; opaque focus; reduced motion; 1440, 1280, 768, 390 and 320 layouts; 200% reflow equivalent; no visible target below 44px; no browser console warning/error.
+- Full platform parity: independent replay found the same visible control sequence, three editable Project fields and complete Project-proof rows at 320 and 1440, with no document/key-region overflow or visible sub-44px target. Builder replay additionally compared 26 completed-Project evidence items and seven selected-team facts at both widths.
+- Documentation: current requirements, user stories, traceability, two-layer drift audit, exact 3:00 video, exact 4:00 live-demo runbook, and bounded judge Q&A are structurally gated and require human semantic replay.
+- Integrity: feasible witnesses are canonically replayed; malformed feasible analyser output fails with `ANALYSER_CONTRACT_ERROR`; missing referenced resources remain infeasible under every permitted relaxation; non-feasible/UNKNOWN solver results cannot carry an objective or witness; explicit collection ceilings return 422; no-op transitions and already-feasible unlocks are rejected.
 
-Core is **ACCEPTED**. The manager independently replayed all 82 backend tests,
-38 focused D3-D10 adversarial cases, TypeScript, ESLint, the Next.js production
-build, and the complete real-browser journey from pristine S0 through verified
-successor state and reset.
+## Current checkpoint
 
-M5 UI is **ACCEPTED**. The production redesign implements the Assembly Table
-with Blueprint Evidence direction, preserves the real six-action API journey,
-and keeps the Clinic blocked until successor verification. The manager's
-independent browser replay confirmed the opening state, compile, Basic proof,
-Clinic blocker, explicit 3/1/2 evidence, 15-subset intervention comparison,
-single verification action, immutable state diff, verified successor,
-inspector, and reset. Builder responsive replays covered 1440, 1280, 768, 390,
-and 320px with no document or named-region overflow and no visible interactive
-target below 44px. Contrast tokens exceed AA for the measured text/background
-pairs, reduced motion is retained, and the app icon returns successfully.
+P0-A Project and integrity hardening is independently accepted. The backend passed 144 tests; frontend typecheck, zero-warning lint and the Next.js production build passed; the documentation gate passed 9 tests; and the real Basic/Clinic browser journeys, Project proof, Reset recovery and 320/1440 parity were independently replayed. No implementation defect is known from this accepted snapshot.
 
-P1 auth/RBAC has not started.
+The requested modular authentication, invitations, community roles, settings and multi-page product experience are the next separately contracted milestone. They are not present in this checkpoint.
 
-No deployment, publication, push or submission is authorised.
+## Intentionally absent
+
+The current product does not include:
+
+- authentication, accounts, sessions, or role-based access control;
+- generic Project CRUD, tasks, manual assignment, project membership, or persistence;
+- cloud services, OAuth, LLM dependence, or external data ingestion;
+- deployment, publication, public repository visibility, or submission.
+
+Do not recreate or claim these capabilities without a separately authorised contract, implementation mission, tests, documentation update, and acceptance gate.

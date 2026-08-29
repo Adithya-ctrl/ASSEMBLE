@@ -21,11 +21,8 @@ from app.api_models import (
     RequirementGroup,
     SolverStatus,
 )
+from app.errors import AnalyserContractError
 from app.models import CommunityState, InitiativeBlueprint, PersonBlock, TimeSlot, occupied_slots
-
-
-class AnalyserContractError(RuntimeError):
-    """Raised when the authoritative analyser cannot satisfy the M2 protocol."""
 
 
 class Analyser(Protocol):

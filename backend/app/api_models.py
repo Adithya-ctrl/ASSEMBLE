@@ -7,7 +7,7 @@ from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
-from app.models import CatalystAction, CommunityState, ContractModel, StableId
+from app.models import MAX_ACTIONS, MAX_INITIATIVES, CatalystAction, CommunityState, ContractModel, StableId
 
 
 class SolverStatus(StrEnum):
@@ -29,7 +29,7 @@ class RequirementGroup(StrEnum):
 
 class AnalyseRequest(ContractModel):
     community: CommunityState
-    initiative_ids: list[StableId] = Field(min_length=1)
+    initiative_ids: list[StableId] = Field(min_length=1, max_length=MAX_INITIATIVES)
 
 
 class ExplainRequest(ContractModel):
@@ -40,13 +40,13 @@ class ExplainRequest(ContractModel):
 class UnlockRequest(ContractModel):
     community: CommunityState
     initiative_id: StableId
-    actions: list[CatalystAction] = Field(min_length=1)
+    actions: list[CatalystAction] = Field(min_length=1, max_length=MAX_ACTIONS)
 
 
 class PlanRequest(ContractModel):
     community: CommunityState
     initiative_id: StableId
-    actions: list[CatalystAction] = Field(min_length=1)
+    actions: list[CatalystAction] = Field(min_length=1, max_length=MAX_ACTIONS)
     max_depth: Literal[2] = 2
     max_expanded_states: int = Field(default=20, ge=1, le=20, strict=True)
 
@@ -54,7 +54,7 @@ class PlanRequest(ContractModel):
 class TransitionRequest(ContractModel):
     community: CommunityState
     action_id: StableId
-    actions: list[CatalystAction] = Field(min_length=1)
+    actions: list[CatalystAction] = Field(min_length=1, max_length=MAX_ACTIONS)
 
 
 class CompileSummary(ContractModel):
@@ -142,7 +142,7 @@ class UnlockResponse(ContractModel):
     interventions: list[StableId] = Field(min_length=1)
     total_cost: int = Field(ge=0)
     catalogue_size: int = Field(ge=1)
-    candidate_subsets_evaluated: int = Field(ge=1)
+    candidate_paths_evaluated: int = Field(ge=1)
     resulting_status: SolverStatus
 
 

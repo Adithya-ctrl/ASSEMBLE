@@ -1,10 +1,20 @@
 # ASSEMBLE — Community Systems Compiler
 
-ASSEMBLE tests which initiatives a community can form from declared people, skills, spaces, resources and time. When an initiative is blocked, it explains a solver-confirmed blocking requirement and searches a disclosed finite intervention catalogue for the minimum modelled unlock.
+ASSEMBLE tests which initiatives a community can form from declared people, skills, spaces, resources and time. When an initiative is blocked, it explains a solver-confirmed blocking requirement and searches a disclosed finite intervention catalogue for the minimum modelled unlock. A feasible base or verified successor can become an executable Project whose operational assignments, venue, schedule, resources, accessibility and readiness are derived from a fresh solver proof.
 
-This repository began during the official SYNCS HACK 2026 build window. The demo fixture is fictional. Results apply only to the declared bounded model and are not predictions of social outcomes.
+The demo fixture is fictional. Results apply only to the declared bounded model and are not predictions of social outcomes.
+
+## Documentation
+
+Start at [`docs/README.md`](docs/README.md). It separates current tutorials, how-to guides, references, and explanations from historical architectural decision records. [`BUILD_STATUS.md`](BUILD_STATUS.md) is the canonical current gate status, and [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md) maps requirements to code and evidence.
+
+The numbered current requirements are in [`docs/reference/requirements.md`](docs/reference/requirements.md). Factual presentation materials live under [`docs/presentation/`](docs/presentation/project-overview.md) and remain bounded to the deterministic fictional fixture.
+
+Contributions use [Conventional Commits](docs/how-to/contributing.md#conventional-commits). Documentation, traceability, tests, and current gate evidence must be updated in the same change as behavior.
 
 ## Run locally
+
+The canonical guide is [`docs/how-to/run-locally.md`](docs/how-to/run-locally.md). The essential commands are repeated below for convenience.
 
 Start the API from the repository root:
 

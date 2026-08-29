@@ -16,9 +16,17 @@ from app.api_models import (
     SolverStatus,
 )
 from app.compiler import (
+    AVAILABILITY,
     CompiledInitiative,
+    LANGUAGE,
+    MAXIMUM_CONTRIBUTION,
+    RESOURCE_QUANTITY,
+    ROLE_CAPABILITY,
+    VENUE_CAPACITY,
+    VENUE_FEATURE,
     compile_initiative,
 )
+from app.errors import AnalyserContractError
 from app.models import (
     CommunityState,
     InitiativeBlueprint,
@@ -213,6 +221,226 @@ def _build_trace(
     return trace
 
 
+def _canonical_trace(
+    community: CommunityState,
+    initiative: InitiativeBlueprint,
+    assignment_by_role: Mapping[str, str],
+    venue_id: str,
+    start: TimeSlot,
+) -> list[AssemblyTraceEntry] | None:
+    """Recompute the one canonical trace shape from domain declarations."""
+
+    spaces_by_id = {space.id: space for space in community.spaces}
+    resources_by_id = {resource.id: resource for resource in community.resources}
+    venue = spaces_by_id.get(venue_id)
+    if venue is None:
+        return None
+    try:
+        occupied = occupied_slots(start, initiative.duration_slots)
+    except ValueError:
+        return None
+
+    trace = [
+        AssemblyTraceEntry(
+            requirement_kind="role",
+            requirement_id=role.id,
+            selected_ids=[assignment_by_role[role.id]],
+            facts=_role_facts(role),
+        )
+        for role in initiative.roles
+    ]
+    trace.append(
+        AssemblyTraceEntry(
+            requirement_kind="venue",
+            requirement_id="VENUE",
+            selected_ids=[venue.id],
+            facts={
+                "minimum_capacity": initiative.venue.minimum_capacity,
+                "required_features": sorted(initiative.venue.required_features),
+                "capacity": venue.capacity,
+                "features": sorted(venue.features),
+            },
+        )
+    )
+    for requirement in initiative.resources:
+        resource = resources_by_id.get(requirement.resource_id)
+        if resource is None:
+            return None
+        trace.append(
+            AssemblyTraceEntry(
+                requirement_kind="resource",
+                requirement_id=requirement.resource_id,
+                selected_ids=[requirement.resource_id],
+                facts={
+                    "quantity_required": requirement.quantity,
+                    "quantity_available": resource.quantity,
+                    "shareable": resource.shareable,
+                },
+            )
+        )
+    trace.append(
+        AssemblyTraceEntry(
+            requirement_kind="time",
+            requirement_id="TIME",
+            selected_ids=[start.value],
+            facts={
+                "start_slot": start.value,
+                "occupied_slots": [slot.value for slot in occupied],
+                "duration_slots": initiative.duration_slots,
+            },
+        )
+    )
+    return trace
+
+
+def _domain_assignment_is_valid(
+    community: CommunityState,
+    initiative: InitiativeBlueprint,
+    assignment_by_role: Mapping[str, str],
+    venue_id: str,
+    start: TimeSlot,
+    *,
+    relaxed_groups: frozenset[str] = frozenset(),
+) -> bool:
+    role_by_id = {role.id: role for role in initiative.roles}
+    if set(assignment_by_role) != set(role_by_id):
+        return False
+    if start not in initiative.candidate_start_slots:
+        return False
+    try:
+        occupied = occupied_slots(start, initiative.duration_slots)
+    except ValueError:
+        return False
+
+    person_by_id = {person.id: person for person in community.people}
+    selected_people: dict[str, PersonBlock] = {}
+    for role_id, person_id in assignment_by_role.items():
+        person = person_by_id.get(person_id)
+        if person is None:
+            return False
+        role = role_by_id[role_id]
+        if ROLE_CAPABILITY not in relaxed_groups and not role.required_capabilities <= person.capabilities:
+            return False
+        if LANGUAGE not in relaxed_groups and not role.required_languages <= person.languages:
+            return False
+        if AVAILABILITY not in relaxed_groups and not set(occupied) <= person.available_slots:
+            return False
+        selected_people[role_id] = person
+
+    spaces_by_id = {space.id: space for space in community.spaces}
+    venue = spaces_by_id.get(venue_id)
+    if venue is None:
+        return False
+    if VENUE_CAPACITY not in relaxed_groups and venue.capacity < initiative.venue.minimum_capacity:
+        return False
+    if VENUE_FEATURE not in relaxed_groups and not initiative.venue.required_features <= venue.features:
+        return False
+    if AVAILABILITY not in relaxed_groups and not set(occupied) <= venue.available_slots:
+        return False
+
+    assigned_roles_by_person: dict[str, list[RoleRequirement]] = {}
+    for role_id, person in selected_people.items():
+        assigned_roles_by_person.setdefault(person.id, []).append(role_by_id[role_id])
+    for roles in assigned_roles_by_person.values():
+        for index, left_role in enumerate(roles):
+            for right_role in roles[index + 1 :]:
+                if not (left_role.allow_shared_person or right_role.allow_shared_person):
+                    return False
+    if MAXIMUM_CONTRIBUTION not in relaxed_groups:
+        for person_id, roles in assigned_roles_by_person.items():
+            has_shareable_pair = any(
+                left_role.allow_shared_person or right_role.allow_shared_person
+                for index, left_role in enumerate(roles)
+                for right_role in roles[index + 1 :]
+            )
+            contribution = len(occupied) if has_shareable_pair else initiative.duration_slots * len(roles)
+            if contribution > person_by_id[person_id].max_contribution_slots:
+                return False
+
+    resources_by_id = {resource.id: resource for resource in community.resources}
+    for requirement in initiative.resources:
+        resource = resources_by_id.get(requirement.resource_id)
+        if resource is None:
+            return False
+        if RESOURCE_QUANTITY not in relaxed_groups and resource.quantity < requirement.quantity:
+            return False
+        if AVAILABILITY not in relaxed_groups and not set(occupied) <= resource.available_slots:
+            return False
+    return True
+
+
+def validate_analysis_witness(
+    community: CommunityState,
+    initiative: InitiativeBlueprint,
+    result: InitiativeAnalysisResult,
+    *,
+    relaxed_groups: Iterable[str] = (),
+) -> bool:
+    """Validate a feasible result as a canonical, domain-derived witness."""
+
+    groups = frozenset(relaxed_groups)
+    if result.initiative_id != initiative.id:
+        return False
+    if result.status not in (SolverStatus.OPTIMAL, SolverStatus.FEASIBLE):
+        return False
+    if result.objective_value is None:
+        return False
+
+    declared_role_ids = [role.id for role in initiative.roles]
+    assignment_role_ids = [assignment.role_instance_id for assignment in result.assignments]
+    if assignment_role_ids != declared_role_ids:
+        return False
+    assignment_by_role = _normalise_assignments(result.assignments)
+    if len(assignment_by_role) != len(declared_role_ids):
+        return False
+
+    venue_entries = [entry for entry in result.assembly_trace if entry.requirement_kind == "venue"]
+    time_entries = [entry for entry in result.assembly_trace if entry.requirement_kind == "time"]
+    if len(venue_entries) != 1 or len(time_entries) != 1:
+        return False
+    if len(venue_entries[0].selected_ids) != 1 or len(time_entries[0].selected_ids) != 1:
+        return False
+    venue_id = venue_entries[0].selected_ids[0]
+    try:
+        start = TimeSlot(time_entries[0].selected_ids[0])
+    except ValueError:
+        return False
+
+    if not _domain_assignment_is_valid(
+        community,
+        initiative,
+        assignment_by_role,
+        venue_id,
+        start,
+        relaxed_groups=groups,
+    ):
+        return False
+    expected_trace = _canonical_trace(community, initiative, assignment_by_role, venue_id, start)
+    if expected_trace is None:
+        return False
+    actual_payload = [entry.model_dump(mode="json") for entry in result.assembly_trace]
+    expected_payload = [entry.model_dump(mode="json") for entry in expected_trace]
+    if actual_payload != expected_payload:
+        return False
+
+    expected_objective = 10 * len(set(assignment_by_role.values())) + 2 * len(initiative.roles)
+    return result.objective_value == expected_objective
+
+
+def _unknown_result(
+    initiative_id: str,
+    stats: SolverStats,
+) -> InitiativeAnalysisResult:
+    return InitiativeAnalysisResult(
+        initiative_id=initiative_id,
+        status=SolverStatus.UNKNOWN,
+        objective_value=None,
+        assignments=[],
+        assembly_trace=[],
+        solver_stats=stats,
+    )
+
+
 def solve_compiled(
     compiled: CompiledInitiative,
     *,
@@ -250,7 +478,7 @@ def solve_compiled(
     )
 
     if status not in (SolverStatus.OPTIMAL, SolverStatus.FEASIBLE):
-        return InitiativeAnalysisResult(
+        return _unknown_result(compiled.initiative.id, stats) if status is SolverStatus.UNKNOWN else InitiativeAnalysisResult(
             initiative_id=compiled.initiative.id,
             status=status,
             objective_value=None,
@@ -260,14 +488,34 @@ def solve_compiled(
         )
 
     assignments = _selected_assignment_vars(compiled, cp_solver)
-    return InitiativeAnalysisResult(
-        initiative_id=compiled.initiative.id,
-        status=status,
-        objective_value=_objective_value(cp_solver),
-        assignments=assignments,
-        assembly_trace=_build_trace(compiled, cp_solver, assignments),
-        solver_stats=stats,
-    )
+    objective = _objective_value(cp_solver)
+    if objective is None:
+        raise AnalyserContractError(
+            f"feasible solver result for {compiled.initiative.id} has no objective"
+        )
+    try:
+        result = InitiativeAnalysisResult(
+            initiative_id=compiled.initiative.id,
+            status=status,
+            objective_value=objective,
+            assignments=assignments,
+            assembly_trace=_build_trace(compiled, cp_solver, assignments),
+            solver_stats=stats,
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise AnalyserContractError(
+            f"feasible solver result for {compiled.initiative.id} could not be decoded"
+        ) from exc
+    if not validate_analysis_witness(
+        compiled.community,
+        compiled.initiative,
+        result,
+        relaxed_groups=compiled.relaxed_groups,
+    ):
+        raise AnalyserContractError(
+            f"feasible solver result for {compiled.initiative.id} failed canonical replay"
+        )
+    return result
 
 
 def solve_initiative(
@@ -339,6 +587,26 @@ def analyse_initiatives(
     ]
 
 
+def analyse_compiled_initiatives(
+    compiled: Sequence[CompiledInitiative],
+    *,
+    time_limit_seconds: float = DEFAULT_TIME_LIMIT_SECONDS,
+    num_search_workers: int = 1,
+    random_seed: int = 0,
+) -> list[InitiativeAnalysisResult]:
+    """Solve already-compiled initiatives without rebuilding their models."""
+
+    return [
+        solve_compiled(
+            item,
+            time_limit_seconds=time_limit_seconds,
+            num_search_workers=num_search_workers,
+            random_seed=random_seed,
+        )
+        for item in compiled
+    ]
+
+
 analyze_initiatives = analyse_initiatives
 solve_many = analyse_initiatives
 solve = solve_initiative
@@ -356,6 +624,22 @@ def build_compile_summary(
         compile_initiative(community, initiative, relax_groups=relax_groups)
         for initiative in initiatives
     ]
+    return CompileSummary(
+        people=len(community.people),
+        organisations=len(community.organisations),
+        spaces=len(community.spaces),
+        resources=len(community.resources),
+        decision_variables=sum(item.decision_variables for item in compiled),
+        hard_constraints=sum(item.hard_constraints for item in compiled),
+    )
+
+
+def build_compile_summary_from_compiled(
+    community: CommunityState,
+    compiled: Sequence[CompiledInitiative],
+) -> CompileSummary:
+    """Derive counts from the exact compiled models used for solving."""
+
     return CompileSummary(
         people=len(community.people),
         organisations=len(community.organisations),
@@ -419,104 +703,22 @@ def replay_assignment(
     venue and resource facts) so a solver extraction bug cannot pass silently.
     """
 
-    result: InitiativeAnalysisResult | None = (
-        result_or_assignments
-        if isinstance(result_or_assignments, InitiativeAnalysisResult)
-        else None
-    )
-    if result is not None:
-        if result.initiative_id != initiative.id:
-            return False
-        if result.status not in (SolverStatus.OPTIMAL, SolverStatus.FEASIBLE):
-            return False
-        assignments_input: Any = result.assignments
-        if venue_id is None:
-            venue_id = _trace_selected_id(result.assembly_trace, "venue")
-        if start_slot is None:
-            start_slot = _trace_selected_id(result.assembly_trace, "time")
-    else:
-        assignments_input = result_or_assignments
-
-    assignment_by_role = _normalise_assignments(assignments_input)
-    role_by_id = {role.id: role for role in initiative.roles}
-    if set(assignment_by_role) != set(role_by_id):
-        return False
-    person_by_id = {person.id: person for person in community.people}
-    selected_people: dict[str, PersonBlock] = {}
-    for role_id, person_id in assignment_by_role.items():
-        person = person_by_id.get(person_id)
-        if person is None:
-            return False
-        selected_people[role_id] = person
-        role = role_by_id[role_id]
-        if not role.required_capabilities <= person.capabilities:
-            return False
-        if not role.required_languages <= person.languages:
-            return False
-
-    if venue_id is None or start_slot is None:
+    if isinstance(result_or_assignments, InitiativeAnalysisResult):
+        return validate_analysis_witness(community, initiative, result_or_assignments)
+    assignment_by_role = _normalise_assignments(result_or_assignments)
+    if venue_id is None or start_slot is None or not assignment_by_role:
         return False
     try:
         start = start_slot if isinstance(start_slot, TimeSlot) else TimeSlot(str(start_slot))
     except ValueError:
         return False
-    try:
-        occupied = occupied_slots(start, initiative.duration_slots)
-    except ValueError:
-        return False
-
-    spaces_by_id = {space.id: space for space in community.spaces}
-    venue = spaces_by_id.get(str(venue_id))
-    if venue is None:
-        return False
-    if venue.capacity < initiative.venue.minimum_capacity:
-        return False
-    if not initiative.venue.required_features <= venue.features:
-        return False
-    if not set(occupied) <= venue.available_slots:
-        return False
-
-    contribution: dict[str, int] = {}
-    assigned_roles_by_person: dict[str, list[RoleRequirement]] = {}
-    for role_id, person in selected_people.items():
-        if not set(occupied) <= person.available_slots:
-            return False
-        assigned_roles_by_person.setdefault(person.id, []).append(role_by_id[role_id])
-    for person_id, roles in assigned_roles_by_person.items():
-        has_shareable_pair = any(
-            left_role.allow_shared_person or right_role.allow_shared_person
-            for index, left_role in enumerate(roles)
-            for right_role in roles[index + 1 :]
-        )
-        contribution[person_id] = (
-            len(occupied)
-            if has_shareable_pair
-            else initiative.duration_slots * len(roles)
-        )
-    if any(
-        contribution[person_id] > person_by_id[person_id].max_contribution_slots
-        for person_id in contribution
-    ):
-        return False
-
-    # Sharing is permitted if one of the paired role declarations explicitly
-    # opts in, matching the compiler's pairwise constraint.
-    for left_index, left_role in enumerate(initiative.roles):
-        for right_role in initiative.roles[left_index + 1 :]:
-            if (
-                assignment_by_role[left_role.id] == assignment_by_role[right_role.id]
-                and not (left_role.allow_shared_person or right_role.allow_shared_person)
-            ):
-                return False
-
-    resources_by_id = {resource.id: resource for resource in community.resources}
-    for requirement in initiative.resources:
-        resource = resources_by_id.get(requirement.resource_id)
-        if resource is None or resource.quantity < requirement.quantity:
-            return False
-        if not set(occupied) <= resource.available_slots:
-            return False
-    return True
+    return _domain_assignment_is_valid(
+        community,
+        initiative,
+        assignment_by_role,
+        str(venue_id),
+        start,
+    )
 
 
 validate_assignment = replay_assignment

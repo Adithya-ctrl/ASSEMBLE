@@ -8,9 +8,10 @@ import type {
   UnlockResponse,
   TransitionResponse,
   ApiErrorPayload,
+  CreateProjectResponse,
 } from "./types";
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_ASSEMBLE_API_URL ?? "";
+const apiBaseUrl = "";
 
 export class ApiRequestError extends Error {
   code: string;
@@ -39,7 +40,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       },
       cache: "no-store",
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
     throw new ApiRequestError("The planning service could not be reached.", 0, "SERVICE_UNAVAILABLE");
   }
 
@@ -62,26 +64,38 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return payload as T;
 }
 
-function postJson<T>(path: string, body: unknown): Promise<T> {
-  return request<T>(path, { method: "POST", body: JSON.stringify(body) });
+function postJson<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  return request<T>(path, { method: "POST", body: JSON.stringify(body), signal });
 }
 
 export const api = {
-  getDemo: () => request<DemoFixture>("/api/demo"),
-  analyse: (community: CommunityState, initiativeIds: string[]) =>
-    postJson<AnalyseResponse>("/api/analyse", { community, initiative_ids: initiativeIds }),
-  explain: (community: CommunityState, initiativeId: string) =>
-    postJson<ExplainResponse>("/api/explain", { community, initiative_id: initiativeId }),
-  unlock: (community: CommunityState, initiativeId: string, actions: CatalystAction[]) =>
-    postJson<UnlockResponse>("/api/unlock", { community, initiative_id: initiativeId, actions }),
-  plan: (community: CommunityState, initiativeId: string, actions: CatalystAction[]) =>
+  getDemo: (signal?: AbortSignal) => request<DemoFixture>("/api/demo", { signal }),
+  analyse: (community: CommunityState, initiativeIds: string[], signal?: AbortSignal) =>
+    postJson<AnalyseResponse>("/api/analyse", { community, initiative_ids: initiativeIds }, signal),
+  explain: (community: CommunityState, initiativeId: string, signal?: AbortSignal) =>
+    postJson<ExplainResponse>("/api/explain", { community, initiative_id: initiativeId }, signal),
+  unlock: (community: CommunityState, initiativeId: string, actions: CatalystAction[], signal?: AbortSignal) =>
+    postJson<UnlockResponse>("/api/unlock", { community, initiative_id: initiativeId, actions }, signal),
+  plan: (community: CommunityState, initiativeId: string, actions: CatalystAction[], signal?: AbortSignal) =>
     postJson<PlanResponse>("/api/plan", {
       community,
       initiative_id: initiativeId,
       actions,
       max_depth: 2,
       max_expanded_states: 20,
-    }),
-  transition: (community: CommunityState, actionId: string, actions: CatalystAction[]) =>
-    postJson<TransitionResponse>("/api/transition", { community, action_id: actionId, actions }),
+    }, signal),
+  transition: (community: CommunityState, actionId: string, actions: CatalystAction[], signal?: AbortSignal) =>
+    postJson<TransitionResponse>("/api/transition", { community, action_id: actionId, actions }, signal),
+  createProject: (
+    baseCommunity: CommunityState,
+    initiativeId: string,
+    catalystPath: string[],
+    metadata: { title: string; short_description: string; objective: string },
+    signal?: AbortSignal,
+  ) => postJson<CreateProjectResponse>("/api/projects/from-plan", {
+    base_community: baseCommunity,
+    initiative_id: initiativeId,
+    catalyst_path: catalystPath,
+    ...metadata,
+  }, signal),
 };

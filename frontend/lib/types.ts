@@ -162,7 +162,7 @@ export interface UnlockResponse {
   interventions: string[];
   total_cost: number;
   catalogue_size: number;
-  candidate_subsets_evaluated: number;
+  candidate_paths_evaluated: number;
   resulting_status: SolverStatus;
 }
 
@@ -195,6 +195,99 @@ export interface PlanResponse {
   nodes: PlanNode[];
   target_status_before: SolverStatus;
   target_status_after: SolverStatus;
+}
+
+export type ProjectStatus = "READY" | "NOT_READY";
+
+export interface ProjectCatalystOutput {
+  action_id: string;
+  action_name: string;
+  predecessor_state_id: string;
+  successor_state_id: string;
+  diff: StateDiff;
+}
+
+export interface ProjectSchedule {
+  start_slot: string;
+  end_slot: string;
+  occupied_slots: string[];
+  duration_slots: number;
+}
+
+export interface ProjectVenue {
+  venue_id: string;
+  venue_name: string;
+  organisation_id: string;
+  capacity: number;
+  features: string[];
+}
+
+export interface ProjectOperationalAssignment {
+  role_id: string;
+  role_label: string;
+  person_id: string;
+  person_name: string;
+  organisation_id: string;
+  organisation_name: string;
+  person_capabilities: string[];
+  person_languages: string[];
+  matched_capabilities: string[];
+  matched_languages: string[];
+  available_slots: string[];
+}
+
+export interface ProjectResourceAllocation {
+  resource_id: string;
+  resource_name: string;
+  organisation_id: string;
+  quantity_required: number;
+  quantity_available: number;
+  allocated_slots: string[];
+  shareable: boolean;
+}
+
+export interface ProjectReadinessCheck {
+  check_id: string;
+  label: string;
+  ready: boolean;
+  evidence: string[];
+}
+
+export interface Project {
+  id: string;
+  source_plan_id: string;
+  source_initiative_id: string;
+  source_initiative_name: string;
+  title: string;
+  short_description: string;
+  objective: string;
+  status: ProjectStatus;
+  base_state_id: string;
+  verified_state_id: string;
+  catalyst_path: string[];
+  catalyst_outputs: ProjectCatalystOutput[];
+  host_organisation_id: string;
+  host_organisation_name: string;
+  venue: ProjectVenue;
+  schedule: ProjectSchedule;
+  operational_assignments: ProjectOperationalAssignment[];
+  resources: ProjectResourceAllocation[];
+  capability_modules: string[];
+  accessibility_requirements: string[];
+  supported_languages: string[];
+  participant_capacity: number;
+  readiness: {
+    status: ProjectStatus;
+    checks: ProjectReadinessCheck[];
+    missing: string[];
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateProjectResponse {
+  project: Project;
+  verification: InitiativeAnalysisResult;
 }
 
 export interface ApiErrorPayload {

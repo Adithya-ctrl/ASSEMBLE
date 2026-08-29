@@ -6,10 +6,12 @@ import pytest
 
 from app.compiler import REQUIREMENT_GROUPS, ROLE_CAPABILITY, compile_initiative
 from app.fixture import fresh_demo_fixture
+from app.errors import AnalyserContractError
 from app.solver import (
     build_compile_summary,
     replay_assignment,
     solve_initiative,
+    validate_analysis_witness,
 )
 from app.api_models import SolverStatus
 from app.models import TimeSlot
@@ -46,6 +48,63 @@ def test_basic_workshop_is_genuinely_optimal_and_replays() -> None:
     assert compiled.decision_variables == len(compiled.model.Proto().variables)
     assert compiled.hard_constraints == len(compiled.model.Proto().constraints)
     assert replay_assignment(fixture.community, initiative, result)
+    assert validate_analysis_witness(fixture.community, initiative, result)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "invalid_start",
+        "fabricated_facts",
+        "objective",
+        "duplicate_assignment",
+        "missing_assignment",
+        "duplicate_trace",
+        "missing_trace",
+        "extra_trace",
+    ],
+)
+def test_canonical_witness_rejects_adversarial_decoded_results(mutation: str) -> None:
+    fixture = fresh_demo_fixture()
+    initiative = _initiative(fixture, "BASIC_WORKSHOP")
+    result = solve_initiative(fixture.community, initiative).model_copy(deep=True)
+
+    if mutation == "invalid_start":
+        time_entry = next(entry for entry in result.assembly_trace if entry.requirement_kind == "time")
+        time_entry.selected_ids = ["SAT_10"]
+        time_entry.facts = {
+            "start_slot": "SAT_10",
+            "occupied_slots": ["SAT_10", "SAT_11"],
+            "duration_slots": 2,
+        }
+    elif mutation == "fabricated_facts":
+        result.assembly_trace[0].facts["label"] = "Fabricated role label"
+    elif mutation == "objective":
+        result.objective_value = 999
+    elif mutation == "duplicate_assignment":
+        result.assignments.append(result.assignments[0].model_copy(deep=True))
+    elif mutation == "missing_assignment":
+        result.assignments.pop()
+    elif mutation == "duplicate_trace":
+        result.assembly_trace.append(result.assembly_trace[0].model_copy(deep=True))
+    elif mutation == "missing_trace":
+        result.assembly_trace.pop()
+    else:
+        extra = result.assembly_trace[0].model_copy(deep=True)
+        extra.requirement_id = "EXTRA_ROLE"
+        result.assembly_trace.append(extra)
+
+    assert not replay_assignment(fixture.community, initiative, result)
+    assert not validate_analysis_witness(fixture.community, initiative, result)
+
+
+def test_solve_compiled_raises_contract_error_when_decoded_witness_is_invalid(monkeypatch) -> None:
+    fixture = fresh_demo_fixture()
+    initiative = _initiative(fixture, "BASIC_WORKSHOP")
+    monkeypatch.setattr("app.solver._objective_value", lambda _: 999)
+
+    with pytest.raises(AnalyserContractError, match="canonical replay"):
+        solve_initiative(fixture.community, initiative)
 
 
 def test_initial_clinic_and_repair_share_are_infeasible() -> None:

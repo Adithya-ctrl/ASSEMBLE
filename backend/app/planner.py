@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from collections import deque
 from collections.abc import Iterable
-from dataclasses import dataclass
 
 from app.api_models import PlanNode, PlanResponse, SolverStatus
 from app.explain import AnalysisCallable, call_analyser, coerce_status, is_feasible
-from app.interventions import TransitionError, apply_action, can_apply_action
+from app.interventions import TransitionError, apply_action, ordered_action_paths
 from app.models import CatalystAction, CommunityState, InitiativeBlueprint
 
 
@@ -16,17 +14,10 @@ class NoPlanFound(LookupError):
     """Raised when no valid path is found within the disclosed BFS bounds."""
 
 
-@dataclass(frozen=True)
-class _QueueNode:
-    state: CommunityState
-    action_path: tuple[str, ...]
-    cumulative_cost: int
-    target_status: SolverStatus
-    depth: int
-
-
-def _path_key(node: _QueueNode) -> tuple[int, int, tuple[str, ...]]:
-    return (node.cumulative_cost, node.depth, node.action_path)
+def _path_key(
+    path: tuple[CatalystAction, ...],
+) -> tuple[int, int, tuple[str, ...]]:
+    return (sum(action.cost for action in path), len(path), tuple(action.id for action in path))
 
 
 def plan_catalyst(
@@ -38,7 +29,7 @@ def plan_catalyst(
     max_depth: int = 2,
     max_expanded_states: int = 20,
 ) -> PlanResponse:
-    """Search action paths with depth-two BFS and a hard expansion cap.
+    """Evaluate the same ordered depth-two action paths used by unlock.
 
     The search is intentionally generic: it never branches on an initiative
     identifier.  Every successor is produced through the same validated,
@@ -57,14 +48,6 @@ def plan_catalyst(
 
     baseline_result = call_analyser(analyser, community, initiative)
     baseline_status = coerce_status(baseline_result)
-    root = _QueueNode(
-        state=community,
-        action_path=(),
-        cumulative_cost=0,
-        target_status=baseline_status,
-        depth=0,
-    )
-    queue: deque[_QueueNode] = deque([root])
     nodes: list[PlanNode] = [
         PlanNode(
             state_id=community.state_id,
@@ -74,65 +57,30 @@ def plan_catalyst(
             prune_reason="target_already_satisfied" if is_feasible(baseline_result) else None,
         )
     ]
-    successes: list[_QueueNode] = []
-    expanded_states = 0
-    expanded_state_ids: set[str] = set()
-
-    # Keep queue ordering breadth-first.  Candidate paths are sorted by action
-    # ID; successful paths are ranked independently after the bounded search.
-    while queue and expanded_states < max_expanded_states:
-        current = queue.popleft()
-        if current.state.state_id not in expanded_state_ids:
-            expanded_state_ids.add(current.state.state_id)
-            expanded_states += 1
-
-        if current.action_path and is_feasible(current.target_status):
-            successes.append(current)
+    if is_feasible(baseline_result):
+        raise NoPlanFound(f"initiative {initiative.id} is already feasible at the base state")
+    successes: list[tuple[tuple[CatalystAction, ...], CommunityState, SolverStatus]] = []
+    candidates = ordered_action_paths(catalogue, max_depth=max_depth)
+    for path in candidates[: max(0, max_expanded_states - 1)]:
+        successor = community
+        try:
+            for action in path:
+                successor, _ = apply_action(successor, action)
+        except (TransitionError, ValueError):
             continue
-        if is_feasible(current.target_status):
-            # The frozen PlanResponse requires a non-empty path, so a target
-            # already feasible at S0 is reported as no catalyst path.
-            continue
-        if current.depth >= max_depth:
-            continue
-
-        for action in catalogue:
-            if action.id in current.action_path:
-                continue
-            if not can_apply_action(current.state, action):
-                continue
-            if expanded_states >= max_expanded_states and len(nodes) >= max_expanded_states:
-                break
-            try:
-                successor, _ = apply_action(current.state, action)
-            except (TransitionError, ValueError):
-                # Preconditions are checked above; this catch preserves a
-                # bounded search if a malformed external catalogue slips in.
-                continue
-            result = call_analyser(analyser, successor, initiative)
-            successor_status = coerce_status(result)
-            child = _QueueNode(
-                state=successor,
-                action_path=(*current.action_path, action.id),
-                cumulative_cost=current.cumulative_cost + action.cost,
-                target_status=successor_status,
-                depth=current.depth + 1,
+        result = call_analyser(analyser, successor, initiative)
+        status = coerce_status(result)
+        nodes.append(
+            PlanNode(
+                state_id=successor.state_id,
+                action_path=[action.id for action in path],
+                cumulative_cost=sum(action.cost for action in path),
+                target_status=status,
+                prune_reason=None,
             )
-            if len(nodes) < max_expanded_states:
-                nodes.append(
-                    PlanNode(
-                        state_id=successor.state_id,
-                        action_path=list(child.action_path),
-                        cumulative_cost=child.cumulative_cost,
-                        target_status=successor_status,
-                        prune_reason=None,
-                    )
-                )
-                queue.append(child)
-            else:
-                # The state was analysed (and therefore remains evidence), but
-                # cannot be queued once the response's node cap is reached.
-                break
+        )
+        if is_feasible(result):
+            successes.append((path, successor, status))
 
     if not successes:
         raise NoPlanFound(
@@ -140,24 +88,22 @@ def plan_catalyst(
             f"{max_expanded_states} expanded states"
         )
 
-    best = min(successes, key=_path_key)
+    best_path, _, best_status = min(successes, key=lambda item: _path_key(item[0]))
     states = [community.state_id]
     current = community
-    for action_id in best.action_path:
-        action = next(action for action in catalogue if action.id == action_id)
+    for action in best_path:
         current, _ = apply_action(current, action)
         states.append(current.state_id)
     return PlanResponse(
         target_initiative_id=initiative.id,
-        path=list(best.action_path),
-        total_cost=best.cumulative_cost,
+        path=[action.id for action in best_path],
+        total_cost=sum(action.cost for action in best_path),
         states=states,
         nodes=nodes,
         target_status_before=baseline_status,
-        target_status_after=best.target_status,
+        target_status_after=best_status,
     )
 
 
 plan = plan_catalyst
 catalyst_plan = plan_catalyst
-

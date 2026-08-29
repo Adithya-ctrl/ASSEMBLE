@@ -20,7 +20,7 @@ def _clinic_analyser(
     return {"status": "OPTIMAL" if helpers >= 3 and laptops >= 5 else "INFEASIBLE"}
 
 
-def test_training_is_cheapest_complete_unlock_and_catalogue_is_exhaustive() -> None:
+def test_training_is_cheapest_complete_unlock_and_catalogue_paths_are_exhaustive() -> None:
     fixture = fresh_demo_fixture()
     clinic = next(item for item in fixture.initiatives if item.id == "MULTILINGUAL_CLINIC")
 
@@ -29,7 +29,7 @@ def test_training_is_cheapest_complete_unlock_and_catalogue_is_exhaustive() -> N
     assert response.interventions == ["TRAIN_DIGITAL_HELPERS"]
     assert response.total_cost == 2
     assert response.catalogue_size == 4
-    assert response.candidate_subsets_evaluated == 15
+    assert response.candidate_paths_evaluated == 16
     assert response.resulting_status == "OPTIMAL"
 
 
@@ -52,4 +52,3 @@ def test_borrowing_laptops_alone_does_not_solve_and_transition_is_immutable() ->
     }
     assert "digital_support" not in fixture.community.people[1].capabilities
     assert transition.successor_state.state_id.startswith("S")
-

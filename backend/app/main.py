@@ -23,7 +23,8 @@ from app.api_models import (
     UnlockRequest,
     UnlockResponse,
 )
-from app.explain import AnalyserContractError, explain_infeasibility
+from app.errors import AnalyserContractError
+from app.explain import explain_infeasibility
 from app.fixture import fresh_demo_fixture, load_demo_fixture
 from app.interventions import (
     ActionAlreadyApplied,
@@ -33,9 +34,16 @@ from app.interventions import (
     find_minimum_unlock,
     transition_state,
 )
+from app.compiler import compile_initiatives
 from app.models import CatalystAction, InitiativeBlueprint
 from app.planner import NoPlanFound, plan_catalyst
-from app.solver import analyse_initiatives, build_compile_summary, solve_initiative
+from app.project_models import CreateProjectRequest, CreateProjectResponse
+from app.projects import CommunityStateMismatch, ProjectPlanNotFeasible, create_project_from_plan
+from app.solver import (
+    analyse_compiled_initiatives,
+    build_compile_summary_from_compiled,
+    solve_initiative,
+)
 
 
 app = FastAPI(title="ASSEMBLE API", version="0.2.0")
@@ -190,10 +198,14 @@ def demo() -> dict[str, object]:
 @app.post("/api/analyse", response_model=AnalyseResponse)
 def analyse(request: AnalyseRequest) -> AnalyseResponse:
     initiatives = _initiatives(request.initiative_ids)
-    return AnalyseResponse(
-        compile=build_compile_summary(request.community, initiatives),
-        results=analyse_initiatives(request.community, initiatives),
-    )
+    try:
+        compiled = compile_initiatives(request.community, initiatives)
+        return AnalyseResponse(
+            compile=build_compile_summary_from_compiled(request.community, compiled),
+            results=analyse_compiled_initiatives(compiled),
+        )
+    except AnalyserContractError as exc:
+        raise _translate_reasoning_error(exc) from exc
 
 
 @app.post("/api/explain", response_model=ExplainResponse)
@@ -247,4 +259,48 @@ def plan(request: PlanRequest) -> PlanResponse:
             max_expanded_states=request.max_expanded_states,
         )
     except (AnalyserContractError, NoPlanFound, TransitionError, ValueError) as exc:
+        raise _translate_reasoning_error(exc) from exc
+
+
+@app.post(
+    "/api/projects/from-plan",
+    response_model=CreateProjectResponse,
+    status_code=201,
+)
+def create_project(request: CreateProjectRequest) -> CreateProjectResponse:
+    initiative = _initiative(request.initiative_id)
+    actions = list(load_demo_fixture().actions)
+    known_action_ids = {action.id for action in actions}
+    unknown_action_ids = [
+        action_id for action_id in request.catalyst_path if action_id not in known_action_ids
+    ]
+    if unknown_action_ids:
+        raise ApiProblem(
+            404,
+            "INVALID_REFERENCE",
+            "The project path references an unknown action.",
+            {"action_id": unknown_action_ids[0]},
+        )
+    try:
+        return create_project_from_plan(
+            request,
+            initiative,
+            actions,
+            load_demo_fixture().community,
+        )
+    except CommunityStateMismatch as exc:
+        raise ApiProblem(
+            409,
+            "COMMUNITY_STATE_MISMATCH",
+            "Project creation must begin from the authoritative community fixture.",
+            {"expected_state_id": load_demo_fixture().community.state_id},
+        ) from exc
+    except ProjectPlanNotFeasible as exc:
+        raise ApiProblem(
+            409,
+            "PROJECT_PLAN_NOT_FEASIBLE",
+            "The replayed plan does not produce a feasible project.",
+            {"initiative_id": request.initiative_id},
+        ) from exc
+    except (ActionAlreadyApplied, AnalyserContractError, TransitionError, ValueError) as exc:
         raise _translate_reasoning_error(exc) from exc

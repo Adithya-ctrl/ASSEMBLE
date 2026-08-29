@@ -92,7 +92,7 @@
       "interventions": ["TRAIN_DIGITAL_HELPERS"],
       "total_cost": 2,
       "catalogue_size": 4,
-      "candidate_subsets_evaluated": 3,
+      "candidate_paths_evaluated": 16,
       "resulting_status": "OPTIMAL"
     },
     "plan": {

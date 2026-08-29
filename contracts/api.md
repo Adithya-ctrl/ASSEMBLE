@@ -1,42 +1,20 @@
-# Frozen API contract — M0
+# ASSEMBLE API contract pointer
 
-All endpoints use JSON. Unknown fields are rejected. IDs and result language are stable. `UNKNOWN` must never be converted to `INFEASIBLE`.
+The executable contract is defined by:
 
-Backend errors use:
+- `backend/app/models.py` for community, initiative, action, and stable-ID models;
+- `backend/app/api_models.py` for solver and reasoning HTTP models;
+- `backend/app/project_models.py` for executable Project models;
+- `backend/app/main.py` for routes, statuses, CORS, and stable error translation.
+
+The canonical current human-readable reference is [`../docs/reference/api.md`](../docs/reference/api.md). Project-specific trust and identity rules are in [`../docs/reference/project-contract.md`](../docs/reference/project-contract.md).
+
+All endpoints use JSON. Unknown fields are rejected. `UNKNOWN` is never converted to `INFEASIBLE`. Errors use the stable envelope:
 
 ```json
 {"error":{"code":"STABLE_CODE","message":"Human-readable message","details":{}}}
 ```
 
-## Endpoints
+`contracts/examples/api_examples.json` contains validated examples for the core solver and reasoning requests and responses. Examples demonstrate contract shape; runtime evidence comes only from actual endpoint execution.
 
-- `GET /api/health` returns `{"status":"ok","solver":"ortools-cp-sat"}`.
-- `GET /api/demo` returns the authoritative `fixture_version`, `community`, `initiatives`, and `actions`.
-- `POST /api/analyse` accepts `community` and non-empty `initiative_ids`; returns compile counts and one genuine solver result per requested initiative.
-- `POST /api/explain` accepts `community` and one `initiative_id`; returns bounded relax-and-resolve evidence.
-- `POST /api/unlock` accepts `community`, one `initiative_id`, and the disclosed `actions`; returns the minimum result under the frozen finite catalogue and cost function.
-- `POST /api/plan` accepts the unlock request plus fixed `max_depth: 2` and `max_expanded_states <= 20`; returns the bounded BFS trace.
-- `POST /api/transition` accepts `community`, `action_id`, and `actions`; returns a new immutable successor state and machine-readable diff.
-
-`POST /api/reassemble` is outside Core Acceptance and is not part of M0.
-
-## Frozen result types
-
-Solver status is exactly one of `OPTIMAL`, `FEASIBLE`, `INFEASIBLE`, or `UNKNOWN`.
-
-Requirement groups are exactly:
-
-- `role_capability`
-- `language`
-- `availability`
-- `venue_feature`
-- `venue_capacity`
-- `resource_quantity`
-- `maximum_contribution`
-
-The executable source of truth is `backend/app/api_models.py`. `contracts/examples/api_examples.json` contains endpoint-specific example overlays. Gate 0 combines those overlays with the authoritative demo fixture and validates every assembled request and response against the frozen Pydantic models. Response numbers are contract-shape examples at M0, not solver evidence; integration replaces displayed values with actual runtime results.
-
-## Ownership
-
-These contracts, `backend/app/models.py`, `backend/app/api_models.py`, and the demo fixture are manager-owned and read-only during the first parallel wave. A worker must stop and report if a frozen interface is insufficient.
-
+Any route, model, status, invariant, or stable-error change must update the executable contract, current reference, examples when affected, traceability, tests, and build status in the same change.

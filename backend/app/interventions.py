@@ -41,7 +41,7 @@ class AlreadyFeasible(ValueError):
 
 
 class NoUnlockPath(LookupError):
-    """Raised when no non-empty catalogue subset yields a feasible target."""
+    """Raised when no depth-two ordered catalogue path yields a feasible target."""
 
 
 def _canonical_value(value: Any) -> Any:
@@ -276,22 +276,34 @@ def apply_action_ids(
     )
 
 
-def _subset_key(subset: tuple[CatalystAction, ...]) -> tuple[int, int, tuple[str, ...]]:
+def _path_key(path: tuple[CatalystAction, ...]) -> tuple[int, int, tuple[str, ...]]:
     return (
-        sum(action.cost for action in subset),
-        len(subset),
-        tuple(action.id for action in subset),
+        sum(action.cost for action in path),
+        len(path),
+        tuple(action.id for action in path),
     )
 
 
-def _all_subsets(actions: list[CatalystAction]) -> list[tuple[CatalystAction, ...]]:
-    ordered = sorted(actions, key=lambda action: action.id)
-    subsets = [
-        tuple(combination)
-        for size in range(1, len(ordered) + 1)
-        for combination in itertools.combinations(ordered, size)
+def ordered_action_paths(
+    actions: Iterable[CatalystAction],
+    *,
+    max_depth: int = 2,
+) -> list[tuple[CatalystAction, ...]]:
+    """Return every unique non-repeating action path up to the frozen depth."""
+
+    if max_depth < 0 or max_depth > 2:
+        raise ValueError("max_depth must be between 0 and 2")
+    catalogue = list(actions)
+    action_ids = [action.id for action in catalogue]
+    if len(action_ids) != len(set(action_ids)):
+        raise ValueError("action catalogue contains duplicate ids")
+    ordered = sorted(catalogue, key=lambda action: action.id)
+    paths = [
+        tuple(path)
+        for size in range(1, min(max_depth, len(ordered)) + 1)
+        for path in itertools.permutations(ordered, size)
     ]
-    return sorted(subsets, key=_subset_key)
+    return sorted(paths, key=_path_key)
 
 
 def find_minimum_unlock(
@@ -300,7 +312,7 @@ def find_minimum_unlock(
     actions: Iterable[CatalystAction],
     analyser: AnalysisCallable | None = None,
 ) -> UnlockResponse:
-    """Exhaustively evaluate the finite intervention catalogue."""
+    """Exhaustively evaluate executable ordered paths up to depth two."""
 
     catalogue = list(actions)
     action_ids = [action.id for action in catalogue]
@@ -313,34 +325,34 @@ def find_minimum_unlock(
     if is_feasible(baseline):
         raise AlreadyFeasible(f"initiative {initiative.id} is already feasible")
 
-    candidates = _all_subsets(catalogue)
+    candidates = ordered_action_paths(catalogue)
     evaluated = 0
     valid: list[tuple[tuple[int, int, tuple[str, ...]], tuple[CatalystAction, ...], SolverStatus]] = []
-    for subset in candidates:
+    for path in candidates:
         evaluated += 1
         try:
             successor = community
-            for action in subset:
+            for action in path:
                 successor, _ = apply_action(successor, action)
         except (TransitionError, ValueError):
             continue
         result = call_analyser(analyser, successor, initiative)
         status = coerce_status(result)
         if is_feasible(result):
-            valid.append((_subset_key(subset), subset, status))
+            valid.append((_path_key(path), path, status))
 
     if not valid:
         raise NoUnlockPath(
-            f"no intervention subset makes {initiative.id} feasible after {evaluated} candidates"
+            f"no ordered intervention path makes {initiative.id} feasible after {evaluated} candidates"
         )
-    _, subset, status = min(valid, key=lambda item: item[0])
+    _, path, status = min(valid, key=lambda item: item[0])
     return UnlockResponse(
         label="minimum_modelled_unlock",
         target_initiative_id=initiative.id,
-        interventions=[action.id for action in subset],
-        total_cost=sum(action.cost for action in subset),
+        interventions=[action.id for action in path],
+        total_cost=sum(action.cost for action in path),
         catalogue_size=len(catalogue),
-        candidate_subsets_evaluated=evaluated,
+        candidate_paths_evaluated=evaluated,
         resulting_status=status,
     )
 
