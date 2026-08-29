@@ -7,7 +7,14 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-StableId = Annotated[str, Field(pattern=r"^[A-Z][A-Z0-9_]*$")]
+# Source-bound counterfactual IDs currently reach 141 characters. Keep room for
+# versioned namespaces while retaining a finite request/response contract.
+MAX_STABLE_ID_LENGTH = 256
+
+StableId = Annotated[
+    str,
+    Field(max_length=MAX_STABLE_ID_LENGTH, pattern=r"^[A-Z][A-Z0-9_]*$"),
+]
 CapabilityId = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*$")]
 LanguageCode = Annotated[str, Field(pattern=r"^[a-z]{2}$")]
 
@@ -51,7 +58,7 @@ class PersonBlock(ContractModel):
     languages: set[LanguageCode] = Field(default_factory=set, max_length=MAX_LANGUAGES)
     willing_to_learn: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
     available_slots: set[TimeSlot] = Field(default_factory=set, max_length=len(TimeSlot))
-    max_contribution_slots: int = Field(ge=1)
+    max_contribution_slots: int = Field(ge=1, strict=True)
 
     @model_validator(mode="after")
     def contribution_fits_availability(self) -> "PersonBlock":
@@ -65,7 +72,7 @@ class SpaceBlock(ContractModel):
     name: str = Field(min_length=1)
     organisation_id: StableId
     available_slots: set[TimeSlot] = Field(default_factory=set, max_length=len(TimeSlot))
-    capacity: int = Field(ge=0)
+    capacity: int = Field(ge=0, strict=True)
     features: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
 
 
@@ -73,9 +80,9 @@ class ResourceBlock(ContractModel):
     id: StableId
     name: str = Field(min_length=1)
     organisation_id: StableId
-    quantity: int = Field(ge=0)
+    quantity: int = Field(ge=0, strict=True)
     available_slots: set[TimeSlot] = Field(default_factory=set, max_length=len(TimeSlot))
-    shareable: bool
+    shareable: bool = Field(strict=True)
 
 
 class CommunityState(ContractModel):
@@ -102,17 +109,17 @@ class RoleRequirement(ContractModel):
     label: str = Field(min_length=1)
     required_capabilities: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
     required_languages: set[LanguageCode] = Field(default_factory=set, max_length=MAX_LANGUAGES)
-    allow_shared_person: bool = False
+    allow_shared_person: bool = Field(default=False, strict=True)
 
 
 class VenueRequirement(ContractModel):
-    minimum_capacity: int = Field(ge=0)
+    minimum_capacity: int = Field(ge=0, strict=True)
     required_features: set[CapabilityId] = Field(default_factory=set, max_length=MAX_CAPABILITIES)
 
 
 class ResourceRequirement(ContractModel):
     resource_id: StableId
-    quantity: int = Field(ge=1)
+    quantity: int = Field(ge=1, strict=True)
 
 
 class InitiativeBlueprint(ContractModel):
@@ -122,7 +129,7 @@ class InitiativeBlueprint(ContractModel):
     venue: VenueRequirement
     resources: list[ResourceRequirement] = Field(default_factory=list, max_length=MAX_REQUIREMENTS)
     candidate_start_slots: list[TimeSlot] = Field(min_length=1, max_length=len(TimeSlot))
-    duration_slots: int = Field(ge=1, le=len(ORDERED_TIME_SLOTS))
+    duration_slots: int = Field(ge=1, le=len(ORDERED_TIME_SLOTS), strict=True)
 
     @model_validator(mode="after")
     def valid_time_and_roles(self) -> "InitiativeBlueprint":
@@ -169,7 +176,7 @@ class AddPersonEffect(ContractModel):
 class AddResourceQuantityEffect(ContractModel):
     type: Literal["add_resource_quantity"]
     resource_id: StableId
-    quantity: int = Field(ge=1)
+    quantity: int = Field(ge=1, strict=True)
 
 
 ActionEffect = Annotated[
@@ -181,7 +188,7 @@ ActionEffect = Annotated[
 class CatalystAction(ContractModel):
     id: StableId
     name: str = Field(min_length=1)
-    cost: int = Field(ge=0)
+    cost: int = Field(ge=0, strict=True)
     preconditions: ActionPreconditions = Field(default_factory=ActionPreconditions)
     effects: list[ActionEffect] = Field(min_length=1, max_length=MAX_EFFECTS)
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from app.models import (
     MAX_ACTIONS,
@@ -61,6 +61,13 @@ class PlanRequest(ContractModel):
     actions: list[CatalystAction] = Field(min_length=1, max_length=MAX_ACTIONS)
     max_depth: Literal[2] = 2
     max_expanded_states: int = Field(default=20, ge=1, le=20, strict=True)
+
+    @field_validator("max_depth", mode="before")
+    @classmethod
+    def max_depth_is_strict_integer(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("max_depth must be the integer 2")
+        return value
 
 
 class TransitionRequest(ContractModel):
