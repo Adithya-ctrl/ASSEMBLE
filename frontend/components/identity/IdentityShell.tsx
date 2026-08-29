@@ -1,6 +1,5 @@
 "use client";
 
-import { Sparkle } from "@phosphor-icons/react";
 import { Theme } from "@radix-ui/themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,7 +27,7 @@ export default function IdentityShell({ children }: { children: ReactNode }) {
         <p className="sr-only identity-sr-only" aria-atomic="true" aria-live="polite">{identity.liveStatus}</p>
         <header className="identity-header">
           <Link aria-label="ASSEMBLE planning demo" className="identity-brand-lockup" href="/">
-            <span className="identity-brand-mark"><Sparkle aria-hidden="true" size={18} weight="fill" /></span>
+            <span aria-hidden="true" className="workbench-brand-mark"><span /><span /><span /></span>
             <span>ASSEMBLE</span>
           </Link>
           <nav aria-label="Account navigation" className="identity-navigation">

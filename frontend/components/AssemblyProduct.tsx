@@ -43,6 +43,8 @@ import type {
 } from "../lib/types";
 import type { ProjectMetadata, RequestKey, RequestState, UiError } from "../lib/workflow-types";
 import { humanize } from "../lib/ui";
+import CivicScene from "./visual/CivicScene";
+import { INITIATIVE_SCENES } from "./visual/sceneAssets";
 
 function statusLabel(status: SolverStatus | undefined): string {
   if (!status) return "Awaiting compile";
@@ -126,14 +128,16 @@ export function InitiativeRail({ initiatives, analyses, verifiedResult, plan, se
     <section className="rail-region" aria-labelledby="initiatives-title">
       <div className="region-heading rail-heading"><div><h2 id="initiatives-title">Choose an initiative to prove</h2><p>See what the community can deliver now, then open one brief to test it.</p></div><span className="region-count">{initiatives.length} initiatives</span></div>
       <p className="rail-summary">{buildableCount} individually buildable, {blockedCount} blocked{plan ? ", with a verified path available" : ""}.</p>
-      <div className="initiative-list">
-        {initiatives.map((initiative) => {
+      <div className="initiative-list initiative-showcase">
+        {initiatives.map((initiative, index) => {
           const result = effectiveResults[initiative.id];
+          const scene = INITIATIVE_SCENES[initiative.id];
           const isPathTarget = plan?.target_initiative_id === initiative.id && (plan.target_status_after === "OPTIMAL" || plan.target_status_after === "FEASIBLE");
           const shownStatus = result?.status ?? (isPathTarget ? plan.target_status_before : undefined);
           return (
-            <button aria-current={selectedId === initiative.id ? "true" : undefined} className={`initiative-card ${selectedId === initiative.id ? "initiative-card-selected" : ""}`} key={initiative.id} onClick={() => onSelect(initiative.id)} type="button">
-              <div className="initiative-card-copy"><h3>{initiative.name}</h3><p>{initiative.roles.length} roles, {initiative.duration_slots} time blocks and {initiative.resources.length} resource requirement</p><span>{isPathTarget && shownStatus === "INFEASIBLE" ? "A verified improvement path is ready" : "Open the proof workspace"}</span></div>
+            <button aria-current={selectedId === initiative.id ? "true" : undefined} className={`initiative-card ${index === 0 ? "initiative-card-featured" : "initiative-card-secondary"} ${selectedId === initiative.id ? "initiative-card-selected" : ""}`} key={initiative.id} onClick={() => onSelect(initiative.id)} type="button">
+              <CivicScene alt={scene?.alt ?? ""} assetSrc={scene?.src} className="initiative-card-scene" kind="initiative" />
+              <div className="initiative-card-copy"><h3>{initiative.name}</h3><p>{initiative.roles.length} community roles, {initiative.duration_slots} time blocks and {initiative.resources.length} shared resource need</p><span>{isPathTarget && shownStatus === "INFEASIBLE" ? "A verified improvement path is ready" : "Select this initiative"}</span></div>
               <div className="initiative-card-action"><StatusBadge status={shownStatus} /><CaretRight aria-hidden="true" size={18} weight="bold" /></div>
             </button>
           );

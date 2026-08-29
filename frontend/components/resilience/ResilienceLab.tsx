@@ -24,6 +24,8 @@ import {
   type StressViewModel,
   type ViewPhase,
 } from "../../lib/resilience-view-model";
+import CivicScene from "../visual/CivicScene";
+import { RESILIENCE_SCENE } from "../visual/sceneAssets";
 import styles from "./ResilienceLab.module.css";
 
 const MODES: ReadonlyArray<{ id: ResilienceMode; label: string; shortLabel: string }> = [
@@ -506,10 +508,19 @@ export default function ResilienceLab(props: ResilienceLabProps) {
   return (
     <section className={styles.lab} aria-labelledby={`${baseId}-title`}>
       <header className={styles.labHeader}>
-        <div>
+        <div className={styles.heroCopy}>
           <h1 id={`${baseId}-title`}>Pressure-test the proof before it becomes a promise</h1>
           <p>Explore structural risk, minimum-disruption recovery, and one-action capability without changing the live workflow.</p>
         </div>
+        <CivicScene
+          alt="A community bridge rebuilt from modular blocks after a disruption"
+          assetSrc={RESILIENCE_SCENE}
+          className={classes(
+            styles.heroScene,
+            mode === "stress" ? styles.heroStress : mode === "recovery" ? styles.heroRecovery : styles.heroFrontier,
+          )}
+          kind="resilience"
+        />
         <div className={styles.sourceCard}>
           <span>Current source</span>
           <strong>{props.source.label}</strong>

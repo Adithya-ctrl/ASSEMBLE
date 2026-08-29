@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { focusIfConnected } from "../components/community/CommunityInventory";
+import { focusIfConnected } from "./focus-utils";
 
 test("focus return targets a still-connected entity trigger", () => {
   let focusCalls = 0;

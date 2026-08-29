@@ -8,6 +8,11 @@ const projectDetail = readFileSync(new URL("../components/project/ProjectDetailV
 const accountMenu = readFileSync(new URL("../components/identity/AccountMenu.tsx", import.meta.url), "utf8");
 const appShell = readFileSync(new URL("../components/shell/AppShell.tsx", import.meta.url), "utf8");
 const assemblyProduct = readFileSync(new URL("../components/AssemblyProduct.tsx", import.meta.url), "utf8");
+const civicScene = readFileSync(new URL("../components/visual/CivicScene.tsx", import.meta.url), "utf8");
+const civicSceneStyles = readFileSync(new URL("../components/visual/CivicScene.module.css", import.meta.url), "utf8");
+const sceneAssets = readFileSync(new URL("../components/visual/sceneAssets.ts", import.meta.url), "utf8");
+const resilienceLab = readFileSync(new URL("../components/resilience/ResilienceLab.tsx", import.meta.url), "utf8");
+const resilienceStyles = readFileSync(new URL("../components/resilience/ResilienceLab.module.css", import.meta.url), "utf8");
 
 test("one root provider owns workflow state across product route transitions", () => {
   assert.match(rootLayout, /import \{ AssemblyProvider \} from "\.\.\/lib\/workflow-context";/);
@@ -35,4 +40,25 @@ test("Project proof uses client routing without browser-storage proof persistenc
 test("a successful proof folds the final action into the completed state while UNKNOWN remains retryable", () => {
   assert.match(assemblyProduct, /const currentStep = proofComplete \? null : steps\[Math\.min\(journeyStep, 5\)\];/);
   assert.match(assemblyProduct, /verifiedResult\?\.status === "UNKNOWN" \? "Retry bounded proof"/);
+});
+
+test("Civic scenes use isolated compositor motion with a static accessibility fallback", () => {
+  assert.match(civicScene, /requestAnimationFrame\(render\)/);
+  assert.match(civicScene, /cancelAnimationFrame\(frame\)/);
+  assert.match(civicScene, /style\.setProperty\("--scene-rotate-x"/);
+  assert.match(civicScene, /style\.setProperty\("--scene-rotate-y"/);
+  assert.match(civicScene, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(civicScene, /useState|addEventListener\("scroll"/);
+  assert.match(civicSceneStyles, /transform-style: preserve-3d/);
+  assert.match(civicSceneStyles, /@media \(max-width: 767px\), \(prefers-reduced-motion: reduce\)/);
+  assert.doesNotMatch(civicSceneStyles, /animation[^;]*infinite/);
+  assert.doesNotMatch(sceneAssets, /\.png/);
+  assert.equal((sceneAssets.match(/\.webp/g) ?? []).length, 5);
+});
+
+test("Resilience scene motion follows the active analytical task and stays static on mobile", () => {
+  assert.match(resilienceLab, /mode === "stress" \? styles\.heroStress/);
+  assert.match(resilienceLab, /mode === "recovery" \? styles\.heroRecovery : styles\.heroFrontier/);
+  assert.match(resilienceStyles, /grid-template-areas:\s*"copy scene"\s*"source scene"/);
+  assert.match(resilienceStyles, /@media \(prefers-reduced-motion: no-preference\) and \(min-width: 768px\)/);
 });

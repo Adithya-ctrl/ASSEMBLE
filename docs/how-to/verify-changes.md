@@ -34,7 +34,7 @@ Lint must finish with zero errors and zero warnings.
 Run the real FastAPI backend and the production Next.js build. Use a clean page state.
 
 1. Open Overview, demo Community, Initiatives, Projects, Collaboration, and Settings through shell/account navigation and direct URLs. Confirm `/preferences` redirects to Settings. Use back, forward, and hard refresh; ordinary planning navigation must preserve proof context while refresh restores authoritative S0.
-2. On Community, visit Overview, People, Places, and Resources, reach all eight entities, compare Graph/List facts, and inspect one focused detail plus its Technical details disclosure.
+2. On Community, visit Overview, People, Places, and Resources, reach all eight entities, compare Graph/List facts, and inspect one focused detail plus its Technical details disclosure. Confirm human availability is chronological while exact technical/source values remain intact.
 3. Open Basic Workshop's Initiative Proof route and compile the community.
 4. Confirm a real feasible S0 proof exposes the Project form with explicit path `[]`.
 5. Create the Basic Project and confirm HTTP 201, `READY`, verified baseline, assignments, venue, schedule, resources, readiness, dedicated Project Proof, and Inspector focus.
@@ -46,6 +46,8 @@ Run the real FastAPI backend and the production Next.js build. Use a clean page 
 11. Reset and confirm all downstream evidence, Project state, hashes, and relationship emphasis clear across Projects and Project Proof.
 
 The planning journey verifies the proof workflow only. Separately replay the current identity UI: guest account menu and Appearance; signup/login; session refresh and scheduled expiry; revoked-session invalidation without stale signed-in controls; profile and password forms; 204 logout; Collaboration list/create/accept; Administrator members/invitations/audit; one-time token removal; `403` role-loss refresh to a non-Administrator view; stable 401/403/404/409/429/503 presentation; and restart persistence. Confirm account-menu actions use the product shell's single application announcement and persisted roles do not gate the planning demo.
+
+For the visual current-state check, confirm guest Collaboration and empty Project Proof use purposeful next-action compositions without invented records. Verify Overview, Community, Projects, login, and signup assign or crop the original scene assets deliberately rather than repeating one identical hero treatment. Confirm scene motion remains static on mobile and under reduced motion.
 
 Then replay `/resilience` against the real backend: Basic S0 Stress, S0 Capability frontier, trained Clinic Stress, and trained Basic Stress followed by Recovery. Confirm every request uses canonical `demo.community` plus the authoritative verified catalyst path, a pending transition blocks actions, a new Stress run invalidates Recovery, late responses do not bind after a source change, Judge mode alone reveals raw receipts, and no result mutates planning, transition or Project state.
 

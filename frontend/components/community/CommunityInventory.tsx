@@ -12,11 +12,14 @@ import {
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 import type { CommunityState, PersonBlock, ResourceBlock, SpaceBlock } from "../../lib/types";
+import { sortAvailabilitySlots } from "../../lib/availability";
+import { focusIfConnected } from "../../lib/focus-utils";
 import { humanize } from "../../lib/ui";
+import CivicScene from "../visual/CivicScene";
+import { CIVIC_WORLD_SCENE } from "../visual/sceneAssets";
 
 type Category = "overview" | "people" | "places" | "resources";
 type ViewMode = "graph" | "list";
-type FocusTarget = Pick<HTMLElement, "focus" | "isConnected">;
 type EntityView =
   | { kind: "person"; id: string; name: string; organisationName: string; availability: string; taskFact: string; source: PersonBlock }
   | { kind: "space"; id: string; name: string; organisationName: string; availability: string; taskFact: string; source: SpaceBlock }
@@ -29,14 +32,8 @@ const CATEGORIES: Array<{ id: Category; label: string }> = [
   { id: "resources", label: "Resources" },
 ];
 
-export function focusIfConnected(target: FocusTarget | null | undefined): boolean {
-  if (!target?.isConnected) return false;
-  target.focus();
-  return true;
-}
-
 function formatSlots(slots: readonly string[]): string {
-  return slots.map((slot) => humanize(slot).replace("Sat ", "Saturday ")).join(", ");
+  return sortAvailabilitySlots(slots).map((slot) => humanize(slot).replace("Sat ", "Saturday ")).join(", ");
 }
 
 function EntityIcon({ kind }: { kind: EntityView["kind"] }) {
@@ -122,11 +119,14 @@ export default function CommunityInventory({ community, selectedId, viewMode, ju
       <div aria-labelledby={`community-tab-${category}`} id="community-category-panel" role="tabpanel">
         {category === "overview" ? (
           <div className="community-overview">
-            <div className="community-overview-copy">
-              <h2 id="community-inventory-title">Capacity across the community</h2>
-              <p>{countLabel(community.people.length, "person", "people")}, {countLabel(community.spaces.length, "shared place")}, and {countLabel(community.resources.length, "resource pool")} are available across {countLabel(community.organisations.length, "local organisation")}.</p>
+            <div className="community-overview-stage">
+              <div className="community-overview-copy">
+                <h2 id="community-inventory-title">Capacity lives across the neighbourhood</h2>
+                <p>{countLabel(community.people.length, "person", "people")}, {countLabel(community.spaces.length, "shared place")}, and {countLabel(community.resources.length, "resource pool")} are available across {countLabel(community.organisations.length, "local organisation")}.</p>
+              </div>
+              <CivicScene alt="A diverse group assembling a shared neighbourhood plan" assetSrc={CIVIC_WORLD_SCENE} className="community-capacity-scene" kind="community" />
             </div>
-            <ul aria-label="Participating organisations">
+            <ul aria-label="Participating organisations" className="community-organisation-tiles">
               {community.organisations.map((organisation) => {
                 const people = community.people.filter((person) => person.organisation_id === organisation.id).length;
                 const places = community.spaces.filter((space) => space.organisation_id === organisation.id).length;

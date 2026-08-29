@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { useIdentity } from "../../lib/identity-context";
+import CivicScene from "../visual/CivicScene";
+import { CIVIC_WORLD_SCENE, INITIATIVE_SCENES } from "../visual/sceneAssets";
 
 type AuthMode = "login" | "signup";
 
@@ -74,66 +76,76 @@ export default function AuthEntry({ mode }: { mode: AuthMode }) {
   const error = localError || identity.error?.message;
 
   return (
-    <section aria-labelledby="auth-title" className="auth-entry">
-      <div className="auth-heading">
-        {isSignup ? <UserPlus aria-hidden="true" size={26} weight="duotone" /> : <LockKey aria-hidden="true" size={26} weight="duotone" />}
-        <h1 id="auth-title">{isSignup ? "Create your account" : "Sign in to collaborate"}</h1>
-        <p>{isSignup ? "Create a local account for collaboration spaces." : "Use your username or email to open collaboration spaces."}</p>
-      </div>
-
-      <form className="auth-form" onSubmit={submit}>
-        {isSignup ? (
-          <>
-            <div className="auth-field">
-              <label htmlFor="auth-username">Username</label>
-              <input aria-describedby="auth-username-help" autoComplete="username" id="auth-username" maxLength={64} minLength={3} onChange={(event) => setUsername(event.target.value)} required type="text" value={username} />
-              <span id="auth-username-help">3-64 characters using letters, numbers, dots, underscores or hyphens.</span>
-            </div>
-            <div className="auth-field">
-              <label htmlFor="auth-email">Email <span>(optional)</span></label>
-              <input autoComplete="email" id="auth-email" maxLength={254} onChange={(event) => setEmail(event.target.value)} type="email" value={email} />
-            </div>
-            <div className="auth-field">
-              <label htmlFor="auth-display-name">Display name <span>(optional)</span></label>
-              <input autoComplete="name" id="auth-display-name" maxLength={120} onChange={(event) => setDisplayName(event.target.value)} type="text" value={displayName} />
-            </div>
-          </>
-        ) : (
-          <div className="auth-field">
-            <label htmlFor="auth-identity">Username or email</label>
-            <input autoComplete="username" id="auth-identity" maxLength={254} minLength={3} onChange={(event) => setLoginIdentity(event.target.value)} required type="text" value={loginIdentity} />
-          </div>
-        )}
-
-        <div className="auth-field">
-          <label htmlFor="auth-password">Password</label>
-          <input
-            aria-describedby={isSignup ? "auth-password-help" : undefined}
-            autoComplete={isSignup ? "new-password" : "current-password"}
-            id="auth-password"
-            maxLength={128}
-            minLength={isSignup ? 12 : 1}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            type="password"
-            value={password}
-          />
-          {isSignup ? <span id="auth-password-help">Use 12-128 characters and at least three of: lowercase, uppercase, number and symbol.</span> : null}
+    <section aria-labelledby="auth-title" className="auth-entry auth-entry-split">
+      <aside className="auth-visual-panel" aria-label="ASSEMBLE collaboration">
+        <div>
+          <strong>ASSEMBLE collaboration</strong>
+          <h2>Give local ideas a shared place to grow.</h2>
+          <p>Keep community membership and invitations together while the planning demo stays open to guests.</p>
+        </div>
+        <CivicScene alt={isSignup ? "Community helpers preparing a shared support session" : "Neighbours assembling a shared community plan"} assetSrc={isSignup ? INITIATIVE_SCENES.MULTILINGUAL_CLINIC.src : CIVIC_WORLD_SCENE} className={isSignup ? "auth-signup-scene" : "auth-login-scene"} kind="identity" />
+      </aside>
+      <div className="auth-form-panel">
+        <div className="auth-heading">
+          {isSignup ? <UserPlus aria-hidden="true" size={26} weight="duotone" /> : <LockKey aria-hidden="true" size={26} weight="duotone" />}
+          <h1 id="auth-title">{isSignup ? "Create your account" : "Sign in to collaborate"}</h1>
+          <p>{isSignup ? "Create a local account for collaboration spaces." : "Use your username or email to open collaboration spaces."}</p>
         </div>
 
-        {error ? <div aria-live="assertive" className="auth-error" role="alert"><strong>{identity.error?.code ?? "CHECK_DETAILS"}</strong><span>{error}</span></div> : null}
+        <form className="auth-form" onSubmit={submit}>
+          {isSignup ? (
+            <>
+              <div className="auth-field">
+                <label htmlFor="auth-username">Username</label>
+                <input aria-describedby="auth-username-help" autoComplete="username" id="auth-username" maxLength={64} minLength={3} onChange={(event) => setUsername(event.target.value)} required type="text" value={username} />
+                <span id="auth-username-help">3-64 characters using letters, numbers, dots, underscores or hyphens.</span>
+              </div>
+              <div className="auth-field">
+                <label htmlFor="auth-email">Email <span>(optional)</span></label>
+                <input autoComplete="email" id="auth-email" maxLength={254} onChange={(event) => setEmail(event.target.value)} type="email" value={email} />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="auth-display-name">Display name <span>(optional)</span></label>
+                <input autoComplete="name" id="auth-display-name" maxLength={120} onChange={(event) => setDisplayName(event.target.value)} type="text" value={displayName} />
+              </div>
+            </>
+          ) : (
+            <div className="auth-field">
+              <label htmlFor="auth-identity">Username or email</label>
+              <input autoComplete="username" id="auth-identity" maxLength={254} minLength={3} onChange={(event) => setLoginIdentity(event.target.value)} required type="text" value={loginIdentity} />
+            </div>
+          )}
 
-        <Button className="auth-submit" disabled={isWorking} size="3" type="submit">
-          {isWorking ? "Please wait" : isSignup ? "Create account" : "Sign in"}
-          {!isWorking ? <ArrowRight aria-hidden="true" size={17} /> : null}
-        </Button>
-      </form>
+          <div className="auth-field">
+            <label htmlFor="auth-password">Password</label>
+            <input
+              aria-describedby={isSignup ? "auth-password-help" : undefined}
+              autoComplete={isSignup ? "new-password" : "current-password"}
+              id="auth-password"
+              maxLength={128}
+              minLength={isSignup ? 12 : 1}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              type="password"
+              value={password}
+            />
+            {isSignup ? <span id="auth-password-help">Use 12-128 characters and at least three of: lowercase, uppercase, number and symbol.</span> : null}
+          </div>
 
-      <div className="auth-alternatives">
-        <p>{isSignup ? "Already have an account?" : "Need an account?"} <Link href={isSignup ? "/login" : "/signup"}>{isSignup ? "Sign in" : "Create one"}</Link></p>
-        <Link className="auth-guest-link" href="/">Continue to the planning demo as a guest</Link>
+          {error ? <div aria-live="assertive" className="auth-error" role="alert"><strong>{identity.error?.code ?? "CHECK_DETAILS"}</strong><span>{error}</span></div> : null}
+
+          <Button className="auth-submit" disabled={isWorking} size="3" type="submit">
+            {isWorking ? "Please wait" : isSignup ? "Create account" : "Sign in"}
+            {!isWorking ? <ArrowRight aria-hidden="true" size={17} /> : null}
+          </Button>
+        </form>
+
+        <div className="auth-alternatives">
+          <p>{isSignup ? "Already have an account?" : "Need an account?"} <Link href={isSignup ? "/login" : "/signup"}>{isSignup ? "Sign in" : "Create one"}</Link></p>
+          <Link className="auth-guest-link" href="/">Continue to the planning demo as a guest</Link>
+        </div>
+        <p className="auth-privacy-note">Session cookies are HttpOnly. This interface never reads or stores the session token.</p>
       </div>
-      <p className="auth-privacy-note">Session cookies are HttpOnly. This interface never reads or stores the session token.</p>
     </section>
   );
 }

@@ -10,6 +10,8 @@ import { authApi } from "../../lib/auth-api";
 import type { CommunitySummary } from "../../lib/auth-types";
 import { useIdentity } from "../../lib/identity-context";
 import { isAbortError } from "../../lib/ui";
+import CivicScene from "../visual/CivicScene";
+import { INITIATIVE_SCENES } from "../visual/sceneAssets";
 
 interface PanelError { code: string; message: string; status: number }
 
@@ -126,7 +128,7 @@ export default function CommunitiesPanel() {
   if (identity.status === "bootstrapping") return <section aria-busy="true" className="collab-panel"><h1>Collaboration spaces</h1><p>Checking account access.</p></section>;
 
   if (!session) {
-    return <section aria-labelledby="collab-title" className="collab-panel collab-signin-state"><UsersThree aria-hidden="true" size={30} weight="duotone" /><h1 id="collab-title">Collaboration spaces</h1><p>Sign in to create spaces, accept an invitation and see your persisted roles.</p><Button asChild size="3"><Link href="/login">Sign in <ArrowRight aria-hidden="true" size={17} /></Link></Button><Link className="collab-guest-link" href="/">Continue to the separate planning demo</Link></section>;
+    return <section aria-labelledby="collab-title" className="collab-panel collab-signin-state collab-signin-state-visual"><div className="collab-signin-copy"><UsersThree aria-hidden="true" size={30} weight="duotone" /><h1 id="collab-title">Collaboration spaces</h1><p>Sign in to create spaces, accept an invitation and see your persisted roles.</p><div className="collab-signin-actions"><Button asChild size="3"><Link href="/login">Sign in <ArrowRight aria-hidden="true" size={17} /></Link></Button><Link className="collab-guest-link" href="/">Continue to the separate planning demo</Link></div></div><div className="collaboration-guest-scene"><CivicScene alt="Neighbours learning together in a community technology workshop" assetSrc={INITIATIVE_SCENES.BASIC_WORKSHOP.src} kind="community" /></div></section>;
   }
 
   return (

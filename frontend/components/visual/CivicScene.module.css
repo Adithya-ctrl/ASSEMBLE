@@ -1,0 +1,157 @@
+.stage {
+  position: relative;
+  min-width: 0;
+  min-height: 240px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--toybox-scene-surface, var(--surface-cobalt));
+  box-shadow: var(--toybox-depth-shadow, 0 24px 56px rgb(52 87 213 / 0.14));
+  contain: layout paint;
+  perspective: 980px;
+  --scene-rotate-x: 0deg;
+  --scene-rotate-y: 0deg;
+}
+
+.sceneWorld {
+  position: absolute;
+  inset: 0;
+  transform: rotateX(var(--scene-rotate-x)) rotateY(var(--scene-rotate-y));
+  transform-style: preserve-3d;
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.assetPlane {
+  position: absolute;
+  inset: 4%;
+  transform: translateZ(42px);
+  transform-style: preserve-3d;
+}
+
+.asset {
+  position: absolute;
+  object-fit: contain;
+  object-position: center;
+}
+
+.pendingAsset {
+  position: absolute;
+  inset: 12%;
+  transform-style: preserve-3d;
+}
+
+.pendingAsset span {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  color: var(--accent-cobalt-dark);
+  box-shadow: 0 18px 28px rgb(45 55 79 / 0.12);
+}
+
+.blockLarge {
+  right: 12%;
+  bottom: 6%;
+  width: 48%;
+  aspect-ratio: 1.12;
+  border-radius: 16px;
+  background: var(--surface);
+  transform: translateZ(52px) rotate(-4deg);
+}
+
+.blockSmall {
+  left: 8%;
+  bottom: 12%;
+  width: 30%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background: var(--toybox-sunflower-soft, #f7df92);
+  transform: translateZ(84px) rotate(7deg);
+}
+
+.blockTall {
+  top: 4%;
+  left: 29%;
+  width: 27%;
+  height: 52%;
+  border-radius: 14px;
+  background: var(--toybox-teal-soft, #9fdad2);
+  transform: translateZ(28px) rotate(-7deg);
+}
+
+.backPlane,
+.frontPlane {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.hasAsset .backPlane,
+.hasAsset .frontPlane {
+  display: none;
+}
+
+.backPlane {
+  inset: 17% 12% 11% 18%;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.48);
+  transform: translateZ(-38px) rotate(4deg);
+}
+
+.frontPlane {
+  right: 9%;
+  bottom: 8%;
+  width: 18%;
+  aspect-ratio: 1;
+  border-radius: 13px;
+  background: var(--toybox-coral-soft, #f2a38b);
+  transform: translateZ(108px) rotate(9deg);
+  box-shadow: 0 14px 24px rgb(74 47 43 / 0.12);
+}
+
+.overview,
+.community,
+.identity {
+  --toybox-scene-surface: #0d1d43;
+}
+
+.overview .assetPlane,
+.community .assetPlane,
+.identity .assetPlane {
+  inset: -4%;
+}
+
+.initiative { --toybox-scene-surface: var(--toybox-sunflower-wash, #fff7dd); }
+.project { --toybox-scene-surface: var(--toybox-teal-wash, #e9f8f5); }
+.resilience { --toybox-scene-surface: #101a2a; }
+
+@media (max-width: 767px) {
+  .stage {
+    min-height: 210px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sceneWorld {
+    animation: assemble-scene 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+}
+
+@keyframes assemble-scene {
+  from { opacity: 0; transform: translate3d(0, 18px, -80px) rotateX(5deg); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) rotateX(var(--scene-rotate-x)) rotateY(var(--scene-rotate-y)); }
+}
+
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .sceneWorld,
+  .blockLarge,
+  .blockSmall,
+  .blockTall {
+    animation: none;
+    transform-style: flat;
+  }
+
+  .sceneWorld {
+    transform: none;
+    transition: none;
+  }
+}

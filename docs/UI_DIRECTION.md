@@ -14,9 +14,9 @@ The primary user is a community coordinator. The primary event-day observer is a
 
 ## 2. Current direction
 
-### Calm civic workspace
+### Civic Toybox spatial workspace
 
-The interface uses the workspace logic of the selected [Project Management UX case study](https://in.pinterest.com/pin/project-management-ux-case-study-on-behance-in-2025--95420085851412838/), adapted through the local minimalist-UI guidance and the predictable navigation and detail-view principles associated with Outline and Immich. These references guide hierarchy and interaction only; ASSEMBLE does not copy their branding or compositions.
+The interface combines the workspace logic of the selected [Project Management UX case study](https://in.pinterest.com/pin/project-management-ux-case-study-on-behance-in-2025--95420085851412838/) with a Civic Toybox spatial language: original dimensional community scenes, a deep civic-workbench rail, restrained cobalt controls, and human-first task surfaces. Predictable navigation and detail-view principles associated with Outline and Immich remain interaction references. These references guide hierarchy and interaction only; ASSEMBLE does not copy their branding or compositions.
 
 The product should feel calm and immediately usable by a first-time community member, not like a report dashboard or technical demo. One navigation system frames single-purpose routes. Human summaries lead, selection reveals one focused detail, and proof internals appear only when deliberately requested.
 
@@ -62,7 +62,7 @@ The core is a route-backed product with a shared proof context, not a sales home
 
 ### Persistent shell and product routes
 
-- compact shell: one slim desktop sidebar with Overview, Community, Initiatives, Projects, Collaboration, and Resilience; one mobile menu with the same destinations; and a compact page header with current context and the account affordance;
+- compact shell: one deep cobalt/graphite desktop workbench rail with Overview, Community, Initiatives, Projects, Collaboration, and Resilience; one mobile menu with the same destinations; a dimensional block mark; carved active navigation; and a compact borderless page header with current context and the account affordance;
 - Overview: bounded purpose, current state, and the next useful route;
 - Community: Overview, People, Places, or Resources one category at a time, with a saved Graph/List view and one selected detail surface;
 - Initiatives: choose and understand one declared brief;
@@ -139,9 +139,9 @@ Authoritative palette:
 
 Material rules:
 
-- subtle 4–8px corners only where they communicate grouping or affordance; full pills only for compact semantic status tags;
-- 1px quiet borders and a single restrained shadow on the active decision surface;
-- no gradients, glass, glow, neon, decorative grain, dark cyber styling, or fake paper/wood texture;
+- 14–16px corners on major image-led scenes and primary task surfaces; 6–8px corners on controls; full pills only for compact semantic status tags;
+- use tinted depth shadows for dimensional scenes and the active decision surface; prefer whitespace and surface tint over borders for ordinary grouping;
+- no filler gradients, glass, neon, decorative grain, fake paper/wood texture, or stock product screenshots;
 - icon plus label plus colour for states; colour alone is never authoritative.
 
 ### Block grammar
@@ -174,7 +174,7 @@ Motion communicates state, causality, or navigation only.
 - loading: use labelled progress or skeletons; never fake solver progress percentages;
 - reduced motion: all information appears immediately, without geometry animation, parallax, or animated scrolling.
 
-No WebGL or true 3D is required. Shallow depth may distinguish the active decision surface from the quiet canvas. That is the only spatial signature in the core.
+Original transparent scene assets sit in isolated client leaves with CSS perspective and `transform-style: preserve-3d`. One-shot depth assembly and restrained pointer parallax write CSS variables through `requestAnimationFrame` without per-frame React state. Initiative scenes lift on hover or focus, and Resilience motion follows the active analytical task. Motion uses transform and opacity only, removes listeners and pending frames on cleanup, and becomes static on mobile or when reduced motion is requested. The product does not use WebGL, Three.js, or a physics dependency.
 
 ## 9. Accessibility and resilience
 
@@ -192,10 +192,12 @@ No WebGL or true 3D is required. Shallow depth may distinguish the active decisi
 
 ## 10. Performance budget
 
-- use existing React/Next.js, native CSS layout, DOM blocks, and one restrained SVG layer;
-- no D3, force-layout, React Flow, WebGL, 3D, physics, video, or large image dependency;
+- use existing React/Next.js, native CSS layout, DOM blocks, Phosphor icons, and `next/image`;
+- use the five original alpha-preserving WebP scenes for specific product moments; their combined repository payload is approximately 1.5 MB after conversion from approximately 9.1 MB of PNG source copies;
+- no D3, force-layout, React Flow, WebGL, 3D framework, physics, or video dependency;
 - no new visual dependency without a measured functional need;
-- connection geometry is measured after layout and recomputed only on relevant resize/state changes;
+- below-fold scenes remain lazy, the Overview hero may be priority-loaded, and every scene reserves its responsive space;
+- pointer motion updates compositor-friendly CSS variables in one isolated frame callback and never drives React state;
 - preserve a responsive interaction target: controls visibly react within 100ms, with honest loading feedback during backend work;
 - test the production build, not only development mode.
 

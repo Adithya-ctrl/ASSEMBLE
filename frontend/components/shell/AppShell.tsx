@@ -11,7 +11,6 @@ import {
   House,
   Lightbulb,
   List,
-  Sparkle,
   WarningCircle,
 } from "@phosphor-icons/react";
 import { Button, DropdownMenu, Theme } from "@radix-ui/themes";
@@ -81,11 +80,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
   }, [proofCapable, setInspectorOpen, setJudgeProofMode]);
 
   if (requestStates.demo === "loading" && !demo) {
-    return <Theme appearance={appearance} accentColor="blue" grayColor="slate" panelBackground="solid" radius="medium" scaling="100%"><main className="app-shell loading-shell"><header className="product-header"><div className="brand-lockup"><span className="brand-mark"><Sparkle aria-hidden="true" size={18} weight="fill" /></span><span>ASSEMBLE</span></div><span className="header-context">Civic capacity planner</span></header><div className="page-loading"><h1>Opening the community fixture</h1><p>Loading people, places and shared resources.</p><div className="loading-layout"><div className="loading-canvas"><InlineSkeleton lines={5} /></div><div className="loading-rail"><InlineSkeleton lines={7} /></div></div></div></main></Theme>;
+    return <Theme appearance={appearance} accentColor="blue" grayColor="slate" panelBackground="solid" radius="medium" scaling="100%"><main className="app-shell loading-shell"><header className="product-header"><div className="brand-lockup"><span aria-hidden="true" className="workbench-brand-mark"><span /><span /><span /></span><span>ASSEMBLE</span></div><span className="header-context">Civic capacity planner</span></header><div className="page-loading"><h1>Opening the community fixture</h1><p>Loading people, places and shared resources.</p><div className="loading-layout"><div className="loading-canvas"><InlineSkeleton lines={5} /></div><div className="loading-rail"><InlineSkeleton lines={7} /></div></div></div></main></Theme>;
   }
   if (!demo || !community) {
     const error = requestErrors.demo ?? { code: "SERVICE_UNAVAILABLE", message: "The community fixture could not be loaded." };
-    return <Theme appearance={appearance} accentColor="blue" grayColor="slate" panelBackground="solid" radius="medium" scaling="100%"><main className="app-shell error-shell"><header className="product-header"><div className="brand-lockup"><span className="brand-mark"><Sparkle aria-hidden="true" size={18} weight="fill" /></span><span>ASSEMBLE</span></div></header><div className="fatal-state"><div className="empty-icon empty-icon-error"><WarningCircle aria-hidden="true" size={25} weight="fill" /></div><h1>We could not open the planning table.</h1><p>Check that the planning service is running, then try again.</p><ErrorNotice error={error} onRetry={() => void workflow.loadDemo()} retryLabel="Reload fixture" /></div></main></Theme>;
+    return <Theme appearance={appearance} accentColor="blue" grayColor="slate" panelBackground="solid" radius="medium" scaling="100%"><main className="app-shell error-shell"><header className="product-header"><div className="brand-lockup"><span aria-hidden="true" className="workbench-brand-mark"><span /><span /><span /></span><span>ASSEMBLE</span></div></header><div className="fatal-state"><div className="empty-icon empty-icon-error"><WarningCircle aria-hidden="true" size={25} weight="fill" /></div><h1>We could not open the planning table.</h1><p>Check that the planning service is running, then try again.</p><ErrorNotice error={error} onRetry={() => void workflow.loadDemo()} retryLabel="Reload fixture" /></div></main></Theme>;
   }
 
   return (
@@ -94,7 +93,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <ProductLiveRegion identityStatus={identity.liveStatus} workflowStatus={liveStatus} />
         <aside className="product-sidebar" aria-label="Product navigation">
           <Link className="sidebar-brand" href="/" aria-label="ASSEMBLE overview">
-            <span className="brand-mark"><Sparkle aria-hidden="true" size={18} weight="fill" /></span>
+            <span aria-hidden="true" className="workbench-brand-mark"><span /><span /><span /></span>
             <span>ASSEMBLE</span>
           </Link>
           <nav className="sidebar-navigation" aria-label="Primary navigation">

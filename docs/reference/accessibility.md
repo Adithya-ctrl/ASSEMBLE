@@ -25,6 +25,8 @@ Graph View and List View are a labelled semantic group inside the selected Commu
 
 SVG connection lines are decorative and hidden from assistive technology. Text remains authoritative.
 
+Human-facing availability labels are sorted chronologically from a copied array; technical/source order remains unchanged. Product scenes have human alternatives when they add route context and empty alternatives when adjacent copy already communicates the same non-data-bearing visual. Scene motion is not required to understand status, proof, or navigation.
+
 ## Visual resilience
 
 - System, light, dark, standard-contrast, and high-contrast token modes are available.

@@ -47,8 +47,10 @@ Browser
 - `components/community-admin/`: three-task Collaboration-space list/create/accept surface and the Administrator-only Members/Invitations/Audit detail; other persisted roles receive a truthful read-only boundary.
 - `app/(product)/**/page.tsx`: substantive Overview, demo Community, Initiatives, Initiative Proof, Projects, and Project Proof routes.
 - `components/community/CommunityInventory.tsx`: category-scoped graph/list inventory and focused detail surface.
+- `lib/availability.ts`: copy-on-sort chronological presentation of human-facing availability labels without mutating authoritative fixture arrays.
 - `components/AssemblyProduct.tsx`: initiative proof actions, progressive evidence panels, Project form, and Technical Inspector.
 - `components/project/`: server-returned Project detail and dedicated source-proof presentation.
+- `components/visual/` and `public/illustrations/`: isolated CSS-perspective scene leaf, semantic scene bindings, and five alpha-preserving WebP assets. Pointer motion writes CSS variables through one cleaned-up animation frame and becomes static on mobile or under reduced motion; no WebGL or 3D framework participates in application state.
 - `app/(product)/resilience/page.tsx`, `components/resilience/`, and `lib/resilience-integration.ts`: the dedicated three-task Resilience Lab, strict response binding, canonical source/path requests, and independent stale-response lanes.
 - `proxy.ts`: fail-visible normalization for malformed dynamic Initiative Proof paths before route handling.
 - `app/globals.css`: shared civic visual grammar, responsive layout, contrast/theme tokens, focus, reduced motion, and overflow protection.
@@ -67,6 +69,6 @@ Stress and frontier scenarios use domain-separated counterfactual receipt IDs an
 
 ## Modular presentation boundary
 
-Each current route has one primary job and no more than three simultaneous primary tasks. The single root provider carries the authoritative in-browser proof context across ordinary Link, back, and forward navigation, including Projects to Project Proof and back; a hard refresh reloads authoritative S0. Human summaries lead, one selected detail surface reveals task-relevant facts, and technical identifiers move to explicit disclosure, Judge Proof Mode, or the Inspector. Mobile and desktop expose the same destinations and capabilities.
+Each current route has one primary job and no more than three simultaneous primary tasks. The single root provider carries the authoritative in-browser proof context across ordinary Link, back, and forward navigation, including Projects to Project Proof and back; a hard refresh reloads authoritative S0. Human summaries lead, one selected detail surface reveals task-relevant facts, and technical identifiers move to explicit disclosure, Judge Proof Mode, or the Inspector. Image-led scenes provide route context without supplying or changing domain facts. Guest Collaboration and empty Project Proof pair an honest next action with a non-data-bearing visual state. Mobile and desktop expose the same destinations and capabilities.
 
 This frontend structure implements independently accepted local identity, Settings, Collaboration-space administration, invitations, role-aware read-only boundaries, and a provenance-bound Resilience Lab while keeping persisted collaboration separate from the planning fixture. It does not implement persisted Projects.

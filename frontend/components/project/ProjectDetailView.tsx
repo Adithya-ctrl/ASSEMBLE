@@ -5,22 +5,28 @@ import Link from "next/link";
 
 import type { CreateProjectResponse } from "../../lib/types";
 import { humanize } from "../../lib/ui";
+import CivicScene from "../visual/CivicScene";
+import { INITIATIVE_SCENES } from "../visual/sceneAssets";
 
 export default function ProjectDetailView({ response }: { response: CreateProjectResponse }) {
   const project = response.project;
   const ready = project.status === "READY";
+  const scene = INITIATIVE_SCENES[project.source_initiative_id];
 
   return (
     <article className={`project-detail project-detail-route ${ready ? "project-detail-ready" : "project-detail-not-ready"}`} aria-labelledby="project-detail-title">
       <header className="project-detail-hero">
-        <div>
-          <h2 id="project-detail-title">{project.title}</h2>
-          <p>{project.short_description}</p>
+        <CivicScene alt={scene?.alt ?? ""} assetSrc={scene?.src} className="project-detail-scene" kind="project" />
+        <div className="project-detail-hero-copy">
+          <div>
+            <h2 id="project-detail-title">{project.title}</h2>
+            <p>{project.short_description}</p>
+          </div>
+          <span className={`project-ready-badge ${ready ? "" : "project-not-ready-badge"}`}>
+            {ready ? <CheckCircle aria-hidden="true" size={18} weight="fill" /> : <WarningCircle aria-hidden="true" size={18} weight="fill" />}
+            {humanize(project.status)}
+          </span>
         </div>
-        <span className={`project-ready-badge ${ready ? "" : "project-not-ready-badge"}`}>
-          {ready ? <CheckCircle aria-hidden="true" size={18} weight="fill" /> : <WarningCircle aria-hidden="true" size={18} weight="fill" />}
-          {humanize(project.status)}
-        </span>
       </header>
 
       <section className="project-objective" aria-labelledby="project-objective-title">
