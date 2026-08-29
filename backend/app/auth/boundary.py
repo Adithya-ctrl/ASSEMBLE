@@ -23,6 +23,10 @@ def _headers(scope: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def _is_auth_path(path: str) -> bool:
+    return any(path == prefix or path.startswith(f"{prefix}/") for prefix in AUTH_PATH_PREFIXES)
+
+
 async def _problem(send: AsgiSend, status: int, code: str, message: str) -> None:
     body = json.dumps(
         {"error": {"code": code, "message": message, "details": {}}},
@@ -50,7 +54,7 @@ class AuthBoundaryMiddleware:
         self.settings = settings
 
     async def __call__(self, scope: dict[str, Any], receive: AsgiReceive, send: AsgiSend) -> None:
-        if scope.get("type") != "http" or not scope.get("path", "").startswith(AUTH_PATH_PREFIXES):
+        if scope.get("type") != "http" or not _is_auth_path(str(scope.get("path", ""))):
             await self.app(scope, receive, send)
             return
 
@@ -63,12 +67,7 @@ class AuthBoundaryMiddleware:
                 return
 
             origin = headers.get("origin")
-            host = headers.get("host")
-            request_origin = f"{scope.get('scheme', 'http')}://{host}" if host else None
-            allowed_origins = {*self.settings.allowed_browser_origins}
-            if request_origin:
-                allowed_origins.add(request_origin)
-            if origin is not None and origin.rstrip("/") not in allowed_origins:
+            if origin is not None and origin not in self.settings.allowed_browser_origins:
                 await _problem(send, 403, "BROWSER_ORIGIN_REJECTED", "The browser origin is not allowed.")
                 return
 

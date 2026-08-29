@@ -198,3 +198,44 @@ def test_secure_cookie_flag_is_configurable(tmp_path: Path) -> None:
         json={"username": "alice", "password": "ValidPassword1!"},
     )
     assert "Secure" in response.headers["set-cookie"]
+
+
+def test_environment_configured_non_default_browser_origin_is_exact(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("ASSEMBLE_AUTH_DB_PATH", str(tmp_path / "auth.sqlite3"))
+    monkeypatch.setenv(
+        "ASSEMBLE_AUTH_ALLOWED_BROWSER_ORIGINS",
+        "http://localhost:4173",
+    )
+    app = FastAPI()
+    install_auth_api(app, clock=Clock())
+    client = TestClient(app)
+
+    allowed = client.post(
+        "/api/auth/signup",
+        json={"username": "alice", "password": "ValidPassword1!"},
+        headers={"Origin": "http://localhost:4173", "Sec-Fetch-Site": "same-origin"},
+    )
+    assert allowed.status_code == 201
+
+    for hostile_origin in (
+        "http://localhost:3000",
+        "http://localhost:4173/",
+        "http://testserver",
+        "https://evil.example",
+    ):
+        rejected = client.post(
+            "/api/auth/login",
+            json={"identity": "alice", "password": "ValidPassword1!"},
+            headers={
+                "Origin": hostile_origin,
+                "Sec-Fetch-Site": "same-origin",
+                "X-Forwarded-Host": hostile_origin.removeprefix("https://"),
+            },
+        )
+        assert (rejected.status_code, rejected.json()["error"]["code"]) == (
+            403,
+            "BROWSER_ORIGIN_REJECTED",
+        )

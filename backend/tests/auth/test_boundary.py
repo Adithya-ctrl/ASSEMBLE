@@ -96,3 +96,19 @@ def test_non_browser_client_without_origin_is_allowed(tmp_path: Path) -> None:
     response = _client(tmp_path).post("/api/auth/echo", json={"ok": True})
     assert response.status_code == 200
     assert response.headers["cache-control"] == "no-store"
+
+
+def test_near_prefix_routes_fall_through_to_stable_not_found(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+    for path in ("/api/authentic", "/api/communities-v2", "/api/invitations-old"):
+        response = client.post(path, content="not-json")
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Not Found"}
+
+
+def test_real_auth_path_segment_remains_boundary_scoped(tmp_path: Path) -> None:
+    response = _client(tmp_path).post("/api/auth/echo", content="not-json")
+    assert (response.status_code, response.json()["error"]["code"]) == (
+        415,
+        "UNSUPPORTED_MEDIA_TYPE",
+    )
