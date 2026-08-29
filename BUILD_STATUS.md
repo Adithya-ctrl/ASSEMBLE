@@ -21,8 +21,8 @@ Builder evidence must not be relabelled as independent acceptance.
 
 ## Current cumulative evidence
 
-- Backend: `257 passed`; one upstream Starlette `httpx` deprecation warning. The suite runs against a private temporary `ASSEMBLE_AUTH_DB_PATH`, not the default persistent file.
-- Auth: `63 passed` in `backend/tests/auth`; signup/session/logout, password rotation, persisted community roles, invitation lifecycle, restart, secret-at-rest, origin/body/rate bounds, concurrency, and POSIX permission checks are covered.
+- Backend: `279 passed`; one upstream Starlette `httpx` deprecation warning. The suite runs against a private temporary `ASSEMBLE_AUTH_DB_PATH`, not the default persistent file.
+- Auth: `84 passed` in `backend/tests/auth`; signup/session/logout, password rotation, persisted community roles, invitation lifecycle, restart, secret-at-rest, origin/body/rate bounds, concurrency, and POSIX permission checks are covered.
 - Structural resilience: stress-test, minimum-disruption recompile and capability-frontier API/runtime suites pass as part of the cumulative gate. Their counterfactual receipts are not operational Project states.
 - Latest ordered-path/API focused gate: `53 passed`.
 - Interface: TypeScript check passes; ESLint passes with zero warnings; Next.js 16.3.3 production build passes.

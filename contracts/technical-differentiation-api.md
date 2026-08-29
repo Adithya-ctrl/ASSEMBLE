@@ -1,8 +1,10 @@
 # Technical differentiation API contract
 
-This additive contract defines the backend-only Structural Stress Test,
-Minimum-Disruption Recompiler, and one-action Capability Frontier. Existing
-routes and schemas remain unchanged.
+This additive contract defines the integrated backend-only Structural Stress
+Test, Minimum-Disruption Recompiler, and one-action Capability Frontier.
+Existing core routes and schemas remain unchanged. The current frontend has no
+surface for these analyses, and the routes are deliberately not protected by
+the separate auth/community-role boundary.
 
 ## Shared trust boundary
 
@@ -135,3 +137,7 @@ such as an infeasible recompile or an empty frontier are not HTTP errors.
 Stress or recompile against a non-feasible source plan is a 409
 `BASELINE_NOT_FEASIBLE` precondition failure. Mathematically valid scenario or
 recompile `INFEASIBLE` and `UNKNOWN` outcomes remain HTTP 200 responses.
+
+Auth-created SQLite communities are not analysis inputs and are not linked to
+the authoritative fictional solver fixture. M7 receipts remain request/response
+evidence only; they are neither persistent community state nor Project state.
