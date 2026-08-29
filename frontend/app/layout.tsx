@@ -7,8 +7,8 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
-  title: "ASSEMBLE — Community Systems Compiler",
-  description: "A bounded community systems compiler for SYNCS HACK 2026.",
+  title: "ASSEMBLE - Civic Capacity Planner",
+  description: "A bounded civic capacity and intervention planner for SYNCS HACK 2026.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -18,4 +18,3 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
-
