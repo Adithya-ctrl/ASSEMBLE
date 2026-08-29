@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
 
-from app.auth import migrations
+from app.auth import migrations, storage as storage_module
 from app.auth.migrations import MigrationError, apply_migrations
 from app.auth.storage import AuthStore, StoragePermissionError
 
@@ -370,10 +371,12 @@ def test_preexisting_auth_paths_reject_symlinks_and_nonregular_files(
 
 
 def test_simultaneous_fresh_store_constructors_are_idempotent(tmp_path: Path) -> None:
-    for round_number in range(5):
+    for round_number in range(100):
         database_path = tmp_path / f"round-{round_number}" / "auth.sqlite3"
+        start = threading.Barrier(8)
 
         def construct_store(_: int) -> AuthStore:
+            start.wait(timeout=5)
             return AuthStore(database_path, now=NOW)
 
         with ThreadPoolExecutor(max_workers=8) as executor:
@@ -386,3 +389,48 @@ def test_simultaneous_fresh_store_constructors_are_idempotent(tmp_path: Path) ->
                     "SELECT version, COUNT(*) FROM schema_migrations GROUP BY version"
                 )
             ] == [(1, 1)]
+
+
+def test_constructor_retries_only_busy_initialization_and_closes_each_connection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_apply = storage_module.apply_migrations
+    connections: list[sqlite3.Connection] = []
+
+    def transient_busy(connection: sqlite3.Connection, now: int) -> None:
+        connections.append(connection)
+        if len(connections) == 1:
+            raise sqlite3.OperationalError("database is locked")
+        original_apply(connection, now)
+
+    monkeypatch.setattr(storage_module, "apply_migrations", transient_busy)
+    AuthStore(tmp_path / "auth.sqlite3", now=NOW)
+
+    assert len(connections) == 2
+    for connection in connections:
+        with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+            connection.execute("SELECT 1")
+
+
+def test_nonbusy_initialization_failure_propagates_closes_and_releases_lock(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_apply = storage_module.apply_migrations
+    connections: list[sqlite3.Connection] = []
+
+    def fail_nonbusy(connection: sqlite3.Connection, now: int) -> None:
+        connections.append(connection)
+        raise sqlite3.OperationalError("disk I/O failure")
+
+    monkeypatch.setattr(storage_module, "apply_migrations", fail_nonbusy)
+    database_path = tmp_path / "auth.sqlite3"
+    with pytest.raises(sqlite3.OperationalError, match="disk I/O failure"):
+        AuthStore(database_path, now=NOW)
+
+    with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+        connections[0].execute("SELECT 1")
+
+    monkeypatch.setattr(storage_module, "apply_migrations", original_apply)
+    AuthStore(database_path, now=NOW)

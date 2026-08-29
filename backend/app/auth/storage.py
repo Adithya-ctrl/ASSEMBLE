@@ -6,11 +6,19 @@ import errno
 import os
 import sqlite3
 import stat
+import threading
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
 from app.auth.migrations import apply_migrations
+
+
+_INITIALIZATION_TIMEOUT_SECONDS = 5.0
+_INITIALIZATION_RETRY_SECONDS = 0.01
+_INITIALIZATION_LOCKS: dict[str, threading.Lock] = {}
+_INITIALIZATION_LOCKS_GUARD = threading.Lock()
 
 
 class StorageBusyError(RuntimeError):
@@ -26,10 +34,39 @@ def _is_busy(exc: sqlite3.OperationalError) -> bool:
     return code in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED} or "locked" in str(exc).casefold()
 
 
+def _initialization_lock(database_path: Path) -> threading.Lock:
+    canonical_path = os.path.normcase(
+        os.path.realpath(os.path.abspath(os.fspath(database_path)))
+    )
+    with _INITIALIZATION_LOCKS_GUARD:
+        return _INITIALIZATION_LOCKS.setdefault(canonical_path, threading.Lock())
+
+
 class AuthStore:
     def __init__(self, database_path: Path, *, now: int) -> None:
         self.database_path = Path(database_path)
-        self._prepare_private_path()
+        initialization_lock = _initialization_lock(self.database_path)
+        if not initialization_lock.acquire(timeout=_INITIALIZATION_TIMEOUT_SECONDS):
+            raise StorageBusyError("auth storage initialization is busy")
+        try:
+            self._prepare_private_path()
+            self._initialize(now)
+        finally:
+            initialization_lock.release()
+
+    def _initialize(self, now: int) -> None:
+        deadline = time.monotonic() + _INITIALIZATION_TIMEOUT_SECONDS
+        while True:
+            try:
+                self._initialize_once(now)
+                return
+            except StorageBusyError:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise
+                time.sleep(min(_INITIALIZATION_RETRY_SECONDS, remaining))
+
+    def _initialize_once(self, now: int) -> None:
         connection = self.connect()
         try:
             try:
