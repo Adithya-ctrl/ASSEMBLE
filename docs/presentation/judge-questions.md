@@ -16,7 +16,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Direct:** The demonstrated jobs belong to community coordinators and coalition planners; members, participants, and reviewers need the evidence to remain understandable and auditable.
 - **Deeper:** The interface prioritizes a guided capacity-to-Project workflow rather than a generic administration dashboard.
 - **Evidence to show:** focused Community categories/detail, labelled Initiative Proof actions, Project detail, and Project Proof.
-- **Honest boundary:** Local accounts and community roles exist in FastAPI, but there is no frontend identity workflow, project membership, or role-specific product experience.
+- **Honest boundary:** Local accounts, Settings, persisted Collaboration roles, invitations, and Administrator controls have frontend surfaces, but there is no project membership and those roles do not authorise planning or M7 routes.
 
 ### What is novel about ASSEMBLE, and how does it fit the theme?
 
@@ -28,9 +28,9 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 ### Why is this not generic project management?
 
 - **Direct:** Generic project management starts after people already know what to do. ASSEMBLE first proves whether the declared community can execute an initiative and derives a Project from that proof.
-- **Deeper:** It has no generic CRUD, task board, arbitrary assignment, comments, or collaboration layer.
+- **Deeper:** It has no generic Project CRUD, task board, arbitrary Project assignment, or comments. Its separate Collaboration spaces manage local community membership and invitations without changing solver data.
 - **Evidence to show:** Project creation stays absent until a real feasible proof; assignments/readiness are server-derived.
-- **Honest boundary:** Auth/community/invitation records persist separately; Projects, proof state, tasks, reassignment, and collaboration do not.
+- **Honest boundary:** Auth/community/invitation records and Collaboration roles persist separately; Projects, proof state, tasks, reassignment, and Project-level collaboration do not.
 
 ### What should we notice in the Project?
 
@@ -137,7 +137,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Direct:** The build uses fictional planning data and a local SQLite identity store. Passwords use bounded scrypt; bearer secrets are digest-only; requests, origins, roles, invitations, rate limits and POSIX file modes fail closed under tested local contracts.
 - **Deeper:** Auth/community routes load current persisted membership; Project status/readiness and M7 inputs remain server-derived from authoritative state.
 - **Evidence to show:** auth adversarial/restart/permission tests, Project adversarial tests, M7 trust-boundary tests, and the security reference.
-- **Honest boundary:** The frontend has no identity workflow; community roles do not gate solver/reasoning/Project/M7 routes; there is no email verification, MFA, OAuth, encrypted application-level database, or public-deployment hardening.
+- **Honest boundary:** The frontend uses the local identity workflow, but community roles do not gate solver/reasoning/Project/M7 routes; there is no email verification, MFA, OAuth, account recovery, encrypted application-level database, or public-deployment hardening.
 
 ### Is accessibility just responsive styling?
 
@@ -148,14 +148,14 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 ### What is not implemented?
 
-- **Direct:** Frontend identity/community/invitation and M7 workflows, role-gating outside community administration, persisted Projects/proof, tasks, project membership, reassignment, notifications, external data, deployment, and public operation are absent.
+- **Direct:** M7 frontend workflows, role-gating outside community administration, persisted Projects/proof, tasks, project membership, reassignment, notifications, external data, deployment, and public operation are absent.
 - **Deeper:** FastAPI has local account/community/invitation persistence and backend-only M7 analyses, but those must not be mistaken for product-surface or production completion.
 - **Evidence to show:** BUILD_STATUS and requirements non-goals.
 - **Honest boundary:** Do not describe roadmap items as partially available.
 
 ### What comes next?
 
-- **Direct:** First, test the declared-data and explanation workflow with real community stakeholders. Then connect the accepted local identity boundary to a truthful frontend and decide whether role-gating, Project persistence, tasks or larger portfolio solving is actually needed.
+- **Direct:** First, independently accept the new local identity/Collaboration frontend and test the declared-data and explanation workflow with real community stakeholders. Then decide whether role-gating, Project persistence, tasks or larger portfolio solving is actually needed.
 - **Deeper:** Each addition should preserve strict validation, source identity, explainability, accessibility/full parity, and cumulative gates.
 - **Evidence to show:** current non-goals and traceability process.
 - **Honest boundary:** This is a proposed sequence, not committed scope, funding, or delivery timing.
@@ -166,7 +166,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Why not ChatGPT?** “The core question is whether every hard constraint can be satisfied. CP-SAT returns an explicit status and witness; an LLM is not in the runtime proof chain.”
 - **What is the key demo?** “Clinic needs three digital helpers but has one. Training two existing helpers costs two, creates an immutable successor, and only a fresh verification unlocks Project creation.”
 - **Can we trust it?** “Within the fixture, important claims are server-derived, content-bound, replayed, and inspectable; forged or non-feasible Project requests fail closed.”
-- **Is it production-ready?** “No. It has local backend auth persistence and deterministic analysis gates, but no frontend identity/M7 workflow, production authorisation boundary, real-user validation, scale evidence, or deployment hardening.”
+- **Is it production-ready?** “No. It has local identity/Collaboration screens and deterministic analysis gates, but no M7 frontend, production-wide authorisation boundary, real-user validation, scale evidence, or deployment hardening.”
 - **Is mobile equivalent?** “The requirement is full parity: the same destinations, Community categories and details, proof flow, fields, evidence, preferences, and Project capability at 320 and 1440, with only layout or label presentation changing.”
 
 ## Bridge phrases

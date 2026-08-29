@@ -8,7 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint .",
-    "test:preferences": "node --import tsx --test lib/preferences.test.ts lib/navigation-persistence.test.ts lib/community-focus.test.ts"
+    "test:preferences": "node --import tsx --test lib/preferences.test.ts lib/navigation-persistence.test.ts lib/community-focus.test.ts lib/auth-contract.test.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "2.1.10",

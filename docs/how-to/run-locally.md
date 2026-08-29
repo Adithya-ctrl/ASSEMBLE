@@ -36,7 +36,7 @@ ASSEMBLE_API_URL=http://127.0.0.1:8000 npm run dev -- --hostname 127.0.0.1 --por
 
 Open `http://127.0.0.1:3000`. Browser calls remain same-origin; the Next.js server forwards `/api/*` to `ASSEMBLE_API_URL`.
 
-The current interface does not expose signup, login, community administration, invitations, stress testing, recompilation or the capability frontier. Its account control remains disabled. Use the API/OpenAPI surface for backend replay; do not describe the interface as demonstrating those capabilities.
+The current interface exposes local signup/login, Settings, persisted Collaboration spaces, role-aware access, invitations, and Administrator audit controls through the same-origin proxy. It does not expose stress testing, recompilation, or the capability frontier. Auth-created spaces remain separate from the fictional planning fixture, and their roles do not gate planning or M7 routes.
 
 ## Production-like interface
 

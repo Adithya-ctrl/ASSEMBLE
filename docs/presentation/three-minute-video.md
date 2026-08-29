@@ -1,6 +1,6 @@
 # Three-minute ASSEMBLE video
 
-This recording demonstrates the current deterministic fictional fixture and the visible core Project chain. It must not be presented as real-user validation, production deployment, measured impact, or a demonstration of the backend-only auth/community/invitation or M7 APIs.
+This recording demonstrates the current deterministic fictional fixture and the visible core Project chain. The separate local identity/Collaboration screens are current but outside this three-minute sequence; M7 remains backend-only. Do not present the recording as real-user validation, production deployment, or measured impact.
 
 ## Exact 3:00 timeline
 
@@ -35,4 +35,4 @@ Total budget: **180 seconds (3:00)**.
 
 ## No-overclaim guardrails
 
-Say “deterministic fictional fixture,” “bounded disclosed catalogue,” and “independently tested locally.” Do not say production-ready, deployed, secure for real personal data, globally minimum, proven community impact, real-user validated, AI-powered, or complete for every community. Do not describe the current frontend as multi-user or authenticated, the Project/proof chain as persistent, community roles as protecting solver/reasoning/Project/M7 routes, or backend-only M7 as visible on screen. Do not imply that CP-SAT proves facts that were never entered into the model.
+Say “deterministic fictional fixture,” “bounded disclosed catalogue,” and “independently tested locally.” Do not say production-ready, deployed, secure for real personal data, globally minimum, proven community impact, real-user validated, AI-powered, or complete for every community. The frontend has local authenticated identity and Collaboration workflows, but do not describe it as a production multi-user platform, imply that persisted community roles protect solver/reasoning/Project/M7 routes, claim that the in-memory Project/proof chain persists across reloads, or present backend-only M7 as visible on screen. Do not imply that CP-SAT proves facts that were never entered into the model.

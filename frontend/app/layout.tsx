@@ -4,6 +4,7 @@ import "@radix-ui/themes/styles.css";
 import "./globals.css";
 
 import { AssemblyProvider } from "../lib/workflow-context";
+import { IdentityProvider } from "../lib/identity-context";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${geist.variable} ${geistMono.variable}`}>
-        <AssemblyProvider>{children}</AssemblyProvider>
+        <IdentityProvider>
+          <AssemblyProvider>{children}</AssemblyProvider>
+        </IdentityProvider>
       </body>
     </html>
   );

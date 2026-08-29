@@ -225,7 +225,8 @@ def test_presentation_package_is_linked_timed_and_bounded() -> None:
     for boundary in (
         "fictional",
         "bounded",
-        "frontend has no identity or m7 workflow",
+        "frontend identity/collaboration surfaces",
+        "backend-only m7 analyses",
         "not role-gated",
         "projects and proof state remain in memory",
         "production deployment",

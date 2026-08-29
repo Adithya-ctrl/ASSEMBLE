@@ -9,7 +9,7 @@
 
 ## Status and announcements
 
-Status uses icon plus text; colour is supplementary. Neutral state is used until a requirement is proven. The interface has one dedicated journey announcement for successful compile/analyse, blocker explanation and shortfall, unlock and cost, successor pending proof, successor verification, and Project creation.
+Status uses icon plus text; colour is supplementary. Neutral state is used until a requirement is proven. Each active shell has one scoped application announcement. The product shell preserves the accepted planning announcements for compile/analyse, blocker and shortfall, unlock and cost, successor pending proof, verification and Project creation, and routes account-menu session changes through that same region. The independent account shell announces identity, Settings and Collaboration actions without mounting a competing product region.
 
 The Clinic must not show Project creation or buildable successor status before a real successor verification result.
 
@@ -39,6 +39,6 @@ SVG connection lines are decorative and hidden from assistive technology. Text r
 
 At 320 and 1440 CSS pixels, the same controls, flows, editable fields, evidence, and Project capabilities must remain available. Layout and shortened label presentation may change; capability and evidence may not.
 
-The current Builder replay traversed every route at 320 and 1440, reached all five primary navigation destinations, all eight Community entities, the same category/detail and graph/list capabilities, all six proof actions, three editable Project fields, complete Project detail and source proof, Preferences, Judge Proof Mode, and the account-boundary status. It found no document or mobile-navigation overflow and no visible interactive target below 44 by 44 CSS pixels. Desktop and mobile Lighthouse accessibility snapshots scored 100 with 34 passed audits and no failed audits. These are local implementation checks, not formal WCAG conformance, independent M6 acceptance, real-user validation, or an impact claim.
+The accepted M6 replay traversed every planning route at 320 and 1440 and covered the full proof journey, Community parity, Projects, appearance preferences, and Judge Proof Mode. The Phase A Builder replay additionally covered guest and authenticated account menus, identity entry, Account/Security/Appearance Settings, Collaboration tasks, Administrator tabs, and Viewer read-only access at 320, 390, and 1440. It found no document overflow or effective interactive target below 44 by 44 CSS pixels; light, dark, and dark-high surfaces retained strong measured contrast, and Settings remained operable when the planning service was unavailable. Earlier desktop/mobile Lighthouse accessibility snapshots scored 100 with 34 passed audits and no failed audits. These are local implementation checks, not formal WCAG conformance, independent Phase A acceptance, real-user validation, or an impact claim.
 
 Use [`../how-to/verify-changes.md`](../how-to/verify-changes.md) for the browser acceptance procedure.

@@ -38,11 +38,14 @@ Browser
 ## Frontend
 
 - `lib/types.ts`: HTTP contract mirror.
-- `lib/api.ts`: same-origin typed client.
-- `app/layout.tsx` and `lib/workflow-context.tsx`: one root-mounted provider owns shared proof state, provenance binding, workflow generations, abort controllers, Project nonce gating, announcements, preferences, and reset behavior across all client-side product navigation.
+- `lib/api.ts`: same-origin typed client with separate JSON and 204 response paths, stable error-envelope preservation, explicit same-origin credentials, and runtime-validator hooks.
+- `app/layout.tsx`, `lib/workflow-context.tsx`, `lib/identity-context.tsx`, and `lib/auth-session.ts`: one root planning provider owns proof state and reset behavior, while the separate identity provider owns session bootstrap, scheduled expiry, fail-closed cached-session/membership invalidation, and auth request cancellation without making guest planning depend on authentication.
+- `lib/auth-{types,contract,api}.ts`: strict response mirrors, fail-closed runtime parsing, and the complete local identity/community request surface.
 - `lib/preferences.ts`: strict versioned cookie encoding for theme, contrast, motion, and preferred inventory view only.
-- `app/(product)/layout.tsx` and `components/shell/AppShell.tsx`: the provider-free product shell owns persistent navigation, account boundary, Judge Proof Mode, Inspector, and live status. Keeping the sole provider above this route-group boundary prevents Project evidence from remounting between `/projects` and `/projects/proof`.
-- `app/(product)/**/page.tsx`: substantive Overview, Community, Initiatives, Initiative Proof, Projects, Project Proof, and Preferences routes.
+- `app/(product)/layout.tsx` and `components/shell/AppShell.tsx`: the provider-free product shell owns persistent planning navigation, active account menu, Judge Proof Mode, Inspector, and one shared planning/account announcement region. Keeping the sole provider above this route-group boundary prevents Project evidence from remounting between `/projects` and `/projects/proof`.
+- `app/(account)/` and `components/identity/`: fixture-independent signup/login, Settings, account menu, and appearance surfaces. `/preferences` redirects to `/settings`.
+- `components/community-admin/`: three-task Collaboration-space list/create/accept surface and the Administrator-only Members/Invitations/Audit detail; other persisted roles receive a truthful read-only boundary.
+- `app/(product)/**/page.tsx`: substantive Overview, demo Community, Initiatives, Initiative Proof, Projects, and Project Proof routes.
 - `components/community/CommunityInventory.tsx`: category-scoped graph/list inventory and focused detail surface.
 - `components/AssemblyProduct.tsx`: initiative proof actions, progressive evidence panels, Project form, and Technical Inspector.
 - `components/project/`: server-returned Project detail and dedicated source-proof presentation.
@@ -51,7 +54,7 @@ Browser
 
 The interface does not calculate feasibility or readiness. It presents backend results and gates Project creation on a provenance-bound proof context. The backend independently replays and solves again when creating the Project.
 
-The interface also does not expose the installed identity/community/invitation routes or the three counterfactual M7 analyses. The account control remains disabled and no role-specific browser behavior is claimed. Auth protection applies to auth and community-administration routes; solver, reasoning, Project, stress-test, recompile and frontier endpoints remain deliberately outside role-gating.
+The interface exposes installed identity/community/invitation routes, but not the three counterfactual M7 analyses. Auth protection applies to auth and community-administration routes; solver, reasoning, Project, stress-test, recompile, and frontier endpoints remain deliberately outside role-gating.
 
 ## State ownership
 
@@ -65,4 +68,4 @@ Stress and frontier scenarios use domain-separated counterfactual receipt IDs an
 
 Each current route has one primary job and no more than three simultaneous primary tasks. The single root provider carries the authoritative in-browser proof context across ordinary Link, back, and forward navigation, including Projects to Project Proof and back; a hard refresh reloads authoritative S0. Human summaries lead, one selected detail surface reveals task-relevant facts, and technical identifiers move to explicit disclosure, Judge Proof Mode, or the Inspector. Mobile and desktop expose the same destinations and capabilities.
 
-This frontend structure does not implement identity, Community administration, invitations, collaboration, M7 analysis views, or persisted Projects. The account control is deliberately disabled even though the FastAPI auth routes are installed; a separately implemented and accepted frontend workflow is still required.
+This frontend structure implements local identity, Settings, Collaboration-space administration, invitations, and role-aware read-only boundaries while keeping them separate from the planning fixture. It still does not implement M7 analysis views or persisted Projects. Phase A frontend evidence is Builder-green and pending independent acceptance.

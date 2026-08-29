@@ -14,6 +14,8 @@ import type {
 const apiBaseUrl = "";
 const API_TIMEOUT_MS = 12_000;
 
+export type ResponseValidator<T> = (value: unknown) => T;
+
 export class ApiRequestError extends Error {
   code: string;
   details: Record<string, unknown>;
@@ -28,7 +30,7 @@ export class ApiRequestError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function fetchResponse(path: string, init?: RequestInit): Promise<Response> {
   let response: Response;
   const timeoutSignal = AbortSignal.timeout(API_TIMEOUT_MS);
   const signal = init?.signal ? AbortSignal.any([init.signal, timeoutSignal]) : timeoutSignal;
@@ -37,6 +39,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     response = await fetch(`${apiBaseUrl}${path}`, {
       ...init,
       signal,
+      credentials: "same-origin",
       headers: {
         Accept: "application/json",
         ...(init?.body ? { "Content-Type": "application/json" } : {}),
@@ -47,36 +50,59 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
     if (error instanceof DOMException && error.name === "TimeoutError") {
-      throw new ApiRequestError("The planning service did not respond in time.", 0, "SERVICE_TIMEOUT");
+      throw new ApiRequestError("The ASSEMBLE service did not respond in time.", 0, "SERVICE_TIMEOUT");
     }
-    throw new ApiRequestError("The planning service could not be reached.", 0, "SERVICE_UNAVAILABLE");
+    throw new ApiRequestError("The ASSEMBLE service could not be reached.", 0, "SERVICE_UNAVAILABLE");
   }
 
-  const payload = (await response.json().catch(() => null)) as T | ApiErrorPayload | null;
+  return response;
+}
+
+function errorFromPayload(response: Response, payload: unknown): ApiRequestError {
+  const problem = payload as ApiErrorPayload | null;
+  return new ApiRequestError(
+    problem?.error?.message ?? `The ASSEMBLE service returned ${response.status}.`,
+    response.status,
+    problem?.error?.code ?? "REQUEST_FAILED",
+    problem?.error?.details ?? {},
+  );
+}
+
+async function errorFromResponse(response: Response): Promise<ApiRequestError> {
+  const payload: unknown = await response.json().catch(() => null);
+  return errorFromPayload(response, payload);
+}
+
+export async function requestJson<T>(path: string, init?: RequestInit, validate?: ResponseValidator<T>): Promise<T> {
+  const response = await fetchResponse(path, init);
+
+  const payload: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const errorPayload = payload as ApiErrorPayload | null;
-    throw new ApiRequestError(
-      errorPayload?.error?.message ?? `The planning service returned ${response.status}.`,
-      response.status,
-      errorPayload?.error?.code ?? "REQUEST_FAILED",
-      errorPayload?.error?.details ?? {},
-    );
+    throw errorFromPayload(response, payload);
   }
 
   if (payload === null) {
-    throw new ApiRequestError("The planning service returned an empty response.", response.status, "EMPTY_RESPONSE");
+    throw new ApiRequestError("The ASSEMBLE service returned an empty response.", response.status, "EMPTY_RESPONSE");
   }
 
-  return payload as T;
+  return validate ? validate(payload) : payload as T;
+}
+
+export async function requestNoContent(path: string, init?: RequestInit): Promise<void> {
+  const response = await fetchResponse(path, init);
+  if (!response.ok) throw await errorFromResponse(response);
+  if (response.status !== 204) {
+    throw new ApiRequestError("The ASSEMBLE service returned an unexpected response.", response.status, "UNEXPECTED_RESPONSE");
+  }
 }
 
 function postJson<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
-  return request<T>(path, { method: "POST", body: JSON.stringify(body), signal });
+  return requestJson<T>(path, { method: "POST", body: JSON.stringify(body), signal });
 }
 
 export const api = {
-  getDemo: (signal?: AbortSignal) => request<DemoFixture>("/api/demo", { signal }),
+  getDemo: (signal?: AbortSignal) => requestJson<DemoFixture>("/api/demo", { signal }),
   analyse: (community: CommunityState, initiativeIds: string[], signal?: AbortSignal) =>
     postJson<AnalyseResponse>("/api/analyse", { community, initiative_ids: initiativeIds }, signal),
   explain: (community: CommunityState, initiativeId: string, signal?: AbortSignal) =>

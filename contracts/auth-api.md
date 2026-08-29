@@ -12,6 +12,6 @@ Unknown fields are rejected. Errors use the repository envelope:
 
 Raw passwords, session tokens, invitation-token digests and invitation tokens after the one-time local delivery response are outside every response schema.
 
-The auth permission matrix applies to auth and community-administration routes only. Solver, reasoning, Project, stress-test, recompile and frontier routes are deliberately not role-gated. No frontend identity, membership or invitation workflow exists at this checkpoint.
+The auth permission matrix applies to auth and community-administration routes only. Solver, reasoning, Project, stress-test, recompile and frontier routes are deliberately not role-gated. The same-origin frontend now provides signup, login, session, logout, profile, password, Settings, persisted collaboration-space, membership, invitation and Administrator-audit workflows. It consumes the strict response contract without reading or storing the HttpOnly session token. These collaboration surfaces remain separate from the planning fixture and do not turn community roles into solver, Project or M7 permissions.
 
 `ASSEMBLE_AUTH_ALLOWED_BROWSER_ORIGINS` is an exact bounded canonical HTTP(S) origin allow-list; it is never inferred or broadened from Host or forwarded headers. Auth middleware namespace matching is segment-aware, so similarly named non-auth routes retain the ordinary application 404 boundary. Auth-created SQLite communities are not linked to the authoritative solver fixture.

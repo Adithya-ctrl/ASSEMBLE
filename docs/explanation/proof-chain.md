@@ -17,4 +17,4 @@ This double proof is intentional. The interface proof controls when the form app
 
 Basic Workshop demonstrates a valid empty catalyst path. Multilingual Clinic demonstrates a one-action successor path. Both produce the same Project shape because execution information is derived from the witness rather than from hand-authored fixture-specific answers.
 
-The installed auth router forms a separate persistence boundary for users, sessions, communities, memberships, invitations, rate counters and audit events. It does not persist this proof chain or role-gate the solver, reasoning, Project or M7 endpoints, and the current frontend exposes no identity or M7 workflow.
+The installed auth router forms a separate persistence boundary for users, sessions, communities, memberships, invitations, rate counters and audit events. The frontend exposes that boundary through local identity, Settings and Collaboration workflows, but it does not persist this proof chain or role-gate the solver, reasoning, Project or M7 endpoints. M7 remains backend-only at this checkpoint.

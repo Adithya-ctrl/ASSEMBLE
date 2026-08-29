@@ -25,7 +25,7 @@ ASSEMBLE replaces coordination guesswork inside its declared model with an inspe
 
 ## Boundaries on the claim
 
-The current software operates only on the deterministic fictional fixture and submitted bounded models. It does not predict social outcomes, discover real community data, guarantee delivery, measure real-world impact, or prove that its catalogue contains every possible intervention. Local identity, community membership and invitation records persist only in FastAPI's SQLite store. The frontend has no identity or M7 workflow; solver, reasoning, Project and M7 routes are not role-gated; Projects and proof state are not persisted; and project membership, tasks, deployment, external LLM use, and data export remain absent.
+The current planning software operates only on the deterministic fictional fixture and submitted bounded models. It does not predict social outcomes, discover real community data, guarantee delivery, measure real-world impact, or prove that its catalogue contains every possible intervention. Local identity, Collaboration membership, invitation and audit records persist in SQLite and have dedicated frontend surfaces, but they are not linked to the fixture. M7 has no frontend workflow; solver, reasoning, Project and M7 routes are not role-gated; Projects and proof state are not persisted; and project membership, tasks, deployment, external LLM use, and data export remain absent.
 
 ## Target users and stakeholders
 

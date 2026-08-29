@@ -50,7 +50,7 @@ These pages describe the software as it behaves now. Historical decisions and su
 
 ## Current surface boundary
 
-The FastAPI application exposes local auth/community/invitation persistence and the three M7 counterfactual analyses. The current frontend exposes neither capability: its account control remains disabled, M7 has no product route, and solver, reasoning, Project and M7 endpoints are deliberately not role-gated. Projects and browser proof context remain in memory. See [`../BUILD_STATUS.md`](../BUILD_STATUS.md) for the current acceptance boundary.
+The frontend now exposes the local auth/community/invitation boundary through dedicated identity, Settings, Collaboration, and Administrator surfaces. Guest access to the fictional planning demo remains available, and persisted collaboration spaces are explicitly separate from that fixture; their roles do not gate solver, reasoning, Project, or M7 routes. The three M7 counterfactual analyses remain backend-only. Projects and browser proof context remain in memory. See [`../BUILD_STATUS.md`](../BUILD_STATUS.md) for the current acceptance boundary.
 
 ## Documentation update rule
 

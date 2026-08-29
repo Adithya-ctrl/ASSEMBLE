@@ -29,7 +29,7 @@ This table maps current behavior to its implementation and verification owner. U
 | Category-scoped equivalent graph/list facts | `frontend/app/(product)/community/page.tsx`, `frontend/components/community/CommunityInventory.tsx` | browser eight-entity category reachability, normalized graph/list parity, selected-detail and raw-ID-containment replay |
 | Complete Project detail and dedicated Project proof | `frontend/app/(product)/projects/page.tsx`, `frontend/app/(product)/projects/proof/page.tsx`, `frontend/components/project/` | Basic/Clinic detail, Project-specific verification/path/lineage, and Inspector-focus replay |
 | Semantic status, trace table, live journey updates and fresh Project-proof focus | `frontend/components/AssemblyProduct.tsx`, `frontend/components/shell/AppShell.tsx`, `frontend/components/project/ProjectProofView.tsx` | browser announcement, semantic-table and Project proof/Inspector replay |
-| Strict local-only UI preferences and session-only Judge Proof Mode | `frontend/lib/preferences.ts`, `frontend/lib/preferences.test.ts`, `frontend/lib/workflow-context.tsx`, `frontend/app/(product)/preferences/page.tsx` | valid/invalid/oversized/stale-version cookie and refresh replay; preference unit tests |
+| Strict local-only UI preferences and session-only Judge Proof Mode | `frontend/lib/preferences.ts`, `frontend/lib/preferences.test.ts`, `frontend/lib/workflow-context.tsx`, `frontend/components/identity/SettingsPanel.tsx`, `frontend/app/(account)/settings/page.tsx` | valid/invalid/oversized/stale-version cookie and refresh replay; preference unit tests |
 | High contrast, opaque focus, reduced motion, zoom and overflow | `frontend/app/globals.css` | production browser token/media/five-width/200%-reflow checks |
 | Living current documentation and historical ADR separation | `docs/README.md`, `docs/how-to/contributing.md`, `docs/adr/` | documentation link and contract tests |
 | Documentation drift hard gate | `docs/how-to/audit-documentation.md`, `docs/how-to/verify-changes.md` | `backend/tests/test_documentation.py` plus human semantic replay |
@@ -56,11 +56,11 @@ The normative wording and acceptance criteria live in [`reference/requirements.m
 | FR-013 | `backend/app/project_models.py`, `backend/app/projects.py` | Basic/Clinic derived-detail tests and live journeys |
 | FR-014 | `frontend/components/project/ProjectProofView.tsx`, `frontend/app/(product)/projects/proof/page.tsx` | Project identity/status, fresh verification, source-plan/path/lineage/catalyst-output and Inspector-focus replay |
 | FR-015 | `frontend/lib/workflow-context.tsx`, `frontend/components/shell/AppShell.tsx` | browser Reset replay after completed Clinic Project and stale-response delay |
-| FR-016 | `frontend/lib/preferences.ts`, `frontend/lib/preferences.test.ts`, `frontend/app/(product)/preferences/page.tsx`, `frontend/app/globals.css` | cookie fallback/persistence, keyboard, contrast/theme/motion, status, and target checks |
-| FR-017 | `frontend/lib/workflow-context.tsx`, `frontend/components/shell/AppShell.tsx` | single live-region journey announcement replay |
-| FR-018 | `backend/app/auth/models.py`, `backend/app/auth/crypto.py`, `backend/app/auth/service.py`, `backend/app/auth/api.py` | account/session/profile/password lifecycle, rotation and adversarial tests in `backend/tests/auth/` |
-| FR-019 | `backend/app/auth/migrations.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | persisted membership, immediate demotion, cross-community and last-Administrator tests |
-| FR-020 | `backend/app/auth/models.py`, `backend/app/auth/service.py`, `backend/app/auth/storage.py` | recipient binding, single-use/revoke/expiry races, restart, redaction and audit tests |
+| FR-016 | `frontend/lib/preferences.ts`, `frontend/lib/preferences.test.ts`, `frontend/components/identity/SettingsPanel.tsx`, `frontend/app/(account)/settings/page.tsx`, `frontend/app/globals.css` | guest/signed-in Settings, redirect, cookie fallback/persistence, keyboard, contrast/theme/motion, status, and target checks |
+| FR-017 | `frontend/lib/workflow-context.tsx`, `frontend/lib/identity-context.tsx`, `frontend/components/shell/AppShell.tsx`, `frontend/components/identity/IdentityShell.tsx` | one scoped application announcement per active shell; product account-menu logout and planning journey replay |
+| FR-018 | backend auth modules; `frontend/lib/identity-context.tsx`, `frontend/lib/auth-session.ts`, `frontend/lib/auth-api.ts`, `frontend/components/identity/` | auth backend suite; 15 focused frontend tests; browser login/session refresh/revocation/profile/logout/Settings and service-failure replay |
+| FR-019 | backend auth storage/service; `frontend/components/community-admin/CommunitiesPanel.tsx`, `CommunityAdminPanel.tsx` | backend role tests plus Administrator, authoritative `403` role-loss, Viewer browser replay, restart persistence, and no-admin-control assertion |
+| FR-020 | backend invitation service/storage; `frontend/components/community-admin/` | backend invitation races plus one-time token removal, revoke, lifecycle-list and audit browser replay |
 | FR-021 | `backend/app/analysis_state.py`, `backend/app/resilience.py`, `backend/app/main.py` | `backend/tests/test_resilience.py`, stress cases in `backend/tests/test_technical_api.py` |
 | FR-022 | `backend/app/recompiler.py`, `backend/app/compiler.py`, `backend/app/main.py` | `backend/tests/test_recompiler.py`, recompile cases in `backend/tests/test_technical_api.py` |
 | FR-023 | `backend/app/frontier.py`, `backend/app/main.py` | `backend/tests/test_frontier.py`, frontier cases in `backend/tests/test_technical_api.py` |
@@ -74,7 +74,7 @@ The normative wording and acceptance criteria live in [`reference/requirements.m
 | NFR-008 | `docs/README.md`, `docs/how-to/audit-documentation.md` | deterministic docs gate and human semantic replay |
 | NFR-009 | local fixture/runtime boundaries | dependency/configuration inspection and absent-capability audit |
 | NFR-010 | local backend/frontend commands | full pytest, typecheck, lint, build, and browser journeys |
-| NFR-011 | `frontend/app/(product)/`, `frontend/components/`, `frontend/app/globals.css` | 320/1440 all-route parity: five destinations, four Community categories, all eight entities, six proof actions, 3 Project fields, complete Project/proof/Preferences capability, no overflow or sub-44px target |
+| NFR-011 | `frontend/app/`, `frontend/components/`, `frontend/app/globals.css` | accepted M6 320/1440 proof parity plus Phase A 320/390/1440 identity, Settings, Collaboration and role-view checks with no overflow or effective sub-44px target |
 | NFR-012 | `backend/app/auth/config.py`, `backend/app/auth/crypto.py`, `backend/app/auth/boundary.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | secret-at-rest, fixation/rotation, persisted rate, streamed-byte, exact bounded origin allow-list, segment scope, restart, lock and POSIX mode tests in `backend/tests/auth/` |
 | NFR-013 | `backend/app/analysis_state.py`, `backend/app/resilience.py`, `backend/app/recompiler.py`, `backend/app/frontier.py` | forged-base, mutation, ceiling, UNKNOWN, receipt-identity, witness and solver-call tests in `backend/tests/test_resilience.py`, `backend/tests/test_recompiler.py`, `backend/tests/test_frontier.py`, `backend/tests/test_technical_api.py` |
 
@@ -89,7 +89,6 @@ The normative wording and acceptance criteria live in [`reference/requirements.m
 | US-008, US-009 | Clinic one-action HTTP 201 Project and focused source inspector | both Project/source-proof segments |
 | US-010 | adversarial Project API suite and stable error envelopes | trust-boundary close and judge Q&A |
 | US-012 | completed-journey Reset replay | 4-minute Reset recovery and close |
-| US-014 | fresh-application restart, cookie/session rotation and secret-at-rest auth tests | API evidence only; disabled frontend account remains truthful |
-| US-015 | complete invitation accept/revoke/expiry, persisted role and audit tests | API evidence only; no current frontend workflow |
+| US-014, US-015 | backend lifecycle suite plus production-browser session refresh, restart persistence, role view, one-time invitation, revoke and audit evidence | Account/Settings and Collaboration surfaces; independent UI replay pending |
 | US-016 | production-fixture stress/recompile runtime tests and counterfactual identity checks | API evidence only; no current M7 frontend surface |
 | US-017 | S0 and trained-source frontier tests, incomplete-coverage ambiguity and Pareto evidence | API evidence only; no current M7 frontend surface |

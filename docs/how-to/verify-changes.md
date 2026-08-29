@@ -33,7 +33,7 @@ Lint must finish with zero errors and zero warnings.
 
 Run the real FastAPI backend and the production Next.js build. Use a clean page state.
 
-1. Open Overview, Community, Initiatives, Projects, and Preferences through shell navigation and direct URLs. Use back, forward, and hard refresh; ordinary navigation must preserve proof context while refresh restores authoritative S0.
+1. Open Overview, demo Community, Initiatives, Projects, Collaboration, and Settings through shell/account navigation and direct URLs. Confirm `/preferences` redirects to Settings. Use back, forward, and hard refresh; ordinary planning navigation must preserve proof context while refresh restores authoritative S0.
 2. On Community, visit Overview, People, Places, and Resources, reach all eight entities, compare Graph/List facts, and inspect one focused detail plus its Technical details disclosure.
 3. Open Basic Workshop's Initiative Proof route and compile the community.
 4. Confirm a real feasible S0 proof exposes the Project form with explicit path `[]`.
@@ -45,7 +45,7 @@ Run the real FastAPI backend and the production Next.js build. Use a clean page 
 10. Hard-refresh Project Proof and confirm the in-memory Project truthfully resets to its empty state rather than being restored from browser storage.
 11. Reset and confirm all downstream evidence, Project state, hashes, and relationship emphasis clear across Projects and Project Proof.
 
-The browser journey verifies the current frontend only. Confirm that the account control remains disabled and that no stress-test, recompile or frontier product route is claimed. Replay auth/community/invitation and M7 behavior through the real API separately; their existence in OpenAPI is not frontend acceptance.
+The planning journey verifies the proof workflow only. Separately replay the current identity UI: guest account menu and Appearance; signup/login; session refresh and scheduled expiry; revoked-session invalidation without stale signed-in controls; profile and password forms; 204 logout; Collaboration list/create/accept; Administrator members/invitations/audit; one-time token removal; `403` role-loss refresh to a non-Administrator view; stable 401/403/404/409/429/503 presentation; and restart persistence. Confirm account-menu actions use the product shell's single application announcement, persisted roles do not gate the planning demo, and no stress-test, recompile, or frontier product route is claimed.
 
 ## Integrated backend API journeys
 
@@ -65,7 +65,7 @@ The browser journey verifies the current frontend only. Confirm that the account
 - Confirm reduced motion removes non-essential animation without hiding information.
 - Confirm high-contrast mode and normal mode retain an opaque focus outline and readable icon-plus-text statuses.
 - Confirm system/light/dark, standard/high contrast, reduced-motion override, and preferred inventory view use only the versioned `assemble_ui_preferences` cookie; invalid, oversized, and stale-version values fail closed. Judge Proof Mode must reset on refresh.
-- At 320 and 390, confirm all five navigation destinations remain visibly discoverable without horizontal navigation scrolling and the disabled account status remains present.
+- At 320 and 390, confirm all five planning destinations remain visibly discoverable, the account menu remains operable, and Settings/Collaboration retain the same tasks without horizontal navigation scrolling.
 - Confirm unknown and malformed Initiative Proof paths show a not-found state with a route back and do not request a fallback initiative.
 - Check browser console warnings/errors and the app icon.
 

@@ -1,6 +1,6 @@
 # Four-minute live-demo runbook
 
-Use a production frontend connected to the real local API. Begin from Reset on a 1440-wide browser unless judges request the 320-wide parity view. This runbook demonstrates the accepted M6 UI and core Project chain. It does not demonstrate the installed auth/community/invitation or M7 backend APIs; the visible account control must remain disabled.
+Use a production frontend connected to the real local API. Begin from Reset on a 1440-wide browser unless judges request the 320-wide parity view. This runbook prioritises the core Project chain. The account menu and Collaboration surfaces are real but outside this four-minute sequence; M7 remains backend-only.
 
 ## Exact 4:00 operator runbook
 
@@ -43,4 +43,4 @@ If a local request or screen action stalls, stop repeated clicks. Use this 45-se
 
 Do not pretend every internal field can be narrated in four minutes. Prioritize the blocker facts, minimum-action comparison, immutable transition, separate verification, server-derived Project, source proof, full feature parity, and honest limits.
 
-If asked about current backend additions, say that local identity/community/invitation persistence and M7 analysis routes are present in FastAPI and verified separately through API/runtime gates. Do not imply that they are visible in this UI, that community roles protect reasoning/Project/M7 routes, or that Projects and proof state persist.
+If asked about collaboration, show the account menu or Collaboration route and state that local identity, Settings, persisted roles, one-time invitations, and Administrator audit controls are current frontend capabilities pending independent Phase A acceptance. Do not imply that those spaces alter the fictional planning fixture, that community roles protect reasoning/Project/M7 routes, that M7 is visible, or that Projects and proof state persist.

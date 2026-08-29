@@ -1,6 +1,6 @@
 # Security and validation reference
 
-ASSEMBLE is currently a localhost, deterministic fixture application. Its FastAPI backend provides local accounts, cookie sessions, persisted community roles and recipient-bound invitations in a private SQLite store. It does not provide frontend identity workflows, OAuth, cloud persistence, deployment, or external data ingestion. Authentication does not wrap solver, reasoning, Project or M7 routes.
+ASSEMBLE is currently a localhost, deterministic fixture application. Its FastAPI backend provides local accounts, HttpOnly cookie sessions, persisted community roles and recipient-bound invitations in a private SQLite store; the frontend exposes those capabilities only through the same-origin proxy, strict runtime response parsers, an independent session provider, and role-aware Collaboration surfaces. It does not provide OAuth, cloud persistence, deployment, or external data ingestion. Authentication does not wrap solver, reasoning, Project, or M7 routes.
 
 ## Trust boundaries
 
@@ -50,6 +50,7 @@ Auth request bodies are capped at 16 KiB of actual received bytes. Username, ema
 - Reapplying an already-present additive effect returns a stable conflict instead of a false successful transition.
 - Framework and domain failures use stable error envelopes.
 - Missing/expired/revoked sessions and persisted role failures return stable auth errors; password changes rotate the current session and revoke earlier sessions.
+- The frontend schedules invalidation from the parsed session expiry, clears cached identity on `AUTHENTICATION_REQUIRED`, and fails closed while refreshing membership after an Administrator request returns `403`.
 - Invitation acceptance is recipient-bound and single-transaction; public token failures are deliberately indistinguishable.
 - Rate counters persist across restart and bound signup, login, password-change and invitation-acceptance attempts before expensive verification.
 - Forged auth database hash parameters, unsafe POSIX database permissions, oversized streamed bodies, non-JSON unsafe auth requests and invalid or rejected exact browser origins fail closed. Auth namespace scope is segment-aware, so lookalike paths fall through to ordinary 404 handling.
@@ -63,4 +64,4 @@ Tests cover forged capabilities, resource quantity, space availability and linea
 
 The default auth store is `backend/.data/auth.sqlite3`, ignored by Git; `ASSEMBLE_AUTH_DB_PATH` overrides it. On POSIX its directory is mode `0700` and database/WAL/SHM files are mode `0600`. Auth/community/invitation records are the only persistent application state. Auth-created SQLite communities are not linked to the solver's authoritative fictional fixture. Projects, proof context and current task state remain in memory.
 
-Do not describe the current frontend as authenticated or multi-user: signup, login, session, profile, community administration and invitation acceptance have no current UI. Do not describe solver, reasoning, Project, stress-test, recompile or frontier routes as authorised by community roles; they are deliberately not role-gated. There is no project membership, task authorisation, account recovery, email ownership verification, MFA, OAuth, public-deployment CSRF design, distributed rate limiter, deployment hardening or encrypted application-level database. The local controls are not a production-security or privacy certification.
+The current frontend exposes local signup, login, session, profile, password, Collaboration administration and recipient-bound invitation workflows through the same-origin proxy. Do not describe that localhost boundary as a production multi-user security system, or describe solver, reasoning, Project, stress-test, recompile or frontier routes as authorised by community roles; they are deliberately not role-gated. There is no project membership, task authorisation, account recovery, email ownership verification, MFA, OAuth, public-deployment CSRF design, distributed rate limiter, deployment hardening or encrypted application-level database. The local controls are not a production-security or privacy certification.
