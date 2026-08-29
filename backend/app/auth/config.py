@@ -44,7 +44,7 @@ def _parse_allowed_browser_origins(configured: str | None) -> tuple[str, ...]:
 
     origins: list[str] = []
     for candidate in candidates:
-        origin = candidate.strip()
+        origin = candidate
         try:
             parsed = urlsplit(origin)
             port = parsed.port
@@ -54,6 +54,7 @@ def _parse_allowed_browser_origins(configured: str | None) -> tuple[str, ...]:
         has_forbidden_character = any(ord(character) <= 0x20 or ord(character) == 0x7F for character in origin)
         if (
             not origin
+            or origin != origin.strip()
             or has_forbidden_character
             or parsed.scheme not in {"http", "https"}
             or not parsed.netloc

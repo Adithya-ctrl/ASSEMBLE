@@ -122,13 +122,23 @@ class ProfileUpdateRequest(ContractModel):
     def avatar_valid(cls, value: str | None) -> str | None:
         if value is None:
             return None
+        has_forbidden_character = any(
+            ord(character) <= 0x20 or ord(character) == 0x7F
+            for character in value
+        )
         normalized = value.strip()
-        parsed = urlsplit(normalized)
+        try:
+            parsed = urlsplit(normalized)
+            port = parsed.port
+        except ValueError as exc:
+            raise ValueError("avatar_url must be an https URL without credentials") from exc
         if normalized and (
             parsed.scheme != "https"
             or not parsed.hostname
             or parsed.username is not None
             or parsed.password is not None
+            or (port is not None and not 1 <= port <= 65535)
+            or has_forbidden_character
         ):
             raise ValueError("avatar_url must be an https URL without credentials")
         return normalized or None

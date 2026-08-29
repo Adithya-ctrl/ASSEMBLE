@@ -9,7 +9,6 @@ from a small, non-secret allow-list.
 
 from __future__ import annotations
 
-import base64
 import json
 import sqlite3
 import time
@@ -21,12 +20,8 @@ from typing import Any, TypeVar
 
 from app.auth.config import AuthSettings
 from app.auth.crypto import (
-    SALT_BYTES,
-    SCRYPT_DKLEN,
-    SCRYPT_N,
-    SCRYPT_P,
-    SCRYPT_R,
     hash_password,
+    is_supported_password_hash,
     normalize_email,
     normalize_username,
     new_bearer_token,
@@ -240,17 +235,7 @@ class AuthService:
 
     @staticmethod
     def _supported_stored_hash(encoded: object) -> bool:
-        if not isinstance(encoded, str):
-            return False
-        parts = encoded.split("$")
-        if len(parts) != 6 or parts[:4] != ["scrypt-v1", str(SCRYPT_N), str(SCRYPT_R), str(SCRYPT_P)]:
-            return False
-        try:
-            salt = base64.urlsafe_b64decode(parts[4].encode("ascii"))
-            digest = base64.urlsafe_b64decode(parts[5].encode("ascii"))
-        except (ValueError, UnicodeError):
-            return False
-        return len(salt) == SALT_BYTES and len(digest) == SCRYPT_DKLEN
+        return is_supported_password_hash(encoded)
 
     # ------------------------------------------------------------------
     # Audit and rate limiting

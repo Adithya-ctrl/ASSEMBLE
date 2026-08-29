@@ -98,6 +98,95 @@ def test_non_browser_client_without_origin_is_allowed(tmp_path: Path) -> None:
     assert response.headers["cache-control"] == "no-store"
 
 
+def test_duplicate_security_headers_are_rejected_before_app_dispatch(tmp_path: Path) -> None:
+    calls: list[bool] = []
+    app = FastAPI()
+    app.add_middleware(
+        AuthBoundaryMiddleware,
+        settings=AuthSettings(database_path=tmp_path / "auth.sqlite3"),
+    )
+
+    @app.post("/api/auth/echo")
+    async def echo() -> dict[str, bool]:
+        calls.append(True)
+        return {"called": True}
+
+    client = TestClient(app)
+    cases = (
+        (
+            [
+                (b"content-type", b"application/json"),
+                (b"origin", b"http://localhost:3000"),
+                (b"origin", b"https://evil.example"),
+            ],
+            403,
+            "BROWSER_ORIGIN_REJECTED",
+        ),
+        (
+            [
+                (b"content-type", b"application/json"),
+                (b"origin", b"https://evil.example"),
+                (b"origin", b"http://localhost:3000"),
+            ],
+            403,
+            "BROWSER_ORIGIN_REJECTED",
+        ),
+        (
+            [
+                (b"content-type", b"application/json"),
+                (b"sec-fetch-site", b"same-origin"),
+                (b"sec-fetch-site", b"cross-site"),
+            ],
+            403,
+            "BROWSER_ORIGIN_REJECTED",
+        ),
+        (
+            [
+                (b"content-type", b"application/json"),
+                (b"sec-fetch-site", b"cross-site"),
+                (b"sec-fetch-site", b"same-origin"),
+            ],
+            403,
+            "BROWSER_ORIGIN_REJECTED",
+        ),
+        (
+            [(b"content-type", b"application/json"), (b"content-type", b"text/plain")],
+            415,
+            "UNSUPPORTED_MEDIA_TYPE",
+        ),
+        (
+            [(b"content-type", b"text/plain"), (b"content-type", b"application/json")],
+            415,
+            "UNSUPPORTED_MEDIA_TYPE",
+        ),
+        (
+            [
+                (b"content-type", b"application/json"),
+                (b"content-length", b"2"),
+                (b"content-length", b"3"),
+            ],
+            422,
+            "INVALID_REQUEST",
+        ),
+        (
+            [
+                (b"content-type", b"application/json"),
+                (b"content-length", b"3"),
+                (b"content-length", b"2"),
+            ],
+            422,
+            "INVALID_REQUEST",
+        ),
+    )
+    for headers, expected_status, expected_code in cases:
+        response = client.post("/api/auth/echo", content=b"{}", headers=headers)
+        assert (response.status_code, response.json()["error"]["code"]) == (
+            expected_status,
+            expected_code,
+        )
+    assert calls == []
+
+
 def test_near_prefix_routes_fall_through_to_stable_not_found(tmp_path: Path) -> None:
     client = _client(tmp_path)
     for path in ("/api/authentic", "/api/communities-v2", "/api/invitations-old"):

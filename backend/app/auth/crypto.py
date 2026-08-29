@@ -16,6 +16,8 @@ SCRYPT_DKLEN = 32
 SCRYPT_MAXMEM = 64 * 1024 * 1024
 SALT_BYTES = 16
 TOKEN_BYTES = 32
+_SALT_B64_LENGTH = len(base64.urlsafe_b64encode(bytes(SALT_BYTES)))
+_DIGEST_B64_LENGTH = len(base64.urlsafe_b64encode(bytes(SCRYPT_DKLEN)))
 
 USERNAME_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9._-]{1,62}[a-z0-9])?$")
 
@@ -55,7 +57,9 @@ def validate_password(value: str) -> str:
 
 def hash_password(password: str, *, salt: bytes | None = None) -> str:
     validate_password(password)
-    actual_salt = salt or secrets.token_bytes(SALT_BYTES)
+    if salt is not None and (not isinstance(salt, bytes) or len(salt) != SALT_BYTES):
+        raise ValueError(f"salt must be exactly {SALT_BYTES} bytes")
+    actual_salt = secrets.token_bytes(SALT_BYTES) if salt is None else salt
     digest = hashlib.scrypt(
         password.encode("utf-8"),
         salt=actual_salt,
@@ -77,22 +81,59 @@ def hash_password(password: str, *, salt: bytes | None = None) -> str:
     )
 
 
+def _decode_password_hash(encoded: object) -> tuple[bytes, bytes] | None:
+    try:
+        if not isinstance(encoded, str):
+            return None
+        algorithm, n_text, r_text, p_text, salt_text, digest_text = encoded.split("$")
+        if (
+            algorithm != "scrypt-v1"
+            or (n_text, r_text, p_text) != (str(SCRYPT_N), str(SCRYPT_R), str(SCRYPT_P))
+            or len(salt_text) != _SALT_B64_LENGTH
+            or len(digest_text) != _DIGEST_B64_LENGTH
+        ):
+            return None
+
+        salt = base64.b64decode(
+            salt_text.encode("ascii"),
+            altchars=b"-_",
+            validate=True,
+        )
+        expected = base64.b64decode(
+            digest_text.encode("ascii"),
+            altchars=b"-_",
+            validate=True,
+        )
+        if len(salt) != SALT_BYTES or len(expected) != SCRYPT_DKLEN:
+            return None
+        if (
+            base64.urlsafe_b64encode(salt).decode("ascii") != salt_text
+            or base64.urlsafe_b64encode(expected).decode("ascii") != digest_text
+        ):
+            return None
+
+        return salt, expected
+    except (ValueError, TypeError, UnicodeError):
+        return None
+
+
+def is_supported_password_hash(encoded: object) -> bool:
+    return _decode_password_hash(encoded) is not None
+
+
 def verify_password(password: str, encoded: str) -> bool:
     try:
-        algorithm, n_text, r_text, p_text, salt_text, digest_text = encoded.split("$")
-        n, r, p = int(n_text), int(r_text), int(p_text)
-        if algorithm != "scrypt-v1" or (n, r, p) != (SCRYPT_N, SCRYPT_R, SCRYPT_P):
+        decoded = _decode_password_hash(encoded)
+        if decoded is None or len(password.encode("utf-8")) > 1024:
             return False
-        salt = base64.urlsafe_b64decode(salt_text.encode("ascii"))
-        expected = base64.urlsafe_b64decode(digest_text.encode("ascii"))
-        if len(salt) != SALT_BYTES or len(expected) != SCRYPT_DKLEN or len(password.encode("utf-8")) > 1024:
-            return False
+        salt, expected = decoded
+
         actual = hashlib.scrypt(
             password.encode("utf-8"),
             salt=salt,
-            n=n,
-            r=r,
-            p=p,
+            n=SCRYPT_N,
+            r=SCRYPT_R,
+            p=SCRYPT_P,
             dklen=SCRYPT_DKLEN,
             maxmem=SCRYPT_MAXMEM,
         )

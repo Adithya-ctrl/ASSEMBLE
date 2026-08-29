@@ -129,6 +129,22 @@ def test_unknown_and_malformed_hash_login_run_one_dummy_scrypt(harness: Harness,
     assert calls == [service_module._DUMMY_PASSWORD_HASH]
 
 
+def test_stored_hash_precheck_uses_canonical_crypto_parser() -> None:
+    canonical = service_module.hash_password("ValidPassword1!", salt=b"\xfb" * 16)
+    parts = canonical.split("$")
+    noncanonical = parts.copy()
+    noncanonical[4] = noncanonical[4].replace("-", "+").replace("_", "/")
+
+    assert AuthService._supported_stored_hash(canonical)
+    assert not AuthService._supported_stored_hash("$".join(noncanonical))
+    assert AuthService._supported_stored_hash(
+        canonical
+    ) == service_module.is_supported_password_hash(canonical)
+    assert AuthService._supported_stored_hash(
+        "$".join(noncanonical)
+    ) == service_module.is_supported_password_hash("$".join(noncanonical))
+
+
 def test_known_stale_session_audited_once_but_unknown_cookie_is_not(harness: Harness) -> None:
     result = signup(harness, "Alice")
     harness.service.logout(result.token)

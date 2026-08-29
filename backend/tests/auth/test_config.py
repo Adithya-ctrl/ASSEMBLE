@@ -48,6 +48,13 @@ def test_allowed_browser_origins_are_configurable_and_defaults_are_localhost(
         "http://localhost%2f.evil:4173",
         "http://999.999.999.999:4173",
         "http://localhost:4173,,https://app.example.test",
+        " http://localhost:4173",
+        "http://localhost:4173 ",
+        "http://localhost:4173, https://app.example.test",
+        "http://localhost:4173\t",
+        "http://localhost:4173\n",
+        "http://localhost:4173\x1f",
+        "http://local host:4173",
     ),
 )
 def test_malformed_allowed_browser_origin_environment_fails_closed(

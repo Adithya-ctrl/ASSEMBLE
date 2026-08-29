@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import os
 import sqlite3
 import stat
@@ -46,38 +47,67 @@ class AuthStore:
         if os.name != "posix":
             return
         parent_mode = stat.S_IMODE(parent.stat().st_mode)
-        if parent_mode & 0o077:
+        if parent_mode != 0o700:
             raise StoragePermissionError(
-                f"auth database directory must not grant group/other access: {parent}"
+                f"auth database directory must have mode 0700: {parent}"
             )
-        if self.database_path.exists():
-            file_stat = os.lstat(self.database_path)
-            if not stat.S_ISREG(file_stat.st_mode) or stat.S_IMODE(file_stat.st_mode) & 0o077:
-                raise StoragePermissionError(
-                    "existing auth database must be a private regular file with mode 0600"
-                )
+        if self._private_file_exists(self.database_path, "existing auth database"):
+            self._validate_existing_runtime_files()
             return
-        descriptor = os.open(
-            self.database_path,
-            os.O_CREAT | os.O_EXCL | os.O_WRONLY,
-            0o600,
-        )
-        os.close(descriptor)
+        try:
+            descriptor = os.open(
+                self.database_path,
+                os.O_CREAT | os.O_EXCL | os.O_WRONLY,
+                0o600,
+            )
+        except OSError as exc:
+            if exc.errno != errno.EEXIST:
+                raise
+            self._validate_private_regular_file(self.database_path, "existing auth database")
+        else:
+            os.close(descriptor)
+        self._validate_existing_runtime_files()
+
+    @staticmethod
+    def _validate_file_stat(file_stat: os.stat_result, label: str) -> None:
+        if not stat.S_ISREG(file_stat.st_mode) or stat.S_IMODE(file_stat.st_mode) != 0o600:
+            raise StoragePermissionError(f"{label} must be a private regular file with mode 0600")
+
+    @classmethod
+    def _validate_private_regular_file(cls, path: Path, label: str) -> None:
+        try:
+            file_stat = os.lstat(path)
+        except FileNotFoundError as exc:
+            raise StoragePermissionError(f"{label} disappeared during permission validation") from exc
+        cls._validate_file_stat(file_stat, label)
+
+    @classmethod
+    def _private_file_exists(cls, path: Path, label: str) -> bool:
+        try:
+            file_stat = os.lstat(path)
+        except FileNotFoundError:
+            return False
+        cls._validate_file_stat(file_stat, label)
+        return True
+
+    def _validate_existing_runtime_files(self) -> None:
+        for suffix in ("-wal", "-shm"):
+            path = Path(f"{self.database_path}{suffix}")
+            self._private_file_exists(path, "auth database runtime file")
 
     def _secure_runtime_files(self) -> None:
         if os.name != "posix":
             return
-        for suffix in ("", "-wal", "-shm"):
+        self._validate_private_regular_file(
+            self.database_path,
+            "auth database runtime file",
+        )
+        for suffix in ("-wal", "-shm"):
             path = Path(f"{self.database_path}{suffix}")
-            if not path.exists():
-                continue
-            mode = stat.S_IMODE(os.lstat(path).st_mode)
-            if mode & 0o077:
-                raise StoragePermissionError(
-                    f"auth database runtime file must have mode 0600: {path}"
-                )
+            self._private_file_exists(path, "auth database runtime file")
 
     def connect(self) -> sqlite3.Connection:
+        self._secure_runtime_files()
         connection = sqlite3.connect(self.database_path, timeout=5.0, isolation_level=None)
         try:
             connection.row_factory = sqlite3.Row

@@ -279,11 +279,110 @@ def test_concurrent_pending_recipient_insert_has_one_winner(tmp_path: Path) -> N
         ).fetchone()[0] == 1
 
 
-def test_existing_broad_auth_file_fails_closed_on_posix(tmp_path: Path) -> None:
+@pytest.mark.parametrize("mode", (0o000, 0o200, 0o400, 0o640, 0o644, 0o660, 0o700))
+def test_existing_auth_file_requires_exact_writable_private_mode_on_posix(
+    tmp_path: Path,
+    mode: int,
+) -> None:
     if os.name != "posix":
         return
     database_path = tmp_path / "auth.sqlite3"
-    database_path.touch(mode=0o644)
-    database_path.chmod(0o644)
+    database_path.touch(mode=0o600)
+    database_path.chmod(mode)
     with pytest.raises(StoragePermissionError, match="private regular file"):
         AuthStore(database_path, now=NOW)
+
+
+@pytest.mark.parametrize("mode", (0o400, 0o500, 0o600, 0o710, 0o750, 0o777))
+def test_existing_auth_directory_requires_exact_0700_on_posix(
+    tmp_path: Path,
+    mode: int,
+) -> None:
+    if os.name != "posix":
+        return
+    parent = tmp_path / "auth-state"
+    parent.mkdir(mode=0o700)
+    parent.chmod(mode)
+    try:
+        with pytest.raises(StoragePermissionError, match="mode 0700"):
+            AuthStore(parent / "auth.sqlite3", now=NOW)
+    finally:
+        parent.chmod(0o700)
+
+
+def test_read_only_auth_file_is_rejected_before_sqlite_open(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if os.name != "posix":
+        return
+    database_path = tmp_path / "auth.sqlite3"
+    database_path.touch(mode=0o600)
+    database_path.chmod(0o400)
+
+    def unexpected_connect(*args: object, **kwargs: object) -> sqlite3.Connection:
+        raise AssertionError("permission validation must run before sqlite open")
+
+    monkeypatch.setattr(sqlite3, "connect", unexpected_connect)
+    with pytest.raises(StoragePermissionError, match="private regular file"):
+        AuthStore(database_path, now=NOW)
+
+
+@pytest.mark.parametrize("suffix", ("-wal", "-shm"))
+@pytest.mark.parametrize("mode", (0o000, 0o400, 0o640, 0o644, 0o660, 0o700))
+def test_preexisting_runtime_files_require_exact_writable_private_mode(
+    tmp_path: Path,
+    suffix: str,
+    mode: int,
+) -> None:
+    if os.name != "posix":
+        return
+    database_path = tmp_path / "auth.sqlite3"
+    AuthStore(database_path, now=NOW)
+    runtime_path = Path(f"{database_path}{suffix}")
+    runtime_path.touch(mode=0o600)
+    runtime_path.chmod(mode)
+    with pytest.raises(StoragePermissionError, match="private regular file"):
+        AuthStore(database_path, now=NOW)
+
+
+@pytest.mark.parametrize("suffix", ("", "-wal", "-shm"))
+@pytest.mark.parametrize("path_kind", ("symlink", "directory"))
+def test_preexisting_auth_paths_reject_symlinks_and_nonregular_files(
+    tmp_path: Path,
+    suffix: str,
+    path_kind: str,
+) -> None:
+    if os.name != "posix":
+        return
+    database_path = tmp_path / "auth.sqlite3"
+    if suffix:
+        AuthStore(database_path, now=NOW)
+    target = Path(f"{database_path}{suffix}")
+    if target.exists():
+        target.unlink()
+    if path_kind == "symlink":
+        target.symlink_to(tmp_path / "missing")
+    else:
+        target.mkdir(mode=0o700)
+    with pytest.raises(StoragePermissionError, match="private regular file"):
+        AuthStore(database_path, now=NOW)
+
+
+def test_simultaneous_fresh_store_constructors_are_idempotent(tmp_path: Path) -> None:
+    for round_number in range(5):
+        database_path = tmp_path / f"round-{round_number}" / "auth.sqlite3"
+
+        def construct_store(_: int) -> AuthStore:
+            return AuthStore(database_path, now=NOW)
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            stores = list(executor.map(construct_store, range(8)))
+
+        with stores[0].connect() as connection:
+            assert [
+                tuple(row)
+                for row in connection.execute(
+                    "SELECT version, COUNT(*) FROM schema_migrations GROUP BY version"
+                )
+            ] == [(1, 1)]

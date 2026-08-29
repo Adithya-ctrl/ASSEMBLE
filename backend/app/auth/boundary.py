@@ -16,11 +16,12 @@ AsgiReceive = Callable[[], Awaitable[dict[str, Any]]]
 AsgiSend = Callable[[dict[str, Any]], Awaitable[None]]
 
 
-def _headers(scope: dict[str, Any]) -> dict[str, str]:
-    return {
-        key.decode("latin-1").lower(): value.decode("latin-1")
-        for key, value in scope.get("headers", [])
-    }
+def _header_values(scope: dict[str, Any]) -> dict[str, list[str]]:
+    headers: dict[str, list[str]] = {}
+    for raw_key, raw_value in scope.get("headers", []):
+        key = raw_key.decode("latin-1").lower()
+        headers.setdefault(key, []).append(raw_value.decode("latin-1"))
+    return headers
 
 
 def _is_auth_path(path: str) -> bool:
@@ -58,7 +59,37 @@ class AuthBoundaryMiddleware:
             await self.app(scope, receive, send)
             return
 
-        headers = _headers(scope)
+        header_values = _header_values(scope)
+        duplicate_origin = len(header_values.get("origin", [])) > 1
+        duplicate_fetch_site = len(header_values.get("sec-fetch-site", [])) > 1
+        duplicate_content_type = len(header_values.get("content-type", [])) > 1
+        duplicate_content_length = len(header_values.get("content-length", [])) > 1
+        if duplicate_origin or duplicate_fetch_site:
+            await _problem(
+                send,
+                403,
+                "BROWSER_ORIGIN_REJECTED",
+                "Duplicate browser security headers are not allowed.",
+            )
+            return
+        if duplicate_content_type:
+            await _problem(
+                send,
+                415,
+                "UNSUPPORTED_MEDIA_TYPE",
+                "Duplicate Content-Type headers are not allowed.",
+            )
+            return
+        if duplicate_content_length:
+            await _problem(
+                send,
+                422,
+                "INVALID_REQUEST",
+                "Duplicate Content-Length headers are not allowed.",
+            )
+            return
+
+        headers = {key: values[0] for key, values in header_values.items()}
         method = str(scope.get("method", "GET")).upper()
         if method in UNSAFE_METHODS:
             content_type = headers.get("content-type", "").split(";", 1)[0].strip().lower()

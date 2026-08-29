@@ -42,7 +42,20 @@ def test_signup_rejects_invalid_or_extra_fields(payload: dict[str, object]) -> N
 
 def test_profile_avatar_requires_https_host_without_credentials() -> None:
     assert ProfileUpdateRequest(avatar_url="https://images.example/avatar.png").avatar_url
-    for value in ("http://images.example/avatar.png", "https://", "https://user:pass@example.com/a"):
+    assert ProfileUpdateRequest(avatar_url="https://images.example:65535/avatar.png").avatar_url
+    assert ProfileUpdateRequest(avatar_url="https://[::1]:65535/avatar.png").avatar_url
+    assert ProfileUpdateRequest(avatar_url="").avatar_url is None
+    for value in (
+        "http://images.example/avatar.png",
+        "https://",
+        "https://user:pass@example.com/a",
+        "https://images.example:99999/avatar.png",
+        "https://images.example:65536/avatar.png",
+        "https://images.example:notaport/avatar.png",
+        "https://[::1/avatar.png",
+        "https://images.example/avatar\n.png",
+        " https://images.example/avatar.png",
+    ):
         with pytest.raises(ValidationError):
             ProfileUpdateRequest(avatar_url=value)
 
