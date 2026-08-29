@@ -118,6 +118,7 @@ def test_project_security_contract_and_current_status_are_documented() -> None:
         assert code in project
         assert code in security
     assert "P0-A Project and integrity hardening is independently accepted" in status
+    assert "Phase A independently connects local authentication" in status
     assert "279 passed" in status
 
     for ceiling in (
