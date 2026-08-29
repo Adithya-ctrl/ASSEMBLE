@@ -1,0 +1,142 @@
+{
+  "requests": {
+    "analyse": {
+      "initiative_ids": ["BASIC_WORKSHOP", "MULTILINGUAL_CLINIC", "REPAIR_SHARE"]
+    },
+    "explain": {
+      "initiative_id": "MULTILINGUAL_CLINIC"
+    },
+    "unlock": {
+      "initiative_id": "MULTILINGUAL_CLINIC"
+    },
+    "plan": {
+      "initiative_id": "MULTILINGUAL_CLINIC",
+      "max_depth": 2,
+      "max_expanded_states": 20
+    },
+    "transition": {
+      "action_id": "TRAIN_DIGITAL_HELPERS"
+    }
+  },
+  "responses": {
+    "analyse": {
+      "compile": {
+        "people": 5,
+        "organisations": 4,
+        "spaces": 1,
+        "resources": 2,
+        "decision_variables": 14,
+        "hard_constraints": 31
+      },
+      "results": [
+        {
+          "initiative_id": "BASIC_WORKSHOP",
+          "status": "OPTIMAL",
+          "objective_value": 24,
+          "assignments": [
+            {"role_instance_id": "DIGITAL_HELPER", "person_id": "LEO"},
+            {"role_instance_id": "FACILITATOR", "person_id": "SAM"}
+          ],
+          "assembly_trace": [
+            {
+              "requirement_kind": "role",
+              "requirement_id": "DIGITAL_HELPER",
+              "selected_ids": ["LEO"],
+              "facts": {"capability": "digital_support"}
+            },
+            {
+              "requirement_kind": "venue",
+              "requirement_id": "VENUE",
+              "selected_ids": ["LIBRARY_ROOM"],
+              "facts": {"minimum_capacity": 8}
+            }
+          ],
+          "solver_stats": {"branches": 0, "conflicts": 0, "wall_time_seconds": 0.001}
+        },
+        {
+          "initiative_id": "MULTILINGUAL_CLINIC",
+          "status": "INFEASIBLE",
+          "objective_value": null,
+          "assignments": [],
+          "assembly_trace": [],
+          "solver_stats": {"branches": 0, "conflicts": 0, "wall_time_seconds": 0.001}
+        }
+      ]
+    },
+    "explain": {
+      "initiative_id": "MULTILINGUAL_CLINIC",
+      "status": "INFEASIBLE",
+      "blocking_requirement_sets": [
+        {
+          "groups": ["role_capability"],
+          "facts": [
+            {
+              "required": 3,
+              "available": 1,
+              "capability": "digital_support",
+              "language": null,
+              "requirement_id": null,
+              "relevant_ids": ["LEO"],
+              "note": null
+            }
+          ],
+          "restored_feasibility_when_relaxed": true
+        }
+      ],
+      "method": "bounded_relax_and_resolve",
+      "solver_runs": 8
+    },
+    "unlock": {
+      "label": "minimum_modelled_unlock",
+      "target_initiative_id": "MULTILINGUAL_CLINIC",
+      "interventions": ["TRAIN_DIGITAL_HELPERS"],
+      "total_cost": 2,
+      "catalogue_size": 4,
+      "candidate_subsets_evaluated": 3,
+      "resulting_status": "OPTIMAL"
+    },
+    "plan": {
+      "target_initiative_id": "MULTILINGUAL_CLINIC",
+      "path": ["TRAIN_DIGITAL_HELPERS"],
+      "total_cost": 2,
+      "states": ["S0", "S1"],
+      "nodes": [
+        {
+          "state_id": "S0",
+          "action_path": [],
+          "cumulative_cost": 0,
+          "target_status": "INFEASIBLE",
+          "prune_reason": null
+        },
+        {
+          "state_id": "S1",
+          "action_path": ["TRAIN_DIGITAL_HELPERS"],
+          "cumulative_cost": 2,
+          "target_status": "OPTIMAL",
+          "prune_reason": null
+        }
+      ],
+      "target_status_before": "INFEASIBLE",
+      "target_status_after": "OPTIMAL"
+    },
+    "transition_overlay": {
+      "action_id": "TRAIN_DIGITAL_HELPERS",
+      "predecessor_state_id": "S0",
+      "diff": {
+        "added_capabilities": {
+          "PRIYA": ["digital_support"],
+          "SAM": ["digital_support"]
+        },
+        "added_people": [],
+        "resource_quantity_changes": {}
+      }
+    },
+    "error": {
+      "error": {
+        "code": "INVALID_REFERENCE",
+        "message": "The request contains an unknown stable ID.",
+        "details": {"id": "MISSING_ID"}
+      }
+    }
+  }
+}

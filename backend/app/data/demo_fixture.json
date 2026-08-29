@@ -1,0 +1,264 @@
+{
+  "fixture_version": "assemble-demo-v1",
+  "community": {
+    "state_id": "S0",
+    "parent_state_id": null,
+    "organisations": [
+      {"id": "TECH_SOCIETY", "name": "USYD Community Tech Society"},
+      {"id": "LOCAL_LIBRARY", "name": "Local Library"},
+      {"id": "ARABIC_ASSOC", "name": "Arabic Community Association"},
+      {"id": "REPAIR_GROUP", "name": "Neighbourhood Repair Group"}
+    ],
+    "people": [
+      {
+        "id": "LEO",
+        "name": "Leo",
+        "organisation_id": "TECH_SOCIETY",
+        "capabilities": ["digital_support", "digital_training"],
+        "languages": ["en"],
+        "willing_to_learn": [],
+        "available_slots": ["SAT_10", "SAT_11", "SAT_12"],
+        "max_contribution_slots": 3
+      },
+      {
+        "id": "PRIYA",
+        "name": "Priya",
+        "organisation_id": "TECH_SOCIETY",
+        "capabilities": [],
+        "languages": ["en"],
+        "willing_to_learn": ["digital_support"],
+        "available_slots": ["SAT_10", "SAT_11", "SAT_12"],
+        "max_contribution_slots": 3
+      },
+      {
+        "id": "SAM",
+        "name": "Sam",
+        "organisation_id": "TECH_SOCIETY",
+        "capabilities": ["facilitation"],
+        "languages": ["en"],
+        "willing_to_learn": ["digital_support"],
+        "available_slots": ["SAT_10", "SAT_11", "SAT_12"],
+        "max_contribution_slots": 3
+      },
+      {
+        "id": "AMIRA",
+        "name": "Amira",
+        "organisation_id": "ARABIC_ASSOC",
+        "capabilities": ["cultural_facilitation"],
+        "languages": ["ar", "en"],
+        "willing_to_learn": [],
+        "available_slots": ["SAT_11", "SAT_12"],
+        "max_contribution_slots": 2
+      },
+      {
+        "id": "MIA",
+        "name": "Mia",
+        "organisation_id": "REPAIR_GROUP",
+        "capabilities": ["repair"],
+        "languages": ["en"],
+        "willing_to_learn": [],
+        "available_slots": ["SAT_12", "SAT_13"],
+        "max_contribution_slots": 2
+      }
+    ],
+    "spaces": [
+      {
+        "id": "LIBRARY_ROOM",
+        "name": "Library Community Room",
+        "organisation_id": "LOCAL_LIBRARY",
+        "available_slots": ["SAT_10", "SAT_11", "SAT_12", "SAT_13"],
+        "capacity": 8,
+        "features": ["wheelchair_accessible", "wifi", "power", "tables"]
+      }
+    ],
+    "resources": [
+      {
+        "id": "LIBRARY_LAPTOPS",
+        "name": "Library laptops",
+        "organisation_id": "LOCAL_LIBRARY",
+        "quantity": 6,
+        "available_slots": ["SAT_10", "SAT_11", "SAT_12", "SAT_13"],
+        "shareable": true
+      },
+      {
+        "id": "REPAIR_KITS",
+        "name": "Repair kits",
+        "organisation_id": "REPAIR_GROUP",
+        "quantity": 2,
+        "available_slots": ["SAT_12", "SAT_13"],
+        "shareable": true
+      }
+    ]
+  },
+  "initiatives": [
+    {
+      "id": "BASIC_WORKSHOP",
+      "name": "Basic Digital Workshop",
+      "roles": [
+        {
+          "id": "DIGITAL_HELPER",
+          "label": "Digital support helper",
+          "required_capabilities": ["digital_support"],
+          "required_languages": [],
+          "allow_shared_person": false
+        },
+        {
+          "id": "FACILITATOR",
+          "label": "Workshop facilitator",
+          "required_capabilities": ["facilitation"],
+          "required_languages": [],
+          "allow_shared_person": false
+        }
+      ],
+      "venue": {
+        "minimum_capacity": 8,
+        "required_features": ["wheelchair_accessible", "wifi", "power"]
+      },
+      "resources": [{"resource_id": "LIBRARY_LAPTOPS", "quantity": 4}],
+      "candidate_start_slots": ["SAT_11"],
+      "duration_slots": 2
+    },
+    {
+      "id": "MULTILINGUAL_CLINIC",
+      "name": "Multilingual Digital Help Clinic",
+      "roles": [
+        {
+          "id": "DIGITAL_HELPER_1",
+          "label": "Digital support helper 1",
+          "required_capabilities": ["digital_support"],
+          "required_languages": [],
+          "allow_shared_person": false
+        },
+        {
+          "id": "DIGITAL_HELPER_2",
+          "label": "Digital support helper 2",
+          "required_capabilities": ["digital_support"],
+          "required_languages": [],
+          "allow_shared_person": false
+        },
+        {
+          "id": "DIGITAL_HELPER_3",
+          "label": "Digital support helper 3",
+          "required_capabilities": ["digital_support"],
+          "required_languages": [],
+          "allow_shared_person": false
+        },
+        {
+          "id": "ARABIC_SUPPORT",
+          "label": "Arabic-language support",
+          "required_capabilities": ["cultural_facilitation"],
+          "required_languages": ["ar"],
+          "allow_shared_person": false
+        }
+      ],
+      "venue": {
+        "minimum_capacity": 8,
+        "required_features": ["wheelchair_accessible", "wifi", "power"]
+      },
+      "resources": [{"resource_id": "LIBRARY_LAPTOPS", "quantity": 5}],
+      "candidate_start_slots": ["SAT_11"],
+      "duration_slots": 2
+    },
+    {
+      "id": "REPAIR_SHARE",
+      "name": "Repair and Skill-Share",
+      "roles": [
+        {
+          "id": "REPAIRER",
+          "label": "Repair specialist",
+          "required_capabilities": ["repair"],
+          "required_languages": [],
+          "allow_shared_person": false
+        },
+        {
+          "id": "REPAIR_FACILITATOR",
+          "label": "Repair session facilitator",
+          "required_capabilities": ["facilitation"],
+          "required_languages": [],
+          "allow_shared_person": false
+        }
+      ],
+      "venue": {
+        "minimum_capacity": 8,
+        "required_features": ["tables", "power"]
+      },
+      "resources": [{"resource_id": "REPAIR_KITS", "quantity": 2}],
+      "candidate_start_slots": ["SAT_12"],
+      "duration_slots": 2
+    }
+  ],
+  "actions": [
+    {
+      "id": "TRAIN_DIGITAL_HELPERS",
+      "name": "Train two digital helpers",
+      "cost": 2,
+      "preconditions": {
+        "person_capabilities": [
+          {"person_id": "LEO", "capability_id": "digital_training"}
+        ],
+        "willing_learners": [
+          {"person_id": "PRIYA", "capability_id": "digital_support"},
+          {"person_id": "SAM", "capability_id": "digital_support"}
+        ],
+        "space_availability": [
+          {"space_id": "LIBRARY_ROOM", "slots": ["SAT_10"]}
+        ]
+      },
+      "effects": [
+        {"type": "add_capability", "person_id": "PRIYA", "capability_id": "digital_support"},
+        {"type": "add_capability", "person_id": "SAM", "capability_id": "digital_support"}
+      ]
+    },
+    {
+      "id": "RECRUIT_HELPER_A",
+      "name": "Recruit external digital helper A",
+      "cost": 3,
+      "preconditions": {},
+      "effects": [
+        {
+          "type": "add_person",
+          "person": {
+            "id": "EXTERNAL_HELPER_A",
+            "name": "External Helper A",
+            "organisation_id": "LOCAL_LIBRARY",
+            "capabilities": ["digital_support"],
+            "languages": ["en"],
+            "willing_to_learn": [],
+            "available_slots": ["SAT_11", "SAT_12"],
+            "max_contribution_slots": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "RECRUIT_HELPER_B",
+      "name": "Recruit external digital helper B",
+      "cost": 3,
+      "preconditions": {},
+      "effects": [
+        {
+          "type": "add_person",
+          "person": {
+            "id": "EXTERNAL_HELPER_B",
+            "name": "External Helper B",
+            "organisation_id": "LOCAL_LIBRARY",
+            "capabilities": ["digital_support"],
+            "languages": ["en"],
+            "willing_to_learn": [],
+            "available_slots": ["SAT_11", "SAT_12"],
+            "max_contribution_slots": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "BORROW_TWO_LAPTOPS",
+      "name": "Borrow two additional laptops",
+      "cost": 1,
+      "preconditions": {},
+      "effects": [
+        {"type": "add_resource_quantity", "resource_id": "LIBRARY_LAPTOPS", "quantity": 2}
+      ]
+    }
+  ]
+}
