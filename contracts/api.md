@@ -5,7 +5,7 @@ The executable contract is defined by:
 - `backend/app/models.py` for community, initiative, action, and stable-ID models;
 - `backend/app/api_models.py` for solver and reasoning HTTP models;
 - `backend/app/project_models.py` for executable Project models;
-- `backend/app/resilience.py`, `backend/app/recompiler.py`, and `backend/app/frontier.py` for backend-only counterfactual analyses;
+- `backend/app/resilience.py`, `backend/app/recompiler.py`, and `backend/app/frontier.py` for the server-side counterfactual analysis engines;
 - `backend/app/auth/` for local identity, persisted membership, invitations and the installed auth router;
 - `backend/app/main.py` for integrated routes, statuses, CORS, and stable error translation.
 
@@ -19,6 +19,6 @@ All endpoints use JSON. Unknown fields are rejected. `UNKNOWN` is never converte
 
 `contracts/examples/api_examples.json` contains validated examples for the core solver and reasoning requests and responses. Examples demonstrate contract shape; runtime evidence comes only from actual endpoint execution.
 
-Authentication protects only the auth and community-administration routes named in its contract. The existing solver, reasoning, Project, stress-test, recompile and frontier routes are deliberately not role-gated at this checkpoint. Auth/community/invitation data is the only file-backed application state; Projects and proof context remain in memory, and none of the auth or M7 APIs has a current frontend workflow.
+Authentication protects only the auth and community-administration routes named in its contract. The existing solver, reasoning, Project, stress-test, recompile and frontier routes are deliberately not role-gated at this checkpoint. Auth/community/invitation data is the only file-backed application state; Projects and proof context remain in memory. The current frontend exposes auth through identity, Settings and Collaboration workflows and presents the three M7 analyses through the dedicated Resilience Lab without changing those persistence or authorisation boundaries.
 
 Any route, model, status, invariant, or stable-error change must update the executable contract, current reference, examples when affected, traceability, tests, and build status in the same change.

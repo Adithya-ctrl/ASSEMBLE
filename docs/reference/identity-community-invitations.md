@@ -18,7 +18,7 @@ Registration does not alter solver/compiler/explain/interventions/planner/Projec
 
 | Asset or boundary | Threat | Required control |
 | --- | --- | --- |
-| Password | Offline database disclosure or forged expensive hash parameters | 16-byte random salt; `scrypt-v1`, N=16384, r=8, p=1, dkLen=32, maxmem=64 MiB; bounded parser; constant-time digest comparison |
+| Password | Offline database disclosure or forged expensive hash parameters | Exact 16-byte random salt; canonical URL-safe Base64 `scrypt-v1`, N=16384, r=8, p=1, dkLen=32, maxmem=64 MiB; bounded parser; constant-time digest comparison |
 | Session | Fixation, theft, stale reuse | 256-bit opaque token; digest-only storage; HttpOnly SameSite cookie; rotation; expiry; revocation; password version |
 | Invitation | Database token leakage, guessing, replay | 256-bit opaque token; digest-only storage; recipient/community/role/inviter binding; transactional single-use lifecycle |
 | Community role | Horizontal or vertical escalation | Load current membership from storage on every request; explicit permission matrix; last-Administrator guard |
@@ -42,7 +42,7 @@ Out of scope for this localhost milestone: public internet deployment, account r
 | `audit_events` | immutable ID; event type; actor/subject/community/invitation references; timestamp; non-secret JSON metadata |
 | `schema_migrations` | applied migration version and timestamp |
 
-All timestamps are UTC epoch seconds. Usernames and emails compare case-insensitively after normalization. Display names preserve user casing. Avatar metadata is an optional `https://` URL of at most 512 characters; image bytes are not stored.
+All timestamps are UTC epoch seconds. Usernames and emails compare case-insensitively after normalization. Display names preserve user casing. Avatar metadata is an optional `https://` URL of at most 512 characters with a syntactically valid port when one is present; image bytes are not stored.
 
 ## Role and permission matrix
 
@@ -61,7 +61,7 @@ The latter two Project permissions are declarations for the control centre. This
 
 All request models reject unknown fields. Errors use the existing stable envelope `{"error":{"code":"STABLE_CODE","message":"Human-readable message.","details":{}}}`. Authentication is cookie-based; raw session tokens are never returned in JSON. The `assemble_session` cookie has an absolute seven-day lifetime; `now >= expires_at` is invalid and last-seen activity does not extend it. Successful signup, login and password change set a fresh cookie whose `Max-Age` and `Expires` match that persisted absolute expiry. Cookies are host-only, use path `/`, and omit `Domain`; logout clears the same name/path/security attributes even when the cookie is missing or stale. Auth and session responses use `Cache-Control: no-store`; the one-time invitation-token response also uses `Referrer-Policy: no-referrer`. Tokens never appear in URLs, logs or audit events.
 
-Unsafe cookie-authenticated routes require `application/json`. A present `Origin` must equal one entry in the strict `ASSEMBLE_AUTH_ALLOWED_BROWSER_ORIGINS` HTTP(S) allow-list; it is never inferred from `Host` or forwarded headers. The comma-separated setting defaults to `http://localhost:3000,http://127.0.0.1:3000`, accepts no more than 32 unique canonical origins or 4096 UTF-8 bytes, supports explicit non-default frontend ports, and fails installation closed for empty, wildcard, credential-bearing, path/query/fragment-bearing, malformed, non-canonical or oversized values. A present `Sec-Fetch-Site` must be `same-origin` or `none`; absent browser headers remain valid for non-browser local clients. The client rate-limit identity is `request.client.host`. `X-Forwarded-For`, `X-Forwarded-Host` and `Host` never broaden the origin contract.
+Unsafe cookie-authenticated routes require `application/json`. A present `Origin` must equal one entry in the strict `ASSEMBLE_AUTH_ALLOWED_BROWSER_ORIGINS` HTTP(S) allow-list; it is never inferred from `Host` or forwarded headers. The comma-separated setting defaults to `http://localhost:3000,http://127.0.0.1:3000`, accepts no more than 32 unique canonical origins or 4096 UTF-8 bytes, supports explicit non-default frontend ports, and fails installation closed for empty, wildcard, credential-bearing, path/query/fragment-bearing, malformed, non-canonical or oversized values. Duplicate `Origin`, `Sec-Fetch-Site`, `Content-Type`, or `Content-Length` fields fail closed before normalization. A present `Sec-Fetch-Site` must be `same-origin` or `none`; absent browser headers remain valid for non-browser local clients. The client rate-limit identity is `request.client.host`. `X-Forwarded-For`, `X-Forwarded-Host` and `Host` never broaden the origin contract.
 
 The auth request boundary matches complete namespace segments. `/api/auth`, `/api/communities` and `/api/invitations` are scoped; lookalikes such as `/api/authentic`, `/api/communities-v2` and `/api/invitations-old` fall through to the ordinary `404 ROUTE_NOT_FOUND` response.
 
@@ -129,7 +129,7 @@ The slice records account creation, login success/failure, logout, password chan
 
 Demoting an Administrator atomically revokes that inviter's still-pending invitations in the same community and records `INVITER_NO_LONGER_AUTHORISED`. This prevents a removed Administrator's unaccepted grants remaining live. The last-Administrator invariant is checked in the same immediate transaction.
 
-The default store is `backend/.data/auth.sqlite3`; `ASSEMBLE_AUTH_DB_PATH` selects a different file. On POSIX, a newly created auth database directory is mode `0700`; the database and any WAL/SHM files are mode `0600`. Startup fails closed when an existing configured database or its directory grants group/other access. Windows relies on the host ACL and requires a deployment-specific review. SQLite lock acquisition is bounded; a busy/locked store returns the stable `503 SERVICE_BUSY` envelope rather than leaking a driver exception.
+The default store is `backend/.data/auth.sqlite3`; `ASSEMBLE_AUTH_DB_PATH` selects a different file. On POSIX, the auth database directory must be exactly mode `0700`, and the database plus any WAL/SHM files must be regular files exactly mode `0600`; even a read-only `0400` database fails closed before SQLite opens it. Concurrent constructors serialize and boundedly retry initialization so they converge on one migration ledger. Windows relies on the host ACL and requires a deployment-specific review. Ordinary request-time SQLite lock acquisition remains bounded; a busy/locked store returns the stable `503 SERVICE_BUSY` envelope rather than leaking a driver exception.
 
 ## Current verification evidence
 

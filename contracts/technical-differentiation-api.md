@@ -1,10 +1,12 @@
 # Technical differentiation API contract
 
-This additive contract defines the integrated backend-only Structural Stress
-Test, Minimum-Disruption Recompiler, and one-action Capability Frontier.
-Existing core routes and schemas remain unchanged. The current frontend has no
-surface for these analyses, and the routes are deliberately not protected by
-the separate auth/community-role boundary.
+This additive contract defines the integrated Structural Stress Test,
+Minimum-Disruption Recompiler, and one-action Capability Frontier. Existing
+core routes and schemas remain unchanged. The current frontend presents these
+analyses through the dedicated Resilience Lab, which reconstructs canonical S0
+plus an authoritative verified catalyst path and cannot write counterfactual
+receipts into operational workflow or Project lineage. These routes remain
+outside the separate auth/community-role boundary.
 
 ## Shared trust boundary
 

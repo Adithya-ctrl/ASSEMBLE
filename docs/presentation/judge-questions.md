@@ -155,7 +155,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 ### What comes next?
 
-- **Direct:** First, independently accept the new local identity/Collaboration frontend and test the declared-data and explanation workflow with real community stakeholders. Then decide whether role-gating, Project persistence, tasks or larger portfolio solving is actually needed.
+- **Direct:** Next, test the declared-data and explanation workflow with real community stakeholders. Then decide whether role-gating, Project persistence, tasks or larger portfolio solving is actually needed.
 - **Deeper:** Each addition should preserve strict validation, source identity, explainability, accessibility/full parity, and cumulative gates.
 - **Evidence to show:** current non-goals and traceability process.
 - **Honest boundary:** This is a proposed sequence, not committed scope, funding, or delivery timing.

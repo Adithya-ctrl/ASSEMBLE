@@ -21,7 +21,7 @@ The integrated product additionally supports local accounts, persisted community
 
 ## Current value proposition
 
-ASSEMBLE replaces coordination guesswork inside its declared model with an inspectable proof chain. It shows the assignment behind a feasible claim, the facts behind a blocker, the cost and sufficiency of an intervention, the immutable state change, and the fresh proof behind a Project. Backend-only counterfactual analyses can then test canonical disruptions, recompile a minimum-change replacement, and compare each disclosed action's capacity effect. This lets a coordinator compare modelled options without treating the cheapest action as automatically valid.
+ASSEMBLE replaces coordination guesswork inside its declared model with an inspectable proof chain. It shows the assignment behind a feasible claim, the facts behind a blocker, the cost and sufficiency of an intervention, the immutable state change, and the fresh proof behind a Project. The Resilience Lab's bounded counterfactual analyses can then test canonical disruptions, recompile a minimum-change replacement, and compare each disclosed action's capacity effect. This lets a coordinator compare modelled options without treating the cheapest action as automatically valid.
 
 ## Boundaries on the claim
 

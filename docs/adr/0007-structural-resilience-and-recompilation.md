@@ -51,10 +51,17 @@ Project states.
   no-applicable-actions, and zero-unlock remain normal results where specified.
 - Frontier results are deliberately one-action comparisons; multi-action
   sequencing remains the planner's responsibility.
-- The analyses have no current frontend surface and are deliberately outside
-  the separate community-role authorisation boundary.
+- At this backend integration checkpoint, the analyses had no frontend surface
+  and were deliberately outside the separate community-role authorisation
+  boundary.
 - Auth-created SQLite communities are not linked to the authoritative
   fictional solver fixture.
+
+Integration note (2026-08-29): a later accepted Resilience Lab added a
+read-only frontend surface for all three analyses while preserving canonical
+source reconstruction, counterfactual-only receipts, the prohibition on
+operational or Project lineage, and the separate community-role authorisation
+boundary.
 
 ## Rejected alternatives
 
