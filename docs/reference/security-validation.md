@@ -6,7 +6,7 @@ ASSEMBLE is currently a localhost, deterministic fixture application. Its FastAP
 
 | Input | Trust decision |
 | --- | --- |
-| Community state used by analyse/explain | Strictly schema-validated bounded input; result applies only to that submitted state |
+| Community state used by analyse/explain | Strictly schema-validated bounded input; analyser calls cannot mutate the submitted community or initiative, and returned status is source-bound to that request |
 | Action catalogue used by reasoning routes | Must exactly match the disclosed server catalogue |
 | Project base community | Must exactly match authoritative fixture content and identity/lineage |
 | Project catalyst path | Required, ordered, unique, known, and bounded to 0–2 actions |
@@ -15,7 +15,7 @@ ASSEMBLE is currently a localhost, deterministic fixture application. Its FastAP
 | Auth request body | Actual received bytes bounded to 16 KiB; unsafe routes require JSON and strict models |
 | Password/session/invitation secrets | Scrypt password hashes and digest-only bearer storage; raw secrets excluded from persistence and ordinary responses |
 | Community permissions | Reload current persisted membership for every protected community-administration request; preserve the last Administrator |
-| Browser cookie boundary | HttpOnly, SameSite=Lax host-only cookie; present Origin must exactly match the bounded canonical allow-list; Host and forwarded headers never broaden it |
+| Browser cookie boundary | HttpOnly, SameSite=Lax host-only cookie; present Origin must exactly match the bounded canonical allow-list; duplicate security-sensitive Origin, Sec-Fetch-Site, Content-Type or Content-Length headers are rejected; Host and forwarded headers never broaden it |
 | Counterfactual analysis | Reconstruct from authoritative S0 and action catalogue; accept no client witness, patch, perturbation body or catalogue |
 | Resilience browser integration | Send untouched canonical demo S0 plus only the verified ordered catalyst path; strict runtime parsers, independent cancellation generations and source bindings reject stale or mismatched responses |
 
@@ -41,11 +41,13 @@ Unlock and planning are further restricted to unique non-repeating paths of one 
 
 Auth request bodies are capped at 16 KiB of actual received bytes. Username, email, password, profile, community, invitation and audit-list field limits are specified in [`identity-community-invitations.md`](identity-community-invitations.md). Stress-test catalogues contain at most 20 server-generated perturbations; the published solver-call ceilings are 601 for stress, 32 for recompile and 1056 for frontier.
 
+Stable identifiers contain 1–256 characters. Integer, boolean and literal fields use strict types: numeric strings, integral floats and booleans do not cross those boundaries by coercion.
+
 ## Fail-closed behavior
 
 - Missing referenced initiative resources remain non-relaxable integrity failures.
 - UNKNOWN never becomes infeasible or feasible and never carries a partial witness.
-- A decoded feasible witness that fails canonical replay is an internal contract breach returned as `500 ANALYSER_CONTRACT_ERROR`; it is not relabelled UNKNOWN.
+- An analyser may not mutate its submitted community or initiative. Its result must bind to the requested initiative and keep status, witness and objective fields consistent; malformed output is an internal contract breach returned as `500 ANALYSER_CONTRACT_ERROR`, never relabelled UNKNOWN.
 - An infeasible or unknown Project proof returns `409 PROJECT_PLAN_NOT_FEASIBLE` without a Project object.
 - A forged base state returns `409 COMMUNITY_STATE_MISMATCH` before Project transition or solving.
 - Reapplying an already-present additive effect returns a stable conflict instead of a false successful transition.
@@ -54,13 +56,15 @@ Auth request bodies are capped at 16 KiB of actual received bytes. Username, ema
 - The frontend schedules invalidation from the parsed session expiry, clears cached identity on `AUTHENTICATION_REQUIRED`, and fails closed while refreshing membership after an Administrator request returns `403`.
 - Invitation acceptance is recipient-bound and single-transaction; public token failures are deliberately indistinguishable.
 - Rate counters persist across restart and bound signup, login, password-change and invitation-acceptance attempts before expensive verification.
-- Forged auth database hash parameters, unsafe POSIX database permissions, oversized streamed bodies, non-JSON unsafe auth requests and invalid or rejected exact browser origins fail closed. Auth namespace scope is segment-aware, so lookalike paths fall through to ordinary 404 handling.
+- Noncanonical password-hash encodings or salts, invalid avatar ports, unsafe POSIX database permissions, oversized streamed bodies, non-JSON unsafe auth requests, duplicate sensitive headers, and invalid or rejected exact browser origins fail closed. Auth namespace scope is segment-aware, so lookalike paths fall through to ordinary 404 handling.
 - Counterfactual IDs are domain-separated from operational state IDs and cannot become Project lineage. `UNKNOWN` is explicit and excluded from decisive stress/frontier claims.
 - The Resilience Lab is read-only: a pending transition disables it, new source/path generations clear incompatible results, and neither visible analysis nor raw Judge evidence can update workflow community, transition or Project state.
 
 ## Current adversarial coverage
 
-Tests cover forged capabilities, resource quantity, space availability and lineage under the same `S0` label; whitespace-only metadata; omitted and extra fields; unknown, duplicate, overlong, insufficient, and already-applied paths; unsafe status/witness combinations and adversarial trace/objective facts; missing referenced IDs; collection overflow; numeric booleans and strings; wrong methods; and unknown routes. Auth coverage adds session fixation, rotation/revocation, secret-at-rest scans, recipient-bound invitation replay/races, last-Administrator and cross-community boundaries, persisted rate limits, restart recovery, locked-store translation, origin/fetch metadata, streamed-byte limits, and POSIX `0700`/`0600` enforcement. M7 coverage adds authoritative reconstruction, one-fact delta assertions, catalogue bounds, two-stage recompile invariants, incomplete-coverage frontier ambiguity and non-operational counterfactual identity.
+Tests cover forged capabilities, resource quantity, space availability and lineage under the same `S0` label; whitespace-only metadata; omitted and extra fields; unknown, duplicate, overlong, insufficient, and already-applied paths; strict scalar types and ID length; analyser input mutation, source/status binding and unsafe witness combinations; adversarial trace/objective facts; missing referenced IDs; collection overflow; wrong methods; and unknown routes. Auth coverage adds canonical hash/salt encoding, session fixation, rotation/revocation, avatar URL bounds, secret-at-rest scans, recipient-bound invitation replay/races, last-Administrator and cross-community boundaries, persisted rate limits, restart recovery, convergent concurrent cold-start, locked-store translation, exact origin and duplicate-header handling, streamed-byte limits, and exact POSIX `0700`/`0600` enforcement. M7 coverage adds authoritative reconstruction, one-fact delta assertions, catalogue bounds, two-stage recompile invariants, incomplete-coverage frontier ambiguity and non-operational counterfactual identity.
+
+The [absolute adversarial acceptance report](../ADVERSARIAL_ACCEPTANCE_REPORT.md) records the supporting executed matrix and its explicit gaps. It is not a production-security certification, and partial browser rows do not establish unexecuted permutations.
 
 ## Persistence and authorisation boundary
 

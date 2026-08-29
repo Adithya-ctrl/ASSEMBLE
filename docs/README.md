@@ -11,6 +11,8 @@ These pages describe the software as it behaves now. Historical decisions and su
 | Status | [`../BUILD_STATUS.md`](../BUILD_STATUS.md) | Current gates, blockers, and unauthorised or intentionally absent capabilities |
 | History | [`adr/`](adr/README.md) | Accepted architectural decisions and their consequences |
 
+The [`ADVERSARIAL_ACCEPTANCE_REPORT.md`](ADVERSARIAL_ACCEPTANCE_REPORT.md) is a supporting A–Z evidence ledger with completed and explicitly unverified rows. It does not replace `BUILD_STATUS.md` as the canonical owner of current release status or gate counts.
+
 ## Learn by completing a journey
 
 - [`tutorials/project-journeys.md`](tutorials/project-journeys.md): create a Project from Basic Workshop or the unlocked Clinic.
@@ -28,6 +30,7 @@ These pages describe the software as it behaves now. Historical decisions and su
 - [`how-to/integrate-auth-backend.md`](how-to/integrate-auth-backend.md): inspect the completed auth registration and configure its local SQLite boundary.
 - [`how-to/verify-changes.md`](how-to/verify-changes.md): run cumulative backend, frontend, browser, accessibility, and security gates.
 - [`how-to/audit-documentation.md`](how-to/audit-documentation.md): apply the automated and human documentation-drift gate.
+- [`ADVERSARIAL_ACCEPTANCE_REPORT.md`](ADVERSARIAL_ACCEPTANCE_REPORT.md): inspect the bounded adversarial evidence, defect ledger, browser matrix, and remaining release gaps.
 - [`how-to/contributing.md`](how-to/contributing.md): change the system without breaking its evidence chain.
 
 ## Look up exact behavior

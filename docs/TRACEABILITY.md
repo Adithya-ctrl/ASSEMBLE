@@ -4,16 +4,16 @@ This table maps current behavior to its implementation and verification owner. U
 
 | Current requirement | Implementation | Verification |
 | --- | --- | --- |
-| Strict domain and HTTP contracts | `backend/app/models.py`, `backend/app/api_models.py` | `backend/tests/test_models.py`, `backend/tests/test_api.py` |
+| Strict domain and HTTP contracts | `backend/app/models.py`, `backend/app/api_models.py` | `backend/tests/test_models.py`, `backend/tests/test_api.py`, `backend/tests/adversarial/models/`, `backend/tests/adversarial/http/` |
 | Canonically replayed feasible witness; empty non-feasible witness | `backend/app/api_models.py`, `backend/app/solver.py`, `backend/app/errors.py` | adversarial assignment/trace/objective cases in `backend/tests/test_solver.py`, `backend/tests/test_projects.py`, `backend/tests/test_api.py` |
 | Non-relaxable missing-reference integrity | `backend/app/compiler.py` | `backend/tests/test_solver.py`, `backend/tests/test_explain.py` |
-| Bounded explanation with factual role/resource/venue evidence | `backend/app/explain.py` | `backend/tests/test_explain.py`, `backend/tests/test_api.py` |
+| Bounded explanation with factual role/resource/venue evidence and analyser trust boundary | `backend/app/explain.py` | `backend/tests/test_explain.py`, `backend/tests/test_api.py`, `backend/tests/adversarial/witness_explain_unlock/` |
 | Minimum disclosed ordered depth-two unlock and matching plan | `backend/app/interventions.py`, `backend/app/planner.py` | 16-path and dependent `Z_TRAIN` → `A_RESOURCE` cases in `backend/tests/test_unlock.py`, `backend/tests/test_planner.py` |
 | Immutable, idempotency-safe transition | `backend/app/interventions.py` | `backend/tests/test_unlock.py`, `backend/tests/test_api.py` |
 | Stable validation/domain/framework error envelope | `backend/app/main.py` | `backend/tests/test_api.py` |
-| Local account, session, profile and password lifecycle | `backend/app/auth/models.py`, `backend/app/auth/crypto.py`, `backend/app/auth/service.py`, `backend/app/auth/api.py` | `backend/tests/auth/test_models.py`, `backend/tests/auth/test_crypto.py`, `backend/tests/auth/test_service.py`, `backend/tests/auth/test_api.py`, `backend/tests/auth/test_adversarial.py` |
+| Local account, session, profile and password lifecycle | `backend/app/auth/models.py`, `backend/app/auth/crypto.py`, `backend/app/auth/service.py`, `backend/app/auth/api.py` | `backend/tests/auth/`, `backend/tests/adversarial/auth/`, `backend/tests/adversarial/http/test_auth_route_contract_abuse.py` |
 | Persistent community roles, invitations and audit evidence | `backend/app/auth/migrations.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | `backend/tests/auth/test_storage.py`, `backend/tests/auth/test_service.py`, `backend/tests/auth/test_adversarial.py` |
-| Auth body/origin/cookie/rate/permission and segment-scope boundary | `backend/app/auth/boundary.py`, `backend/app/auth/config.py`, `backend/app/auth/api.py` | `backend/tests/auth/test_boundary.py`, `backend/tests/auth/test_config.py`, `backend/tests/auth/test_contract.py`, `backend/tests/auth/test_api.py`, `backend/tests/auth/test_adversarial.py` |
+| Auth body/origin/cookie/rate/permission and segment-scope boundary | `backend/app/auth/boundary.py`, `backend/app/auth/config.py`, `backend/app/auth/api.py` | `backend/tests/auth/`, `backend/tests/adversarial/auth/`, `backend/tests/adversarial/http/test_auth_route_contract_abuse.py` |
 | Installed auth router with non-auth routes deliberately outside role-gating | `backend/app/main.py`, `backend/app/auth/api.py` | integrated OpenAPI/API checks in `backend/tests/test_api.py` and `backend/tests/auth/test_api.py` |
 | Project creation from explicit 0–2 path | `backend/app/project_models.py`, `backend/app/projects.py`, `backend/app/main.py` | `backend/tests/test_projects.py`, `backend/tests/test_api.py` |
 | Authoritative base-state provenance | `backend/app/projects.py` | forged capability/quantity/availability/lineage cases in `backend/tests/test_api.py` |
@@ -33,9 +33,9 @@ This table maps current behavior to its implementation and verification owner. U
 | Semantic status, trace table, live journey updates and fresh Project-proof focus | `frontend/components/AssemblyProduct.tsx`, `frontend/components/shell/AppShell.tsx`, `frontend/components/project/ProjectProofView.tsx` | browser announcement, semantic-table and Project proof/Inspector replay |
 | Strict local-only UI preferences and session-only Judge Proof Mode | `frontend/lib/preferences.ts`, `frontend/lib/preferences.test.ts`, `frontend/lib/workflow-context.tsx`, `frontend/components/identity/SettingsPanel.tsx`, `frontend/app/(account)/settings/page.tsx` | valid/invalid/oversized/stale-version cookie and refresh replay; preference unit tests |
 | Civic Toybox shell, deliberate scenes and truthful empty states | `frontend/components/shell/AppShell.tsx`, `frontend/components/visual/`, `frontend/public/illustrations/`, `frontend/app/globals.css`, route presentation components | independent Civic Toybox review plus 1440/390 chronological-label, guest Collaboration, Project Proof empty-state, overflow and target checks |
-| High contrast, opaque focus, reduced motion, zoom and overflow | `frontend/app/globals.css` | production browser token/media/five-width/200%-reflow checks |
+| High contrast, opaque focus, reduced motion, zoom and overflow | `frontend/app/globals.css` | adversarial Chrome responsive, keyboard, theme, reduced-motion, 200%/available-300% reflow and 2560-pixel audits; declared cross-browser, 400% and screen-reader gaps |
 | Living current documentation and historical ADR separation | `docs/README.md`, `docs/how-to/contributing.md`, `docs/adr/` | documentation link and contract tests |
-| Documentation drift hard gate | `docs/how-to/audit-documentation.md`, `docs/how-to/verify-changes.md` | `backend/tests/test_documentation.py` plus human semantic replay |
+| Documentation drift hard gate | `docs/how-to/audit-documentation.md`, `docs/how-to/verify-changes.md` | `backend/tests/test_documentation.py`, `tests/adversarial/audit/`, human semantic replay and the supporting `docs/ADVERSARIAL_ACCEPTANCE_REPORT.md` ledger |
 | Factual presentation package | `docs/presentation/` | timing, link, ID, claim-boundary tests plus rehearsal against the running product |
 
 ## Numbered requirement coverage
@@ -67,18 +67,18 @@ The normative wording and acceptance criteria live in [`reference/requirements.m
 | FR-021 | `backend/app/analysis_state.py`, `backend/app/resilience.py`, `backend/app/main.py`, `frontend/components/resilience/ResilienceIntegration.tsx` | stress API tests plus production-browser Basic and trained Clinic Stress replay |
 | FR-022 | `backend/app/recompiler.py`, `backend/app/compiler.py`, `backend/app/main.py`, `frontend/components/resilience/ResilienceIntegration.tsx` | recompile API tests plus trained Basic Recovery replay |
 | FR-023 | `backend/app/frontier.py`, `backend/app/main.py`, `frontend/components/resilience/ResilienceIntegration.tsx`, `frontend/lib/resilience-integration.ts` | frontier API tests plus focused response/source-generation and production-browser provenance, stale-response, Judge-mode and no-mutation replay |
-| NFR-001 | solver, reasoning, transition, Project, and inspector evidence chain | cumulative backend tests and real-browser proof replay |
+| NFR-001 | solver, reasoning, transition, Project, and inspector evidence chain | cumulative backend, adversarial analyser/witness and real-browser proof replay |
 | NFR-002 | `backend/app/solver.py`, `backend/app/explain.py`, `backend/app/planner.py` | deterministic fixture matrix and bounded-search tests |
-| NFR-003 | strict bounded backend models and `backend/app/projects.py` | invalid type/ID/extra-field/collection-overflow/forged-state/path/status tests |
-| NFR-004 | `frontend/app/(product)/`, `frontend/components/`, `frontend/app/globals.css` | keyboard, focus, status, live, target, contrast, motion and desktop/mobile Lighthouse checks |
-| NFR-005 | `frontend/components/shell/AppShell.tsx`, `frontend/app/globals.css` | all-route 1440/768/390/320, 200% reflow, visible mobile navigation and overflow checks |
+| NFR-003 | strict bounded backend models and `backend/app/projects.py` | adversarial scalar/type/ID/extra-field/collection-overflow/forged-state/path/status tests |
+| NFR-004 | `frontend/app/(product)/`, `frontend/components/`, `frontend/app/globals.css` | Chrome keyboard, focus, semantic status/live, target, contrast, motion and accessibility-tree checks; full screen-reader and non-Chrome gaps remain declared |
+| NFR-005 | `frontend/components/shell/AppShell.tsx`, `frontend/app/globals.css` | responsive route matrix from 320 through 1920, 2560 audit, 200% and available 300% reflow, visible navigation and overflow checks; 400% remains unverified |
 | NFR-006 | loading state and bounded solver configuration | interactive journey and solver statistics |
 | NFR-007 | `backend/app/main.py`, `frontend/app/layout.tsx`, frontend workflow-generation/abort protections | stable-envelope API tests, provider-boundary unit check, Project route preservation, and all-route stale/duplicate-response replay |
-| NFR-008 | `docs/README.md`, `docs/how-to/audit-documentation.md` | deterministic docs gate and human semantic replay |
+| NFR-008 | `docs/README.md`, `docs/how-to/audit-documentation.md` | deterministic docs gate, adversarial read-only audit, supporting A–Z ledger and human semantic replay |
 | NFR-009 | local fixture/runtime boundaries | dependency/configuration inspection and absent-capability audit |
-| NFR-010 | local backend/frontend commands | full pytest, typecheck, lint, build, and browser journeys |
-| NFR-011 | `frontend/app/`, `frontend/components/`, `frontend/app/globals.css` | accepted M6 320/1440 proof parity plus Phase A 320/390/1440 identity, Settings, Collaboration and role-view checks with no overflow or effective sub-44px target |
-| NFR-012 | `backend/app/auth/config.py`, `backend/app/auth/crypto.py`, `backend/app/auth/boundary.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | secret-at-rest, fixation/rotation, persisted rate, streamed-byte, exact bounded origin allow-list, segment scope, restart, lock and POSIX mode tests in `backend/tests/auth/` |
+| NFR-010 | local backend/frontend commands | complete backend collection, frontend focused and adversarial TypeScript tests, typecheck, lint, production build, source audit and bounded browser journeys |
+| NFR-011 | `frontend/app/`, `frontend/components/`, `frontend/app/globals.css` | Chrome responsive route matrix, full marathon and supplemental parity batteries with explicit cross-browser and Cartesian gaps |
+| NFR-012 | `backend/app/auth/config.py`, `backend/app/auth/crypto.py`, `backend/app/auth/boundary.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | canonical hash/salt, fixation/rotation, persisted rate, actual-byte, duplicate-sensitive-header, exact origin, restart, convergent cold-start, lock and exact POSIX mode tests in `backend/tests/auth/` and `backend/tests/adversarial/auth/` |
 | NFR-013 | `backend/app/analysis_state.py`, `backend/app/resilience.py`, `backend/app/recompiler.py`, `backend/app/frontier.py`, `frontend/lib/resilience-integration.ts` | forged-base, mutation, ceiling, UNKNOWN, receipt-identity, witness and solver-call tests plus browser no-operational-mutation replay |
 
 ## User-story demonstration coverage

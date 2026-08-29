@@ -33,7 +33,7 @@ Human-facing availability labels are sorted chronologically from a copied array;
 - Only theme, contrast, motion, and preferred inventory view persist in the strict versioned `assemble_ui_preferences` cookie. Judge Proof Mode resets with the browser session and is never stored as account or security data.
 - Reduced-motion preference clamps animations and transitions and stops the loading spinner animation without hiding its label.
 - Long state, Project, and source-plan IDs wrap.
-- Content reflows at 200% zoom without two-dimensional document scrolling.
+- Content reflows at 200% zoom without two-dimensional document scrolling. The definitive automated Chrome environment also passed its measured 300% maximum; requested 400% zoom remains unverified because that environment clamped the request.
 - Supported widths are 1440, 1280, 768, 390, and 320 CSS pixels without horizontal document overflow.
 - Loading forms use disabled inputs and `aria-busy`; late responses cannot populate a changed Project form.
 
@@ -41,6 +41,8 @@ Human-facing availability labels are sorted chronologically from a copied array;
 
 At 320 and 1440 CSS pixels, the same controls, flows, editable fields, evidence, Project capabilities, and Resilience tasks must remain available. Layout and shortened label presentation may change; capability and evidence may not.
 
-The accepted cumulative replay traversed every product route at 320, 390 and 1440 and covered the full proof journey, Community parity, Projects, appearance preferences, Judge Proof Mode, guest and authenticated account menus, identity entry, Account/Security/Appearance Settings, Collaboration tasks, Administrator tabs, Viewer read-only access, token focus restoration, Resilience tasks and the shared product live region. It found no document overflow or effective interactive target below 44 by 44 CSS pixels; light, dark, light-high and dark-high surfaces retained strong measured contrast. Earlier desktop/mobile Lighthouse accessibility snapshots scored 100 with 34 passed audits and no failed audits. These are local implementation checks, not formal WCAG conformance, real-user validation, public-deployment evidence or an impact claim.
+The definitive Chrome replay covered every route across the recorded responsive matrix from 320 through 1920 CSS pixels plus a separate 2560-pixel audit. Completed rows included the proof journey, Community parity, Projects, appearance preferences, Judge Proof Mode, guest and authenticated account menus, identity entry, Account/Security/Appearance Settings, Collaboration tasks, Administrator controls, invited-role views, token focus restoration, Resilience tasks and the shared product live region. Those rows found no document overflow or effective interactive target below 44 by 44 CSS pixels; light, dark and high-contrast surfaces retained readable contrast, and keyboard/focus/accessibility-tree checks passed.
+
+This evidence is bounded. Firefox and WebKit/Safari, requested 400% zoom, a full screen-reader product journey, and the complete state × viewport × theme screenshot Cartesian product were not verified. The completed Chrome rows and earlier Lighthouse snapshots are local implementation checks, not formal WCAG conformance, cross-browser acceptance, real-user validation, public-deployment evidence or an impact claim. See the [supporting adversarial evidence ledger](../ADVERSARIAL_ACCEPTANCE_REPORT.md) for the executed rows and gaps.
 
 Use [`../how-to/verify-changes.md`](../how-to/verify-changes.md) for the browser acceptance procedure.

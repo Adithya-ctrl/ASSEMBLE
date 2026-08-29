@@ -89,6 +89,8 @@ def test_reconciled_current_contracts_have_no_drift() -> None:
 def test_audit_has_no_write_or_browser_side_effects() -> None:
     # The audit is deliberately source-only.  This check documents the
     # allowed artifact boundary for reviewers and catches accidental expansion
-    # of the test's own scope.
-    assert str(ROOT).endswith("assemble-adversarial-gauntlet")
+    # of the test's own scope without coupling the artifact to a temporary
+    # worktree name.
+    assert ROOT == HERE.parents[2]
+    assert (ROOT / "tests/adversarial/audit/run_readonly_audit.py").is_file()
     assert HERE.is_dir()

@@ -29,6 +29,13 @@ npm run build
 
 Lint must finish with zero errors and zero warnings.
 
+From the repository root, run the pure adversarial frontend harness with the same lockfile-identical frontend runtime:
+
+```bash
+cd frontend
+node --import tsx --test ../tests/adversarial/browser-harness/*.test.ts
+```
+
 ## Real-browser journey
 
 Run the real FastAPI backend and the production Next.js build. Use a clean page state.
@@ -78,6 +85,17 @@ Then replay `/resilience` against the real backend: Basic S0 Stress, S0 Capabili
 Verify stable rejection for forged base capabilities, quantities, availability, lineage, unknown references, duplicate or overlong paths, omitted `catalyst_path`, extra client proof fields, whitespace-only metadata, infeasible paths, and UNKNOWN results. Error responses must not contain a Project object.
 
 Record current results in [`../../BUILD_STATUS.md`](../../BUILD_STATUS.md). Builder evidence is not independent acceptance.
+
+## Absolute adversarial evidence
+
+Use [`../ADVERSARIAL_ACCEPTANCE_REPORT.md`](../ADVERSARIAL_ACCEPTANCE_REPORT.md) as the supporting A–Z ledger, not as a substitute for the canonical status in `BUILD_STATUS.md`. Run the source-only audit and wrapper:
+
+```bash
+python3 tests/adversarial/audit/run_readonly_audit.py
+backend/.venv/bin/pytest -q tests/adversarial/audit/test_readonly_audit.py
+```
+
+The completed Chrome marathon, responsive matrix, ultrawide audit and supplemental batteries prove only their recorded rows. Exhaustive acceptance additionally requires the report's outstanding cross-browser, 400% zoom, full Cartesian visual, full screen-reader, mounted async/parser/RBAC/race, named boss-fight, mutation and randomized-browser work. Do not report those gaps as passed or infer a release statement from focused or pure-model tests.
 
 ## Documentation drift gate
 

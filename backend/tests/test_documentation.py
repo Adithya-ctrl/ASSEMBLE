@@ -47,6 +47,7 @@ def test_docs_index_exposes_diat_axis_and_governance_roles() -> None:
     assert "UI_DIRECTION.md" in index
     assert "identity-community-invitations.md" in index
     assert "technical-differentiation.md" in index
+    assert "ADVERSARIAL_ACCEPTANCE_REPORT.md" in index
 
 
 def test_api_reference_matches_current_openapi_routes() -> None:
@@ -119,7 +120,14 @@ def test_project_security_contract_and_current_status_are_documented() -> None:
         assert code in security
     assert "P0-A Project and integrity hardening is independently accepted" in status
     assert "Phase A independently connects local authentication" in status
-    assert "279 passed" in status
+    for current_evidence in (
+        "1,975/1,975 passed",
+        "40/40",
+        "17/17",
+        "37-step Chrome marathon passed",
+        "HOLD — not release-accepted",
+    ):
+        assert current_evidence in status
 
     for ceiling in (
         "Organisations in a community | 32",
@@ -154,6 +162,10 @@ def test_current_docs_do_not_preserve_known_superseded_contract_history() -> Non
         "Authentication and role-based access control are not current capabilities",
         "It is executable only after the control centre registers the router",
         "After reviewing and accepting the isolated slice",
+        "none of the auth or M7 APIs has a current frontend workflow",
+        "The current frontend has no surface for these analyses",
+        "Backend-only counterfactual analyses",
+        "First, independently accept the new local identity/Collaboration frontend",
     ):
         assert stale_marker not in combined
 
@@ -244,8 +256,10 @@ def test_documentation_audit_and_full_parity_are_wired() -> None:
     verify = (DOCS / "how-to" / "verify-changes.md").read_text(encoding="utf-8")
     requirements = (DOCS / "reference" / "requirements.md").read_text(encoding="utf-8")
     accessibility = (DOCS / "reference" / "accessibility.md").read_text(encoding="utf-8")
+    report = (DOCS / "ADVERSARIAL_ACCEPTANCE_REPORT.md").read_text(encoding="utf-8")
 
     assert "how-to/audit-documentation.md" in index
+    assert "ADVERSARIAL_ACCEPTANCE_REPORT.md" in index
     assert "Layer A" in audit and "Layer B" in audit
     assert "tutorials/video-demo-script.md" not in audit
     assert "presentation/project-overview.md" in audit
@@ -253,7 +267,23 @@ def test_documentation_audit_and_full_parity_are_wired() -> None:
         assert source in audit
     assert "audit-documentation.md" in contributing
     assert "audit-documentation.md" in verify
+    assert "ADVERSARIAL_ACCEPTANCE_REPORT.md" in audit
+    assert "ADVERSARIAL_ACCEPTANCE_REPORT.md" in verify
     assert "must not be accepted, committed, or pushed" in contributing
+
+    status = (ROOT / "BUILD_STATUS.md").read_text(encoding="utf-8")
+    gap_docs = "\n".join((status, audit, verify, accessibility)).lower()
+    for gap in (
+        "Firefox and WebKit/Safari",
+        "400% zoom",
+        "screen-reader",
+        "Mutation testing",
+        "randomized browser monkey",
+    ):
+        assert gap in report
+        assert gap.lower() in gap_docs
+    assert "Status: **HOLD — NOT RELEASE-ACCEPTED**" in report
+    assert "Open product-code defects: none within the tested source and completed rows" in report
 
     parity_sources = "\n".join((requirements, accessibility, audit))
     for evidence in (
@@ -326,6 +356,9 @@ def test_integrated_auth_and_m7_boundaries_are_current_and_traceable() -> None:
         "Resilience Lab",
         "remain in memory",
         "counterfactual",
+        "duplicate security-sensitive",
+        "concurrent cold start",
+        "1–256",
     ):
         assert contract in combined
     assert "backend/.data/" in gitignore
