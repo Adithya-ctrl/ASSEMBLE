@@ -1,0 +1,9 @@
+diff --git a/backend/app/main.py b/backend/app/main.py
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -12,0 +13 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
++from app.auth.api import install_auth_api
+@@ -306,0 +308,3 @@
++
++
++install_auth_api(app)

@@ -1,0 +1,121 @@
+"""Small SQLite adapter with explicit transaction ownership."""
+
+from __future__ import annotations
+
+import os
+import sqlite3
+import stat
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
+
+from app.auth.migrations import apply_migrations
+
+
+class StorageBusyError(RuntimeError):
+    """Raised when SQLite cannot obtain its bounded local lock."""
+
+
+class StoragePermissionError(RuntimeError):
+    """Raised when durable auth state has unsafe POSIX permissions."""
+
+
+def _is_busy(exc: sqlite3.OperationalError) -> bool:
+    code = getattr(exc, "sqlite_errorcode", None)
+    return code in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED} or "locked" in str(exc).casefold()
+
+
+class AuthStore:
+    def __init__(self, database_path: Path, *, now: int) -> None:
+        self.database_path = Path(database_path)
+        self._prepare_private_path()
+        connection = self.connect()
+        try:
+            try:
+                apply_migrations(connection, now)
+            except sqlite3.OperationalError as exc:
+                if _is_busy(exc):
+                    raise StorageBusyError("auth storage is busy") from exc
+                raise
+        finally:
+            connection.close()
+
+    def _prepare_private_path(self) -> None:
+        parent = self.database_path.parent
+        parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+        if os.name != "posix":
+            return
+        parent_mode = stat.S_IMODE(parent.stat().st_mode)
+        if parent_mode & 0o077:
+            raise StoragePermissionError(
+                f"auth database directory must not grant group/other access: {parent}"
+            )
+        if self.database_path.exists():
+            file_stat = os.lstat(self.database_path)
+            if not stat.S_ISREG(file_stat.st_mode) or stat.S_IMODE(file_stat.st_mode) & 0o077:
+                raise StoragePermissionError(
+                    "existing auth database must be a private regular file with mode 0600"
+                )
+            return
+        descriptor = os.open(
+            self.database_path,
+            os.O_CREAT | os.O_EXCL | os.O_WRONLY,
+            0o600,
+        )
+        os.close(descriptor)
+
+    def _secure_runtime_files(self) -> None:
+        if os.name != "posix":
+            return
+        for suffix in ("", "-wal", "-shm"):
+            path = Path(f"{self.database_path}{suffix}")
+            if not path.exists():
+                continue
+            mode = stat.S_IMODE(os.lstat(path).st_mode)
+            if mode & 0o077:
+                raise StoragePermissionError(
+                    f"auth database runtime file must have mode 0600: {path}"
+                )
+
+    def connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.database_path, timeout=5.0, isolation_level=None)
+        try:
+            connection.row_factory = sqlite3.Row
+            connection.execute("PRAGMA foreign_keys=ON")
+            connection.execute("PRAGMA busy_timeout=5000")
+            connection.execute("PRAGMA journal_mode=WAL")
+            self._secure_runtime_files()
+            return connection
+        except sqlite3.OperationalError as exc:
+            connection.close()
+            if _is_busy(exc):
+                raise StorageBusyError("auth storage is busy") from exc
+            raise
+        except BaseException:
+            connection.close()
+            raise
+
+    @contextmanager
+    def transaction(self, *, immediate: bool = False) -> Iterator[sqlite3.Connection]:
+        connection = self.connect()
+        try:
+            try:
+                connection.execute("BEGIN IMMEDIATE" if immediate else "BEGIN")
+            except sqlite3.OperationalError as exc:
+                if _is_busy(exc):
+                    raise StorageBusyError("auth storage is busy") from exc
+                raise
+            self._secure_runtime_files()
+            yield connection
+            connection.commit()
+            self._secure_runtime_files()
+        except sqlite3.OperationalError as exc:
+            connection.rollback()
+            if _is_busy(exc):
+                raise StorageBusyError("auth storage is busy") from exc
+            raise
+        except BaseException:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
