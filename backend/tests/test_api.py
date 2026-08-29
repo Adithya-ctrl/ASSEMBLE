@@ -614,8 +614,9 @@ def test_solver_backed_routes_translate_analyser_contract_breaches(
     assert "project" not in response.json()
 
 
-def test_openapi_contains_frozen_core_routes() -> None:
+def test_openapi_contains_frozen_core_and_additive_technical_routes() -> None:
     assert set(app.openapi()["paths"]) == {
         "/api/health", "/api/demo", "/api/analyse", "/api/explain",
         "/api/unlock", "/api/plan", "/api/transition", "/api/projects/from-plan",
+        "/api/stress-test", "/api/recompile", "/api/frontier",
     }

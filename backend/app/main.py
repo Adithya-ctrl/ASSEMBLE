@@ -14,18 +14,26 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.api_models import (
     AnalyseRequest,
     AnalyseResponse,
+    CapabilityFrontierRequest,
+    CapabilityFrontierResponse,
     ExplainRequest,
     ExplainResponse,
     PlanRequest,
     PlanResponse,
+    RecompileRequest,
+    RecompileResponse,
+    StressTestRequest,
+    StressTestResponse,
     TransitionRequest,
     TransitionResponse,
     UnlockRequest,
     UnlockResponse,
 )
+from app.analysis_state import AuthoritativeBaseMismatch, InvalidCatalystPath
 from app.errors import AnalyserContractError
 from app.explain import explain_infeasibility
 from app.fixture import fresh_demo_fixture, load_demo_fixture
+from app.frontier import evaluate_capability_frontier
 from app.interventions import (
     ActionAlreadyApplied,
     AlreadyFeasible,
@@ -39,6 +47,16 @@ from app.models import CatalystAction, InitiativeBlueprint
 from app.planner import NoPlanFound, plan_catalyst
 from app.project_models import CreateProjectRequest, CreateProjectResponse
 from app.projects import CommunityStateMismatch, ProjectPlanNotFeasible, create_project_from_plan
+from app.recompiler import (
+    InvalidPerturbation as RecompilerInvalidPerturbation,
+    recompile_minimum_disruption,
+)
+from app.resilience import (
+    BaselineNotFeasible,
+    InvalidPerturbation as StressInvalidPerturbation,
+    PerturbationCatalogueTooLarge,
+    run_stress_test,
+)
 from app.solver import (
     analyse_compiled_initiatives,
     build_compile_summary_from_compiled,
@@ -185,6 +203,50 @@ def _translate_reasoning_error(exc: Exception) -> ApiProblem:
     return ApiProblem(422, "INVALID_REQUEST", str(exc))
 
 
+def _validate_catalyst_path_references(
+    catalyst_path: Sequence[str],
+    actions: Sequence[CatalystAction],
+) -> None:
+    known_action_ids = {action.id for action in actions}
+    unknown_action_ids = [
+        action_id for action_id in catalyst_path if action_id not in known_action_ids
+    ]
+    if unknown_action_ids:
+        raise ApiProblem(
+            404,
+            "INVALID_REFERENCE",
+            "The catalyst path references an unknown action.",
+            {"action_id": unknown_action_ids[0]},
+        )
+
+
+def _translate_technical_analysis_error(exc: Exception) -> ApiProblem:
+    if isinstance(exc, AuthoritativeBaseMismatch):
+        return ApiProblem(
+            409,
+            "COMMUNITY_STATE_MISMATCH",
+            "Counterfactual analysis must begin from the authoritative community fixture.",
+            {"expected_state_id": load_demo_fixture().community.state_id},
+        )
+    if isinstance(exc, BaselineNotFeasible):
+        return ApiProblem(409, "BASELINE_NOT_FEASIBLE", str(exc))
+    if isinstance(exc, PerturbationCatalogueTooLarge):
+        return ApiProblem(422, "PERTURBATION_CATALOGUE_TOO_LARGE", str(exc))
+    if isinstance(exc, (StressInvalidPerturbation, RecompilerInvalidPerturbation)):
+        return ApiProblem(404, "INVALID_PERTURBATION", str(exc))
+    if isinstance(exc, InvalidCatalystPath):
+        return ApiProblem(422, "INVALID_REQUEST", str(exc))
+    if isinstance(exc, TransitionError):
+        return ApiProblem(409, "TRANSITION_NOT_ALLOWED", str(exc))
+    if isinstance(exc, AnalyserContractError):
+        return ApiProblem(
+            500,
+            "ANALYSER_CONTRACT_ERROR",
+            "The solver analyser returned an invalid result.",
+        )
+    return ApiProblem(422, "INVALID_REQUEST", str(exc))
+
+
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "solver": "ortools-cp-sat"}
@@ -304,3 +366,77 @@ def create_project(request: CreateProjectRequest) -> CreateProjectResponse:
         ) from exc
     except (ActionAlreadyApplied, AnalyserContractError, TransitionError, ValueError) as exc:
         raise _translate_reasoning_error(exc) from exc
+
+
+@app.post("/api/stress-test", response_model=StressTestResponse)
+def stress_test(request: StressTestRequest) -> StressTestResponse:
+    fixture = fresh_demo_fixture()
+    initiative = _initiative(request.initiative_id)
+    _validate_catalyst_path_references(request.catalyst_path, fixture.actions)
+    try:
+        return run_stress_test(
+            request,
+            initiative,
+            fixture.community,
+            fixture.actions,
+        )
+    except (
+        AnalyserContractError,
+        AuthoritativeBaseMismatch,
+        BaselineNotFeasible,
+        InvalidCatalystPath,
+        PerturbationCatalogueTooLarge,
+        StressInvalidPerturbation,
+        TransitionError,
+        ValueError,
+    ) as exc:
+        raise _translate_technical_analysis_error(exc) from exc
+
+
+@app.post("/api/recompile", response_model=RecompileResponse)
+def recompile(request: RecompileRequest) -> RecompileResponse:
+    fixture = fresh_demo_fixture()
+    initiative = _initiative(request.initiative_id)
+    _validate_catalyst_path_references(request.catalyst_path, fixture.actions)
+    try:
+        return recompile_minimum_disruption(
+            request,
+            initiative,
+            fixture.community,
+            fixture.actions,
+        )
+    except (
+        AnalyserContractError,
+        AuthoritativeBaseMismatch,
+        BaselineNotFeasible,
+        InvalidCatalystPath,
+        PerturbationCatalogueTooLarge,
+        RecompilerInvalidPerturbation,
+        StressInvalidPerturbation,
+        TransitionError,
+        ValueError,
+    ) as exc:
+        raise _translate_technical_analysis_error(exc) from exc
+
+
+@app.post("/api/frontier", response_model=CapabilityFrontierResponse)
+def capability_frontier(
+    request: CapabilityFrontierRequest,
+) -> CapabilityFrontierResponse:
+    fixture = fresh_demo_fixture()
+    _validate_catalyst_path_references(request.catalyst_path, fixture.actions)
+    try:
+        return evaluate_capability_frontier(
+            request,
+            fixture.initiatives,
+            fixture.community,
+            fixture.actions,
+        )
+    except (
+        AnalyserContractError,
+        AuthoritativeBaseMismatch,
+        InvalidCatalystPath,
+        TransitionError,
+        ValueError,
+    ) as exc:
+        raise _translate_technical_analysis_error(exc) from exc

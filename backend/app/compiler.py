@@ -14,7 +14,7 @@ by the API, the explanation worker, and tests without duplicating semantics.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, Sequence
+from typing import Iterable, Literal, Sequence
 
 from ortools.sat.python import cp_model
 
@@ -52,6 +52,9 @@ REQUIREMENT_GROUPS = frozenset(
         MAXIMUM_CONTRIBUTION,
     }
 )
+
+PLANNING_BURDEN_DISTINCT_PERSON_WEIGHT = 10
+PLANNING_BURDEN_ASSIGNMENT_WEIGHT = 2
 
 
 def normalise_relax_groups(groups: Iterable[str] | None) -> frozenset[str]:
@@ -141,6 +144,25 @@ class CompiledInitiative:
         return self.start_vars
 
 
+def planning_burden_expression(compiled: CompiledInitiative) -> cp_model.LinearExpr:
+    """Return the one authoritative lower-is-better planning burden expression."""
+
+    return (
+        PLANNING_BURDEN_DISTINCT_PERSON_WEIGHT * sum(compiled.used_person_vars.values())
+        + PLANNING_BURDEN_ASSIGNMENT_WEIGHT * sum(compiled.assignment_vars.values())
+    )
+
+
+def planning_burden_value(assignments: Iterable[tuple[str, str]]) -> int:
+    """Evaluate the compiler burden for decoded ``(role, person)`` pairs."""
+
+    pairs = tuple(assignments)
+    return (
+        PLANNING_BURDEN_DISTINCT_PERSON_WEIGHT * len({person_id for _, person_id in pairs})
+        + PLANNING_BURDEN_ASSIGNMENT_WEIGHT * len(pairs)
+    )
+
+
 def _sorted_people(community: CommunityState) -> list[PersonBlock]:
     return sorted(community.people, key=lambda person: person.id)
 
@@ -180,6 +202,7 @@ def compile_initiative(
     *,
     relax_groups: Iterable[str] | None = None,
     relaxed_groups: Iterable[str] | None = None,
+    objective_mode: Literal["burden", "none"] = "burden",
 ) -> CompiledInitiative:
     """Compile one initiative into a genuine OR-Tools CP-SAT model.
 
@@ -378,15 +401,7 @@ def compile_initiative(
         model.AddMaxEquality(used, assignments)
         used_person_vars[person_id] = used
 
-    # Preference violations are not declared by the frozen P0 schema, so the
-    # third objective term is exactly zero.  The remaining terms are the
-    # specified planning burden objective.
-    model.Minimize(
-        10 * sum(used_person_vars.values())
-        + 2 * sum(assignment_vars.values())
-    )
-
-    return CompiledInitiative(
+    compiled = CompiledInitiative(
         community=community,
         initiative=initiative,
         model=model,
@@ -399,6 +414,14 @@ def compile_initiative(
         occupied_slots_by_start=occupied_slots_by_start,
         relaxed_groups=groups,
     )
+    if objective_mode == "burden":
+        # Preference violations are not declared by the frozen P0 schema, so
+        # the third objective term is exactly zero. The default remains the
+        # accepted planning burden objective.
+        model.Minimize(planning_burden_expression(compiled))
+    elif objective_mode != "none":
+        raise ValueError("objective_mode must be 'burden' or 'none'")
+    return compiled
 
 
 def compile_model(

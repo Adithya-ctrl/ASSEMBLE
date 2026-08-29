@@ -25,6 +25,7 @@ from app.compiler import (
     VENUE_CAPACITY,
     VENUE_FEATURE,
     compile_initiative,
+    planning_burden_value,
 )
 from app.errors import AnalyserContractError
 from app.models import (
@@ -78,6 +79,45 @@ def _objective_value(solver: cp_model.CpSolver) -> int | None:
         return int(round(solver.ObjectiveValue()))
     except (RuntimeError, ValueError):
         return None
+
+
+def solver_stats(solver: cp_model.CpSolver) -> SolverStats:
+    """Return the canonical non-negative public solver statistics."""
+
+    return SolverStats(
+        branches=max(0, int(solver.NumBranches())),
+        conflicts=max(0, int(solver.NumConflicts())),
+        wall_time_seconds=max(0.0, float(solver.WallTime())),
+    )
+
+
+def solver_status_from_cp_sat(status: int) -> SolverStatus:
+    """Public additive wrapper around the accepted CP-SAT status mapping."""
+
+    return _status_from_cp_sat(status)
+
+
+def configure_solver(
+    solver: cp_model.CpSolver,
+    *,
+    time_limit_seconds: float,
+    num_search_workers: int,
+    random_seed: int,
+) -> None:
+    """Public additive wrapper around the accepted deterministic configuration."""
+
+    _configure_solver(
+        solver,
+        time_limit_seconds=time_limit_seconds,
+        num_search_workers=num_search_workers,
+        random_seed=random_seed,
+    )
+
+
+def integral_objective_value(solver: cp_model.CpSolver) -> int | None:
+    """Public additive wrapper around the accepted integral objective decoder."""
+
+    return _objective_value(solver)
 
 
 def _selected_assignment_vars(
@@ -423,7 +463,7 @@ def validate_analysis_witness(
     if actual_payload != expected_payload:
         return False
 
-    expected_objective = 10 * len(set(assignment_by_role.values())) + 2 * len(initiative.roles)
+    expected_objective = planning_burden_value(assignment_by_role.items())
     return result.objective_value == expected_objective
 
 
@@ -471,11 +511,7 @@ def solve_compiled(
     )
     status_code = cp_solver.Solve(compiled.model)
     status = _status_from_cp_sat(status_code)
-    stats = SolverStats(
-        branches=max(0, int(cp_solver.NumBranches())),
-        conflicts=max(0, int(cp_solver.NumConflicts())),
-        wall_time_seconds=max(0.0, float(cp_solver.WallTime())),
-    )
+    stats = solver_stats(cp_solver)
 
     if status not in (SolverStatus.OPTIMAL, SolverStatus.FEASIBLE):
         return _unknown_result(compiled.initiative.id, stats) if status is SolverStatus.UNKNOWN else InitiativeAnalysisResult(

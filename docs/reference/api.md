@@ -25,6 +25,9 @@ Framework 404 and 405 responses use the same envelope. Malformed request bodies 
 | POST | `/api/unlock` | 200 | Find the minimum sufficient executable ordered path, limited to two actions |
 | POST | `/api/plan` | 200 | Trace a bounded depth-two catalyst path |
 | POST | `/api/transition` | 200 | Apply one authoritative action to a copied state and return its diff |
+| POST | `/api/stress-test` | 200 | Analyse the complete canonical structural-perturbation catalogue without changing operational lineage |
+| POST | `/api/recompile` | 200 | Find a proven minimum-disruption replacement for one canonical perturbation |
+| POST | `/api/frontier` | 200 | Compare each authoritative action independently as a one-action capability frontier |
 | POST | `/api/projects/from-plan` | 201 | Replay a 0–2 action plan, solve it, and derive an executable Project |
 
 ## Solver result invariant
@@ -45,11 +48,16 @@ Framework 404 and 405 responses use the same envelope. Malformed request bodies 
 | `TRANSITION_NOT_ALLOWED` | 409 | Action precondition or transition invariant failed |
 | `NO_UNLOCK_PATH` | 422 | No disclosed ordered action path of depth at most two unlocks the initiative |
 | `NO_PLAN_FOUND` | 422 | Bounded planner found no successor proof |
-| `COMMUNITY_STATE_MISMATCH` | 409 | Project base differs from the authoritative fixture |
+| `COMMUNITY_STATE_MISMATCH` | 409 | Project or counterfactual-analysis base differs from the authoritative fixture |
 | `PROJECT_PLAN_NOT_FEASIBLE` | 409 | Replayed Project plan is INFEASIBLE or UNKNOWN |
+| `BASELINE_NOT_FEASIBLE` | 409 | Stress or recompile baseline is not decisively feasible |
+| `INVALID_PERTURBATION` | 404 | Requested perturbation is not in the server-generated canonical catalogue |
+| `PERTURBATION_CATALOGUE_TOO_LARGE` | 422 | Complete canonical stress catalogue exceeds the hard ceiling of 20; no partial metric is returned |
 | `ROUTE_NOT_FOUND` | 404 | API route does not exist |
 | `METHOD_NOT_ALLOWED` | 405 | Method is not allowed on the route |
 | `ANALYSER_CONTRACT_ERROR` | 500 | An internal analyser returned a result that violates its contract |
 | `HTTP_ERROR` | framework status | A non-404/405 framework HTTP failure was normalized to the stable envelope |
 
 See [`project-contract.md`](project-contract.md) for the Project endpoint trust boundary.
+
+No-applicable-actions and zero-unlock frontier outcomes are ordinary HTTP 200 analyses. Perturbed or recompiled `INFEASIBLE` and `UNKNOWN` outcomes are also returned as analysis responses, not transport errors.
