@@ -1,0 +1,43 @@
+.proofNeeded,
+.unavailable {
+  display: grid;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.proofNeeded {
+  max-width: 720px;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border-radius: 8px;
+  background: var(--surface-subtle);
+}
+
+.proofNeeded span,
+.unavailable span {
+  max-width: 68ch;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.proofNeeded a,
+.unavailable a {
+  min-height: 44px;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 4px;
+  color: var(--accent-cobalt-dark);
+  font-weight: 740;
+}
+
+.unavailable {
+  max-width: 680px;
+  margin-block: clamp(50px, 9vw, 110px);
+}
+
+.unavailable h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 3.1rem);
+  letter-spacing: -0.04em;
+}

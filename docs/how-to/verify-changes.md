@@ -45,7 +45,9 @@ Run the real FastAPI backend and the production Next.js build. Use a clean page 
 10. Hard-refresh Project Proof and confirm the in-memory Project truthfully resets to its empty state rather than being restored from browser storage.
 11. Reset and confirm all downstream evidence, Project state, hashes, and relationship emphasis clear across Projects and Project Proof.
 
-The planning journey verifies the proof workflow only. Separately replay the current identity UI: guest account menu and Appearance; signup/login; session refresh and scheduled expiry; revoked-session invalidation without stale signed-in controls; profile and password forms; 204 logout; Collaboration list/create/accept; Administrator members/invitations/audit; one-time token removal; `403` role-loss refresh to a non-Administrator view; stable 401/403/404/409/429/503 presentation; and restart persistence. Confirm account-menu actions use the product shell's single application announcement, persisted roles do not gate the planning demo, and no stress-test, recompile, or frontier product route is claimed.
+The planning journey verifies the proof workflow only. Separately replay the current identity UI: guest account menu and Appearance; signup/login; session refresh and scheduled expiry; revoked-session invalidation without stale signed-in controls; profile and password forms; 204 logout; Collaboration list/create/accept; Administrator members/invitations/audit; one-time token removal; `403` role-loss refresh to a non-Administrator view; stable 401/403/404/409/429/503 presentation; and restart persistence. Confirm account-menu actions use the product shell's single application announcement and persisted roles do not gate the planning demo.
+
+Then replay `/resilience` against the real backend: Basic S0 Stress, S0 Capability frontier, trained Clinic Stress, and trained Basic Stress followed by Recovery. Confirm every request uses canonical `demo.community` plus the authoritative verified catalyst path, a pending transition blocks actions, a new Stress run invalidates Recovery, late responses do not bind after a source change, Judge mode alone reveals raw receipts, and no result mutates planning, transition or Project state.
 
 ## Integrated backend API journeys
 
@@ -65,7 +67,7 @@ The planning journey verifies the proof workflow only. Separately replay the cur
 - Confirm reduced motion removes non-essential animation without hiding information.
 - Confirm high-contrast mode and normal mode retain an opaque focus outline and readable icon-plus-text statuses.
 - Confirm system/light/dark, standard/high contrast, reduced-motion override, and preferred inventory view use only the versioned `assemble_ui_preferences` cookie; invalid, oversized, and stale-version values fail closed. Judge Proof Mode must reset on refresh.
-- At 320 and 390, confirm all five planning destinations remain visibly discoverable, the account menu remains operable, and Settings/Collaboration retain the same tasks without horizontal navigation scrolling.
+- At 320 and 390, confirm all six product destinations remain visibly discoverable, the account menu remains operable, and Settings, Collaboration and Resilience retain the same tasks without horizontal navigation scrolling.
 - Confirm unknown and malformed Initiative Proof paths show a not-found state with a route back and do not request a fallback initiative.
 - Check browser console warnings/errors and the app icon.
 

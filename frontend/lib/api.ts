@@ -131,4 +131,7 @@ export const api = {
     catalyst_path: catalystPath,
     ...metadata,
   }, signal),
+  stressTest: (body: unknown, signal?: AbortSignal) => postJson<unknown>("/api/stress-test", body, signal),
+  recompile: (body: unknown, signal?: AbortSignal) => postJson<unknown>("/api/recompile", body, signal),
+  frontier: (body: unknown, signal?: AbortSignal) => postJson<unknown>("/api/frontier", body, signal),
 };

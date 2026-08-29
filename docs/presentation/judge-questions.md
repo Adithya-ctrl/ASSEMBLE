@@ -109,7 +109,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Direct:** They test every canonical witness-derived one-fact loss, keep UNKNOWN explicit, and can prove the minimum assignment changes needed for a replacement before optimising normal burden.
 - **Deeper:** Stress receipts are server-generated counterfactuals; recompilation accepts one canonical perturbation ID; the one-action frontier ranks only complete decisive coverage.
 - **Evidence to show:** real `/api/stress-test`, `/api/recompile`, and `/api/frontier` responses plus M7 tests/reference.
-- **Honest boundary:** These analyses are backend-only, bounded to the fixture and catalogues, absent from the current UI, and never operational Project successors.
+- **Honest boundary:** These analyses are bounded to the fixture and catalogues, presented through the Resilience Lab, and never operational Project successors.
 
 ### What happens when resources compete independently?
 
@@ -143,13 +143,13 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 - **Direct:** No. The interface includes native controls, keyboard operation, opaque focus, icon-plus-text status, one scoped live region, 44-pixel targets, reduced motion, high contrast, 200% reflow, and graph/list equivalence.
 - **Deeper:** Full platform parity requires the same controls, flows, fields, inventory facts, evidence, and Project capabilities at 320 and 1440; only layout or label presentation may change.
-- **Evidence to show:** all five destinations, four Community categories, all eight entities, keyboard focus, graph/list detail, live status, Project Proof/Inspector focus, and the same proof/preferences capability at 320 and 1440. Builder desktop and mobile Lighthouse snapshots scored 100 accessibility with 34 passed and zero failed audits.
+- **Evidence to show:** all six product destinations, four Community categories, all eight entities, keyboard focus, graph/list detail, live status, Project Proof/Inspector focus, Resilience tasks, and the same proof/preferences capability at 320 and 1440. Builder desktop and mobile Lighthouse snapshots scored 100 accessibility with 34 passed and zero failed audits.
 - **Honest boundary:** These are WCAG-oriented local Builder checks, not independent M6 acceptance or a formal conformance audit with disabled users.
 
 ### What is not implemented?
 
-- **Direct:** M7 frontend workflows, role-gating outside community administration, persisted Projects/proof, tasks, project membership, reassignment, notifications, external data, deployment, and public operation are absent.
-- **Deeper:** FastAPI has local account/community/invitation persistence and backend-only M7 analyses, but those must not be mistaken for product-surface or production completion.
+- **Direct:** Role-gating outside community administration, persisted Projects/proof, tasks, project membership, reassignment, notifications, external data, deployment, and public operation are absent.
+- **Deeper:** FastAPI has local account/community/invitation persistence and the product has a Resilience Lab, but neither should be mistaken for production-wide authorisation or operational persistence.
 - **Evidence to show:** BUILD_STATUS and requirements non-goals.
 - **Honest boundary:** Do not describe roadmap items as partially available.
 
@@ -166,7 +166,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Why not ChatGPT?** “The core question is whether every hard constraint can be satisfied. CP-SAT returns an explicit status and witness; an LLM is not in the runtime proof chain.”
 - **What is the key demo?** “Clinic needs three digital helpers but has one. Training two existing helpers costs two, creates an immutable successor, and only a fresh verification unlocks Project creation.”
 - **Can we trust it?** “Within the fixture, important claims are server-derived, content-bound, replayed, and inspectable; forged or non-feasible Project requests fail closed.”
-- **Is it production-ready?** “No. It has local identity/Collaboration screens and deterministic analysis gates, but no M7 frontend, production-wide authorisation boundary, real-user validation, scale evidence, or deployment hardening.”
+- **Is it production-ready?** “No. It has local identity, Collaboration and Resilience screens plus deterministic analysis gates, but no production-wide authorisation boundary, real-user validation, scale evidence, or deployment hardening.”
 - **Is mobile equivalent?** “The requirement is full parity: the same destinations, Community categories and details, proof flow, fields, evidence, preferences, and Project capability at 320 and 1440, with only layout or label presentation changing.”
 
 ## Bridge phrases

@@ -1,6 +1,6 @@
 # Four-minute live-demo runbook
 
-Use a production frontend connected to the real local API. Begin from Reset on a 1440-wide browser unless judges request the 320-wide parity view. This runbook prioritises the core Project chain. The account menu and Collaboration surfaces are real but outside this four-minute sequence; M7 remains backend-only.
+Use a production frontend connected to the real local API. Begin from Reset on a 1440-wide browser unless judges request the 320-wide parity view. This runbook prioritises the core Project chain. The account menu, Collaboration and Resilience surfaces are real but outside this four-minute sequence.
 
 ## Exact 4:00 operator runbook
 
@@ -43,4 +43,4 @@ If a local request or screen action stalls, stop repeated clicks. Use this 45-se
 
 Do not pretend every internal field can be narrated in four minutes. Prioritize the blocker facts, minimum-action comparison, immutable transition, separate verification, server-derived Project, source proof, full feature parity, and honest limits.
 
-If asked about collaboration, show the account menu or Collaboration route and state that local identity, Settings, persisted roles, one-time invitations, and Administrator audit controls are independently accepted local frontend capabilities. Do not imply that those spaces alter the fictional planning fixture, that community roles protect reasoning/Project/M7 routes, that M7 is visible, or that Projects and proof state persist.
+If asked about collaboration, show the account menu or Collaboration route and state that local identity, Settings, persisted roles, one-time invitations, and Administrator audit controls are independently accepted local frontend capabilities. If asked about resilience, open the dedicated route and state that its Stress, Recovery and Capability frontier tasks are bounded counterfactual analyses. Do not imply that persisted spaces alter the fictional planning fixture, that community roles protect reasoning/Project/M7 routes, that counterfactual receipts are operational successors, or that Projects and proof state persist.

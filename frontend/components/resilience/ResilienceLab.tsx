@@ -63,7 +63,7 @@ function TechnicalEvidence({
         if (judgeMode && !event.currentTarget.open) event.currentTarget.open = true;
       }}
     >
-      <summary>{judgeMode ? `${label} · Judge mode` : label}</summary>
+      <summary>{judgeMode ? `${label}, Judge mode` : label}</summary>
       <dl>
         {facts.map((fact) => (
           <div key={`${fact.label}-${fact.value}`}>
@@ -137,7 +137,7 @@ function StressPanel({
     <div className={styles.panelBody}>
       <div className={styles.taskIntro}>
         <div>
-          <p className={styles.kicker}>Task 1 · Structural resilience</p>
+          <p className={styles.kicker}>Stress test</p>
           <h2>What single disruption would stop this plan?</h2>
           <p>Test every server-returned one-fact change against the same proved source.</p>
         </div>
@@ -252,7 +252,7 @@ function RecoveryPanel({
     <div className={styles.panelBody}>
       <div className={styles.taskIntro}>
         <div>
-          <p className={styles.kicker}>Task 2 · Minimum disruption</p>
+          <p className={styles.kicker}>Recovery</p>
           <h2>Can the selected disruption be recovered?</h2>
           <p>Stage 1 proves the fewest changed assignments. Stage 2 then minimises normal burden.</p>
         </div>
@@ -268,7 +268,7 @@ function RecoveryPanel({
               {stressView.outcomes.length === 0 ? <option value="">Run a current stress test first</option> : null}
               {stressView.outcomes.map((outcome) => (
                 <option key={outcome.perturbationId} value={outcome.perturbationId}>
-                  {outcome.label} · {outcome.statusLabel}
+                  {outcome.label}, {outcome.statusLabel}
                 </option>
               ))}
             </select>
@@ -304,14 +304,14 @@ function RecoveryPanel({
             {view.stage1 ? (
               <section className={styles.stageCard} aria-labelledby={`${idPrefix}-stage-one`}>
                 <span>Stage 1</span>
-                <h3 id={`${idPrefix}-stage-one`}>Minimum change · {view.stage1.status}</h3>
+                <h3 id={`${idPrefix}-stage-one`}>Minimum change, {view.stage1.status}</h3>
                 <p>{view.stage1.claim}</p>
               </section>
             ) : null}
             <section className={styles.stageCard} aria-labelledby={`${idPrefix}-stage-two`}>
               <span>Stage 2</span>
               <h3 id={`${idPrefix}-stage-two`}>
-                {view.stage2 ? `Secondary burden · ${view.stage2.status}` : "Not run"}
+                {view.stage2 ? `Secondary burden, ${view.stage2.status}` : "Not run"}
               </h3>
               <p>{view.stage2?.claim ?? "Stage 2 is withheld until Stage 1 proves the minimum."}</p>
             </section>
@@ -348,7 +348,7 @@ function RecoveryPanel({
 function Bucket({ label, values, tone }: { label: string; values: string[]; tone: string }) {
   return (
     <div className={styles.bucket}>
-      <span className={classes(styles.bucketLabel, tone)}>{label} · {values.length}</span>
+      <span className={classes(styles.bucketLabel, tone)}>{label}: {values.length}</span>
       <p>{values.length > 0 ? values.join(", ") : "None"}</p>
     </div>
   );
@@ -377,7 +377,7 @@ function FrontierPanel({
     <div className={styles.panelBody}>
       <div className={styles.taskIntro}>
         <div>
-          <p className={styles.kicker}>Task 3 · One-action frontier</p>
+          <p className={styles.kicker}>Capability frontier</p>
           <h2>Which single action changes what is buildable?</h2>
           <p>Every action is compared independently from this source. Results are not an action sequence.</p>
         </div>
@@ -507,7 +507,6 @@ export default function ResilienceLab(props: ResilienceLabProps) {
     <section className={styles.lab} aria-labelledby={`${baseId}-title`}>
       <header className={styles.labHeader}>
         <div>
-          <p className={styles.kicker}>Resilience Lab</p>
           <h1 id={`${baseId}-title`}>Pressure-test the proof before it becomes a promise</h1>
           <p>Explore structural risk, minimum-disruption recovery, and one-action capability without changing the live workflow.</p>
         </div>
@@ -516,8 +515,8 @@ export default function ResilienceLab(props: ResilienceLabProps) {
           <strong>{props.source.label}</strong>
           <small>
             {props.source.catalystPath.length === 0
-              ? "Declared community · no catalyst applied"
-              : props.source.catalystPath.map((item) => item.label).join(" · ")}
+              ? "Declared community with no catalyst applied"
+              : props.source.catalystPath.map((item) => item.label).join(", then ")}
           </small>
           <TechnicalEvidence
             judgeMode={props.judgeMode}
@@ -600,7 +599,6 @@ export default function ResilienceLab(props: ResilienceLabProps) {
           ) : null}
         </div>
       ))}
-      <p className={styles.srOnly} aria-live="polite" aria-atomic="true">{activeView.liveSummary}</p>
     </section>
   );
 }

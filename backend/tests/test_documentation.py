@@ -226,8 +226,8 @@ def test_presentation_package_is_linked_timed_and_bounded() -> None:
     for boundary in (
         "fictional",
         "bounded",
-        "frontend identity/collaboration surfaces",
-        "backend-only m7 analyses",
+        "identity/collaboration surfaces",
+        "resilience lab",
         "not role-gated",
         "projects and proof state remain in memory",
         "production deployment",
@@ -323,7 +323,7 @@ def test_integrated_auth_and_m7_boundaries_are_current_and_traceable() -> None:
         "0600",
         "not linked to the solver",
         "not role-gated",
-        "no current frontend",
+        "Resilience Lab",
         "remain in memory",
         "counterfactual",
     ):

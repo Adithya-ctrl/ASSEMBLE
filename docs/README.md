@@ -36,7 +36,7 @@ These pages describe the software as it behaves now. Historical decisions and su
 - [`reference/requirements.md`](reference/requirements.md): numbered functional, non-functional, and user-story acceptance requirements.
 - [`reference/project-contract.md`](reference/project-contract.md): Project creation trust boundary and returned fields.
 - [`reference/identity-community-invitations.md`](reference/identity-community-invitations.md): installed local account, session, role, invitation, persistence, and security contract.
-- [`reference/technical-differentiation.md`](reference/technical-differentiation.md): backend-only stress-test, recompilation, and capability-frontier behavior.
+- [`reference/technical-differentiation.md`](reference/technical-differentiation.md): stress-test, recovery, capability-frontier, and Resilience Lab trust boundaries.
 - [`reference/accessibility.md`](reference/accessibility.md): semantic, keyboard, contrast, motion, zoom, and parity requirements.
 - [`reference/security-validation.md`](reference/security-validation.md): current validation and fail-closed behavior.
 - [`UI_DIRECTION.md`](UI_DIRECTION.md): current civic interface and browser-acceptance direction.
@@ -50,7 +50,7 @@ These pages describe the software as it behaves now. Historical decisions and su
 
 ## Current surface boundary
 
-The frontend now exposes the local auth/community/invitation boundary through dedicated identity, Settings, Collaboration, and Administrator surfaces. Guest access to the fictional planning demo remains available, and persisted collaboration spaces are explicitly separate from that fixture; their roles do not gate solver, reasoning, Project, or M7 routes. The three M7 counterfactual analyses remain backend-only. Projects and browser proof context remain in memory. See [`../BUILD_STATUS.md`](../BUILD_STATUS.md) for the current acceptance boundary.
+The frontend exposes the local auth/community/invitation boundary through dedicated identity, Settings, Collaboration, and Administrator surfaces. Guest access to the fictional planning demo remains available, and persisted collaboration spaces are explicitly separate from that fixture; their roles do not gate solver, reasoning, Project, or M7 routes. The dedicated Resilience Lab presents all three M7 counterfactual analyses without turning their receipts into operational state. Projects and browser proof context remain in memory. See [`../BUILD_STATUS.md`](../BUILD_STATUS.md) for the current acceptance boundary.
 
 ## Documentation update rule
 

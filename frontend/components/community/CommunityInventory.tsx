@@ -7,7 +7,6 @@ import {
   ListChecks,
   Toolbox,
   UserCircle,
-  UsersThree,
   X,
 } from "@phosphor-icons/react";
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
@@ -46,12 +45,16 @@ function EntityIcon({ kind }: { kind: EntityView["kind"] }) {
   return <Toolbox aria-hidden="true" size={22} weight="duotone" />;
 }
 
+function countLabel(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 function EntityDetail({ entity, judgeMode, onClose }: { entity: EntityView; judgeMode: boolean; onClose: () => void }) {
   const source = entity.source;
   return (
     <aside aria-labelledby="community-detail-title" className="community-entity-detail" tabIndex={-1}>
       <div className="community-detail-heading">
-        <div><span>{humanize(entity.kind)}</span><h2 id="community-detail-title">{entity.name}</h2></div>
+        <div><span className="community-detail-type">{humanize(entity.kind)}</span><h2 id="community-detail-title">{entity.name}</h2></div>
         <button aria-label="Close details" onClick={onClose} type="button"><X aria-hidden="true" size={18} /></button>
       </div>
       <dl className="community-detail-facts">
@@ -75,9 +78,9 @@ export default function CommunityInventory({ community, selectedId, viewMode, ju
   const entityTriggerRefs = useRef(new Map<string, HTMLButtonElement>());
   const organisationNames = useMemo(() => new Map(community.organisations.map((organisation) => [organisation.id, organisation.name])), [community.organisations]);
   const entities = useMemo<EntityView[]>(() => {
-    if (category === "people") return community.people.map((person) => ({ kind: "person", id: person.id, name: person.name, organisationName: organisationNames.get(person.organisation_id) ?? "Community organisation", availability: `${person.available_slots.length} available time blocks`, taskFact: person.capabilities.slice(0, 2).map(humanize).join(" · ") || "Learning capacity", source: person }));
-    if (category === "places") return community.spaces.map((space) => ({ kind: "space", id: space.id, name: space.name, organisationName: organisationNames.get(space.organisation_id) ?? "Community organisation", availability: `${space.available_slots.length} available time blocks`, taskFact: `Capacity ${space.capacity} · ${humanize(space.features[0] ?? "shared space")}`, source: space }));
-    if (category === "resources") return community.resources.map((resource) => ({ kind: "resource", id: resource.id, name: resource.name, organisationName: organisationNames.get(resource.organisation_id) ?? "Community organisation", availability: `${resource.available_slots.length} available time blocks`, taskFact: `${resource.quantity} available · ${resource.shareable ? "Shareable" : "Reserved"}`, source: resource }));
+    if (category === "people") return community.people.map((person) => ({ kind: "person", id: person.id, name: person.name, organisationName: organisationNames.get(person.organisation_id) ?? "Community organisation", availability: countLabel(person.available_slots.length, "available time block"), taskFact: person.capabilities.slice(0, 2).map(humanize).join(" and ") || "Open to learning", source: person }));
+    if (category === "places") return community.spaces.map((space) => ({ kind: "space", id: space.id, name: space.name, organisationName: organisationNames.get(space.organisation_id) ?? "Community organisation", availability: countLabel(space.available_slots.length, "available time block"), taskFact: `Capacity for ${space.capacity}, ${humanize(space.features[0] ?? "shared space").toLowerCase()}`, source: space }));
+    if (category === "resources") return community.resources.map((resource) => ({ kind: "resource", id: resource.id, name: resource.name, organisationName: organisationNames.get(resource.organisation_id) ?? "Community organisation", availability: countLabel(resource.available_slots.length, "available time block"), taskFact: `${resource.quantity} available, ${resource.shareable ? "shareable" : "reserved"}`, source: resource }));
     return [];
   }, [category, community.people, community.resources, community.spaces, organisationNames]);
   const selected = entities.find((entity) => entity.id === selectedId) ?? null;
@@ -109,17 +112,51 @@ export default function CommunityInventory({ community, selectedId, viewMode, ju
     onAnnounce(`${selectedEntityName} details closed.`);
     requestAnimationFrame(() => focusIfConnected(entityTriggerRefs.current.get(selectedEntityId)));
   };
+  const selectedCategoryLabel = CATEGORIES.find((item) => item.id === category)?.label ?? "Community";
 
   return (
     <section className="community-inventory" aria-labelledby="community-inventory-title">
-      <div className="community-summary-strip" aria-label="Community inventory summary">
-        <div><strong>{community.organisations.length}</strong><span>organisations</span></div><div><strong>{community.people.length}</strong><span>people</span></div><div><strong>{community.spaces.length}</strong><span>places</span></div><div><strong>{community.resources.length}</strong><span>resource pools</span></div>
-      </div>
       <div aria-label="Community category" className="community-category-tabs" onKeyDown={handleCategoryKeys} role="tablist">
         {CATEGORIES.map((item) => <button aria-controls="community-category-panel" aria-selected={category === item.id} id={`community-tab-${item.id}`} key={item.id} onClick={() => chooseCategory(item.id)} role="tab" tabIndex={category === item.id ? 0 : -1} type="button">{item.label}</button>)}
       </div>
       <div aria-labelledby={`community-tab-${category}`} id="community-category-panel" role="tabpanel">
-        {category === "overview" ? <div className="community-overview"><div className="community-overview-copy"><UsersThree aria-hidden="true" size={28} weight="duotone" /><div><h2 id="community-inventory-title">Community at a glance</h2><p>Capacity is shared across these local organisations. Choose a category when you need more detail.</p></div></div><ul>{community.organisations.map((organisation) => { const people = community.people.filter((person) => person.organisation_id === organisation.id).length; const places = community.spaces.filter((space) => space.organisation_id === organisation.id).length; const resources = community.resources.filter((resource) => resource.organisation_id === organisation.id).length; return <li key={organisation.id}><strong>{organisation.name}</strong><span>{people} people · {places} places · {resources} resources</span>{judgeMode ? <small className="mono">{organisation.id}</small> : null}</li>; })}</ul></div> : <div className="community-category-layout"><div className="community-category-main"><div className="community-category-toolbar"><div><h2 id="community-inventory-title">{CATEGORIES.find((item) => item.id === category)?.label}</h2><p>{entities.length} available in this community.</p></div><fieldset><legend>View</legend><button aria-pressed={viewMode === "graph"} onClick={() => { onViewModeChange("graph"); onAnnounce("Community graph view enabled."); }} type="button"><GitBranch aria-hidden="true" size={16} />Graph</button><button aria-pressed={viewMode === "list"} onClick={() => { onViewModeChange("list"); onAnnounce("Community list view enabled."); }} type="button"><ListChecks aria-hidden="true" size={16} />List</button></fieldset></div>{entities.length > 0 ? <div className={`community-entity-collection community-entity-${viewMode}`} data-category={category}>{entities.map((entity) => <button aria-pressed={selectedId === entity.id} className="community-entity-row" key={entity.id} onClick={() => selectEntity(entity)} ref={(node) => { if (node) entityTriggerRefs.current.set(entity.id, node); else entityTriggerRefs.current.delete(entity.id); }} type="button"><span className="community-entity-icon"><EntityIcon kind={entity.kind} /></span><span className="community-entity-copy"><strong>{entity.name}</strong><small>{humanize(entity.kind)} · {entity.organisationName}</small><span>{entity.availability} · {entity.taskFact}</span></span>{selectedId === entity.id ? <Check aria-label="Selected" size={17} weight="bold" /> : null}</button>)}</div> : <div className="community-empty-category"><strong>No capacity in this category</strong><span>Choose another category to continue.</span></div>}</div><div ref={detailRef}>{selected ? <EntityDetail entity={selected} judgeMode={judgeMode} onClose={closeSelectedEntity} /> : null}</div></div>}
+        {category === "overview" ? (
+          <div className="community-overview">
+            <div className="community-overview-copy">
+              <h2 id="community-inventory-title">Capacity across the community</h2>
+              <p>{countLabel(community.people.length, "person", "people")}, {countLabel(community.spaces.length, "shared place")}, and {countLabel(community.resources.length, "resource pool")} are available across {countLabel(community.organisations.length, "local organisation")}.</p>
+            </div>
+            <ul aria-label="Participating organisations">
+              {community.organisations.map((organisation) => {
+                const people = community.people.filter((person) => person.organisation_id === organisation.id).length;
+                const places = community.spaces.filter((space) => space.organisation_id === organisation.id).length;
+                const resources = community.resources.filter((resource) => resource.organisation_id === organisation.id).length;
+                return <li key={organisation.id}><Buildings aria-hidden="true" size={21} weight="duotone" /><span><strong>{organisation.name}</strong><small>{countLabel(people, "person", "people")}, {countLabel(places, "place")}, {countLabel(resources, "resource pool")}</small></span>{judgeMode ? <small className="mono">{organisation.id}</small> : null}</li>;
+              })}
+            </ul>
+          </div>
+        ) : (
+          <div className={`community-category-layout ${selected ? "community-category-layout-selected" : ""}`}>
+            <div className="community-category-main">
+              <div className="community-category-toolbar">
+                <div><h2 id="community-inventory-title">{selectedCategoryLabel}</h2><p>{countLabel(entities.length, category === "people" ? "person" : category === "places" ? "place" : "resource pool", category === "people" ? "people" : undefined)}</p></div>
+                <fieldset><legend>Preferred inventory view</legend><button aria-label="Graph view" aria-pressed={viewMode === "graph"} onClick={() => { onViewModeChange("graph"); onAnnounce("Community graph view enabled."); }} type="button"><GitBranch aria-hidden="true" size={17} /><span>Graph</span></button><button aria-label="List view" aria-pressed={viewMode === "list"} onClick={() => { onViewModeChange("list"); onAnnounce("Community list view enabled."); }} type="button"><ListChecks aria-hidden="true" size={17} /><span>List</span></button></fieldset>
+              </div>
+              {entities.length > 0 ? (
+                <div className={`community-entity-collection community-entity-${viewMode}`} data-category={category}>
+                  {entities.map((entity) => (
+                    <button aria-pressed={selectedId === entity.id} className="community-entity-row" key={entity.id} onClick={() => selectEntity(entity)} ref={(node) => { if (node) entityTriggerRefs.current.set(entity.id, node); else entityTriggerRefs.current.delete(entity.id); }} type="button">
+                      <span className="community-entity-icon"><EntityIcon kind={entity.kind} /></span>
+                      <span className="community-entity-copy"><strong>{entity.name}</strong><small>{entity.organisationName}</small><span className="community-entity-facts"><span>{entity.availability}</span><span>{entity.taskFact}</span></span></span>
+                      {selectedId === entity.id ? <Check aria-label="Selected" size={17} weight="bold" /> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : <div className="community-empty-category"><strong>No capacity in this category</strong><span>Choose another category to continue.</span></div>}
+            </div>
+            {selected ? <div className="community-detail-surface" ref={detailRef}><EntityDetail entity={selected} judgeMode={judgeMode} onClose={closeSelectedEntity} /></div> : null}
+          </div>
+        )}
       </div>
     </section>
   );

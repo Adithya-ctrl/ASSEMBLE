@@ -36,7 +36,7 @@ ASSEMBLE_API_URL=http://127.0.0.1:8000 npm run dev -- --hostname 127.0.0.1 --por
 
 Open `http://127.0.0.1:3000`. Browser calls remain same-origin; the Next.js server forwards `/api/*` to `ASSEMBLE_API_URL`.
 
-The current interface exposes local signup/login, Settings, persisted Collaboration spaces, role-aware access, invitations, and Administrator audit controls through the same-origin proxy. It does not expose stress testing, recompilation, or the capability frontier. Auth-created spaces remain separate from the fictional planning fixture, and their roles do not gate planning or M7 routes.
+The current interface exposes local signup/login, Settings, persisted Collaboration spaces, role-aware access, invitations, Administrator audit controls, and the three-task Resilience Lab through the same-origin proxy. Auth-created spaces remain separate from the fictional planning fixture, and their roles do not gate planning or M7 routes. Resilience requests reconstruct only canonical S0 plus a verified catalyst path and do not create operational state.
 
 ## Production-like interface
 

@@ -2,7 +2,7 @@
 
 This tutorial uses the deterministic fictional demo fixture.
 
-It covers the current frontend Project journey only. Local accounts and persisted Collaboration spaces have separate screens and are not linked to this solver fixture; their roles do not gate reasoning or Project routes, and Projects/proof state remain in memory. The backend-only stress-test, recompile, and frontier APIs also have no steps in this tutorial.
+It covers the current frontend Project journey only. Local accounts and persisted Collaboration spaces have separate screens and are not linked to this solver fixture; their roles do not gate reasoning or Project routes, and Projects/proof state remain in memory. Structural stress, Recovery and Capability frontier are available on the separate Resilience route and are not steps in this Project tutorial.
 
 ## Basic Workshop: no catalyst required
 

@@ -7,6 +7,7 @@ const productLayout = readFileSync(new URL("../app/(product)/layout.tsx", import
 const projectDetail = readFileSync(new URL("../components/project/ProjectDetailView.tsx", import.meta.url), "utf8");
 const accountMenu = readFileSync(new URL("../components/identity/AccountMenu.tsx", import.meta.url), "utf8");
 const appShell = readFileSync(new URL("../components/shell/AppShell.tsx", import.meta.url), "utf8");
+const assemblyProduct = readFileSync(new URL("../components/AssemblyProduct.tsx", import.meta.url), "utf8");
 
 test("one root provider owns workflow state across product route transitions", () => {
   assert.match(rootLayout, /import \{ AssemblyProvider \} from "\.\.\/lib\/workflow-context";/);
@@ -29,4 +30,9 @@ test("Project proof uses client routing without browser-storage proof persistenc
   assert.match(projectDetail, /<Link className="secondary-link" href="\/projects\/proof">/);
   const layoutsAndProject = `${rootLayout}\n${productLayout}\n${projectDetail}`;
   assert.doesNotMatch(layoutsAndProject, /localStorage|sessionStorage/);
+});
+
+test("a successful proof folds the final action into the completed state while UNKNOWN remains retryable", () => {
+  assert.match(assemblyProduct, /const currentStep = proofComplete \? null : steps\[Math\.min\(journeyStep, 5\)\];/);
+  assert.match(assemblyProduct, /verifiedResult\?\.status === "UNKNOWN" \? "Retry bounded proof"/);
 });

@@ -14,9 +14,11 @@ The primary user is a community coordinator. The primary event-day observer is a
 
 ## 2. Current direction
 
-### Assembly Table with Blueprint Evidence
+### Calm civic workspace
 
-The interface should feel like a warm community planning table becoming active. People and resources are visually primary. Blueprint-like sockets, seams, and evidence rows expose how requirements connect to capacity. The visual metaphor must remain truthful: a seam or socket represents a real relationship in the backend model, never decoration.
+The interface uses the workspace logic of the selected [Project Management UX case study](https://in.pinterest.com/pin/project-management-ux-case-study-on-behance-in-2025--95420085851412838/), adapted through the local minimalist-UI guidance and the predictable navigation and detail-view principles associated with Outline and Immich. These references guide hierarchy and interaction only; ASSEMBLE does not copy their branding or compositions.
+
+The product should feel calm and immediately usable by a first-time community member, not like a report dashboard or technical demo. One navigation system frames single-purpose routes. Human summaries lead, selection reveals one focused detail, and proof internals appear only when deliberately requested.
 
 Desired emotional sequence:
 
@@ -33,6 +35,8 @@ References are used for principles and interaction mechanisms only. Do not repro
 
 | Role | Reference | Principle to borrow | Do not borrow |
 | --- | --- | --- | --- |
+| Primary workspace | [Project Management UX case study](https://in.pinterest.com/pin/project-management-ux-case-study-on-behance-in-2025--95420085851412838/) | Calm navigation, clear work areas, predictable detail hierarchy | Branding, exact composition, project-management feature scope |
+| Product navigation | Outline and Immich interaction patterns | Stable routes, restrained density, progressive detail and strong empty states | Branding, media-library composition, or administration clutter |
 | Identity | [Decidim](https://decidim.org/) | Civic directness, transparent participation, assertive graphic structure | Its palette, branding, or campaign composition |
 | Hero / opening state | [Felt UI upgrades](https://felt.com/blog/ui-upgrades) | A map-like workspace begins immediately; restrained controls frame the surface | Geographic map conventions irrelevant to ASSEMBLE |
 | Primary canvas | [Kumu system mapping](https://www.kumu.io/markets/system-mapping) | Relationships and focused reveal make a system legible | Infinite graph complexity or force-layout movement |
@@ -58,15 +62,17 @@ The core is a route-backed product with a shared proof context, not a sales home
 
 ### Persistent shell and product routes
 
-- compact shell: ASSEMBLE identity, five always-discoverable product destinations, reset, Judge Proof Mode, truthful unavailable-account status, and inspector disclosure;
+- compact shell: one slim desktop sidebar with Overview, Community, Initiatives, Projects, Collaboration, and Resilience; one mobile menu with the same destinations; and a compact page header with current context and the account affordance;
 - Overview: bounded purpose, current state, and the next useful route;
 - Community: Overview, People, Places, or Resources one category at a time, with a saved Graph/List view and one selected detail surface;
 - Initiatives: choose and understand one declared brief;
 - Initiative Proof: one current action, collapsed completed-action timeline, stage evidence, and the exact six-action sequence;
 - Projects: complete server-returned Project truth after creation;
 - Project Proof: Project identity/status, source initiative, fresh verification, path, lineage, catalyst outputs, and Inspector focus;
-- Preferences: theme, contrast, motion, and preferred Community view only;
-- technical inspector: collapsed by default, containing variable/constraint counts, solve status, objective, trace, exact identifiers, and state diff.
+- Resilience: Stress, Recovery, and Capability frontier from canonical S0 plus an authoritative verified catalyst path;
+- Settings: Account and Security for authenticated users, Appearance for everyone, and the preferred Community view;
+- technical proof: Judge mode and the Inspector are contextual behind one secondary View proof entry on proof-capable screens; exact identifiers and solver details are absent from normal views;
+- reset: contextual to Initiative Proof rather than a global equal-weight action.
 
 ### Judge journey
 

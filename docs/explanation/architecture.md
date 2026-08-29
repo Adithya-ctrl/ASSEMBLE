@@ -49,12 +49,13 @@ Browser
 - `components/community/CommunityInventory.tsx`: category-scoped graph/list inventory and focused detail surface.
 - `components/AssemblyProduct.tsx`: initiative proof actions, progressive evidence panels, Project form, and Technical Inspector.
 - `components/project/`: server-returned Project detail and dedicated source-proof presentation.
+- `app/(product)/resilience/page.tsx`, `components/resilience/`, and `lib/resilience-integration.ts`: the dedicated three-task Resilience Lab, strict response binding, canonical source/path requests, and independent stale-response lanes.
 - `proxy.ts`: fail-visible normalization for malformed dynamic Initiative Proof paths before route handling.
 - `app/globals.css`: shared civic visual grammar, responsive layout, contrast/theme tokens, focus, reduced motion, and overflow protection.
 
 The interface does not calculate feasibility or readiness. It presents backend results and gates Project creation on a provenance-bound proof context. The backend independently replays and solves again when creating the Project.
 
-The interface exposes installed identity/community/invitation routes, but not the three counterfactual M7 analyses. Auth protection applies to auth and community-administration routes; solver, reasoning, Project, stress-test, recompile, and frontier endpoints remain deliberately outside role-gating.
+The interface exposes installed identity/community/invitation routes and the three counterfactual M7 analyses. Auth protection applies to auth and community-administration routes; solver, reasoning, Project, stress-test, recompile, and frontier endpoints remain deliberately outside role-gating.
 
 ## State ownership
 
@@ -68,4 +69,4 @@ Stress and frontier scenarios use domain-separated counterfactual receipt IDs an
 
 Each current route has one primary job and no more than three simultaneous primary tasks. The single root provider carries the authoritative in-browser proof context across ordinary Link, back, and forward navigation, including Projects to Project Proof and back; a hard refresh reloads authoritative S0. Human summaries lead, one selected detail surface reveals task-relevant facts, and technical identifiers move to explicit disclosure, Judge Proof Mode, or the Inspector. Mobile and desktop expose the same destinations and capabilities.
 
-This frontend structure implements independently accepted local identity, Settings, Collaboration-space administration, invitations, and role-aware read-only boundaries while keeping them separate from the planning fixture. It still does not implement M7 analysis views or persisted Projects.
+This frontend structure implements independently accepted local identity, Settings, Collaboration-space administration, invitations, role-aware read-only boundaries, and a provenance-bound Resilience Lab while keeping persisted collaboration separate from the planning fixture. It does not implement persisted Projects.

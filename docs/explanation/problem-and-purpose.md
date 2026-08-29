@@ -17,7 +17,7 @@ ASSEMBLE compiles a declared fictional community state into a bounded CP-SAT mod
 5. Can the verified plan be converted into an executable Project with derived people, venue, time, resources, accessibility, languages, and readiness evidence?
 6. How structurally resilient is a proved plan to canonical one-fact losses, what minimum assignment disruption recovers it, and which one-action catalysts expand feasible initiative capacity?
 
-The integrated backend additionally supports local accounts, persisted community membership and recipient-bound invitations. Those administration capabilities establish a future multi-user boundary; they are not yet connected to the current interface or to solver, reasoning, Project or M7 authorisation.
+The integrated product additionally supports local accounts, persisted community membership and recipient-bound invitations through dedicated identity, Settings and Collaboration surfaces. Those persisted spaces remain separate from the fictional planning fixture and do not authorise solver, reasoning, Project or M7 routes.
 
 ## Current value proposition
 
@@ -25,7 +25,7 @@ ASSEMBLE replaces coordination guesswork inside its declared model with an inspe
 
 ## Boundaries on the claim
 
-The current planning software operates only on the deterministic fictional fixture and submitted bounded models. It does not predict social outcomes, discover real community data, guarantee delivery, measure real-world impact, or prove that its catalogue contains every possible intervention. Local identity, Collaboration membership, invitation and audit records persist in SQLite and have dedicated frontend surfaces, but they are not linked to the fixture. M7 has no frontend workflow; solver, reasoning, Project and M7 routes are not role-gated; Projects and proof state are not persisted; and project membership, tasks, deployment, external LLM use, and data export remain absent.
+The current planning software operates only on the deterministic fictional fixture and submitted bounded models. It does not predict social outcomes, discover real community data, guarantee delivery, measure real-world impact, or prove that its catalogue contains every possible intervention. Local identity, Collaboration membership, invitation and audit records persist in SQLite and have dedicated frontend surfaces, but they are not linked to the fixture. The Resilience Lab presents bounded counterfactual analysis without creating operational successors; solver, reasoning, Project and M7 routes are not role-gated; Projects and proof state are not persisted; and project membership, tasks, deployment, external LLM use, and data export remain absent.
 
 ## Target users and stakeholders
 

@@ -17,6 +17,7 @@ ASSEMBLE is currently a localhost, deterministic fixture application. Its FastAP
 | Community permissions | Reload current persisted membership for every protected community-administration request; preserve the last Administrator |
 | Browser cookie boundary | HttpOnly, SameSite=Lax host-only cookie; present Origin must exactly match the bounded canonical allow-list; Host and forwarded headers never broaden it |
 | Counterfactual analysis | Reconstruct from authoritative S0 and action catalogue; accept no client witness, patch, perturbation body or catalogue |
+| Resilience browser integration | Send untouched canonical demo S0 plus only the verified ordered catalyst path; strict runtime parsers, independent cancellation generations and source bindings reject stale or mismatched responses |
 
 ## Explicit collection ceilings
 
@@ -55,6 +56,7 @@ Auth request bodies are capped at 16 KiB of actual received bytes. Username, ema
 - Rate counters persist across restart and bound signup, login, password-change and invitation-acceptance attempts before expensive verification.
 - Forged auth database hash parameters, unsafe POSIX database permissions, oversized streamed bodies, non-JSON unsafe auth requests and invalid or rejected exact browser origins fail closed. Auth namespace scope is segment-aware, so lookalike paths fall through to ordinary 404 handling.
 - Counterfactual IDs are domain-separated from operational state IDs and cannot become Project lineage. `UNKNOWN` is explicit and excluded from decisive stress/frontier claims.
+- The Resilience Lab is read-only: a pending transition disables it, new source/path generations clear incompatible results, and neither visible analysis nor raw Judge evidence can update workflow community, transition or Project state.
 
 ## Current adversarial coverage
 

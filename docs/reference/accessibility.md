@@ -3,7 +3,7 @@
 ## Semantics and keyboard
 
 - The interface uses `main`, header, sections, regions, complementary content, headings, lists, forms, labels, details/summary, and native buttons.
-- Product navigation, all six solver actions, initiative choices, Community category tabs and entity rows, graph/list control, appearance choices, reset, Inspector, form fields, Project creation, and source-proof controls are keyboard accessible.
+- Product navigation, all six solver actions, initiative choices, Community category tabs and entity rows, graph/list control, the three Resilience tasks, appearance choices, contextual reset, Inspector, form fields, Project creation, and source-proof controls are keyboard accessible.
 - Visible interactive targets are at least 44 by 44 CSS pixels.
 - Focus uses an opaque cobalt outline in normal and high-contrast modes.
 
@@ -37,8 +37,8 @@ SVG connection lines are decorative and hidden from assistive technology. Text r
 
 ## Full feature parity
 
-At 320 and 1440 CSS pixels, the same controls, flows, editable fields, evidence, and Project capabilities must remain available. Layout and shortened label presentation may change; capability and evidence may not.
+At 320 and 1440 CSS pixels, the same controls, flows, editable fields, evidence, Project capabilities, and Resilience tasks must remain available. Layout and shortened label presentation may change; capability and evidence may not.
 
-The accepted M6 replay traversed every planning route at 320 and 1440 and covered the full proof journey, Community parity, Projects, appearance preferences, and Judge Proof Mode. The independently accepted Phase A replay additionally covered guest and authenticated account menus, identity entry, Account/Security/Appearance Settings, Collaboration tasks, Administrator tabs, Viewer read-only access, token focus restoration and the shared product live region at 320, 390, and 1440. It found no document overflow or effective interactive target below 44 by 44 CSS pixels; light, dark, light-high and dark-high surfaces retained strong measured contrast. Earlier desktop/mobile Lighthouse accessibility snapshots scored 100 with 34 passed audits and no failed audits. These are local implementation checks, not formal WCAG conformance, real-user validation, public-deployment evidence or an impact claim.
+The accepted cumulative replay traversed every product route at 320, 390 and 1440 and covered the full proof journey, Community parity, Projects, appearance preferences, Judge Proof Mode, guest and authenticated account menus, identity entry, Account/Security/Appearance Settings, Collaboration tasks, Administrator tabs, Viewer read-only access, token focus restoration, Resilience tasks and the shared product live region. It found no document overflow or effective interactive target below 44 by 44 CSS pixels; light, dark, light-high and dark-high surfaces retained strong measured contrast. Earlier desktop/mobile Lighthouse accessibility snapshots scored 100 with 34 passed audits and no failed audits. These are local implementation checks, not formal WCAG conformance, real-user validation, public-deployment evidence or an impact claim.
 
 Use [`../how-to/verify-changes.md`](../how-to/verify-changes.md) for the browser acceptance procedure.

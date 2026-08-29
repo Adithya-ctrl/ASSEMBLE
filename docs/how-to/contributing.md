@@ -8,7 +8,7 @@
 4. Verify the current implementation and tests; documentation is evidence and navigation, not executable authority.
 5. Read [`audit-documentation.md`](audit-documentation.md) before declaring a milestone complete.
 
-The event execution packet remains the product authority. Do not silently add frontend identity behavior, extend community roles onto solver/reasoning/Project/M7 routes, persist Projects or proof state, or add generic project management, cloud services, deployment, publication, or submission behavior.
+The event execution packet remains the product authority. Do not silently expand identity behavior, extend community roles onto solver/reasoning/Project/M7 routes, let Resilience counterfactual receipts enter operational state, persist Projects or proof state, or add generic project management, cloud services, deployment, publication, or submission behavior.
 
 ## Change rule
 
