@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.auth.api import install_auth_api
 from app.api_models import (
     AnalyseRequest,
     AnalyseResponse,
@@ -440,3 +441,6 @@ def capability_frontier(
         ValueError,
     ) as exc:
         raise _translate_technical_analysis_error(exc) from exc
+
+
+install_auth_api(app)

@@ -11,11 +11,13 @@ backend/.venv/bin/pytest -q backend/tests/test_documentation.py
 backend/.venv/bin/pytest -q backend/tests
 ```
 
+Set `ASSEMBLE_AUTH_DB_PATH` to a private temporary database for both commands so the documentation import and cumulative suite cannot read or mutate the default local identity store.
+
 The deterministic documentation gate checks:
 
 - local Markdown link integrity, including ADRs and the contract pointer;
 - documented API route parity with generated OpenAPI;
-- required consecutive `FR-###`, `NFR-###`, and `US-###` identifiers;
+- required consecutive FR-001–FR-023, NFR-001–NFR-013, and US-001–US-017 identifiers;
 - user-story mapping to existing requirements;
 - current requirements represented in traceability;
 - route-backed modular architecture, progressive-disclosure, preference-cookie, and full-feature-parity requirements at 320 and 1440 CSS pixels;
@@ -34,12 +36,15 @@ Run the production-like interface and real API, then compare observed behavior a
 - [`../reference/requirements.md`](../reference/requirements.md);
 - [`../tutorials/project-journeys.md`](../tutorials/project-journeys.md);
 - [`../reference/api.md`](../reference/api.md) and [`../reference/project-contract.md`](../reference/project-contract.md);
+- [`../reference/identity-community-invitations.md`](../reference/identity-community-invitations.md) and [`../reference/technical-differentiation.md`](../reference/technical-differentiation.md);
 - [`../reference/security-validation.md`](../reference/security-validation.md);
 - [`../reference/accessibility.md`](../reference/accessibility.md);
 - [`../presentation/project-overview.md`](../presentation/project-overview.md), the timed video and live-demo runbooks, and the judge Q&A;
 - [`../../BUILD_STATUS.md`](../../BUILD_STATUS.md).
 
-Replay both Basic empty-path and Clinic successor-path Project journeys. Check every displayed number, status, action, error code, accessibility behavior, absent capability, and presentation statement against the running software. Open every product route directly and through navigation; verify valid, unknown, and malformed Initiative Proof paths. At both 320 and 1440 CSS pixels, compare visible navigation, Community categories and all eight entities, graph/list detail, flows, three editable fields, proof evidence, appearance preferences, account boundary, and Project capabilities; only layout or label presentation may differ. Confirm valid preference-cookie refresh behavior and invalid/oversized/stale-version fallback, session-only Judge Proof Mode, no normal-view identifier leakage, and no superseded behavior. Architectural history belongs only in ADRs.
+Replay both Basic empty-path and Clinic successor-path Project journeys. Check every displayed number, status, action, error code, accessibility behavior, absent capability, and presentation statement against the running software. Open every product route directly and through navigation; verify valid, unknown, and malformed Initiative Proof paths. At both 320 and 1440 CSS pixels, compare visible navigation, Community categories and all eight entities, graph/list detail, flows, three editable fields, proof evidence, appearance preferences, disabled account boundary, and Project capabilities; only layout or label presentation may differ. Confirm valid preference-cookie refresh behavior and invalid/oversized/stale-version fallback, session-only Judge Proof Mode, no normal-view identifier leakage, and no superseded behavior.
+
+Separately replay the real auth/community/invitation API against one private SQLite file across an application restart, and replay all three M7 routes against authoritative S0. Confirm the precise boundary: auth/community/invitation persistence exists only in FastAPI; there is no frontend identity or M7 workflow; solver, reasoning, Project and M7 routes are not role-gated; Projects and proof state remain in memory; and counterfactual receipts cannot become operational Project lineage. Architectural history belongs only in ADRs.
 
 ## Gate result
 

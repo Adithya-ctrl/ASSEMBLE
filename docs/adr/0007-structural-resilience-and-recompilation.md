@@ -1,6 +1,6 @@
 # ADR 0007: Structural resilience and recompilation are counterfactual analyses
 
-- Status: Accepted for the M7 backend implementation
+- Status: Accepted and integrated in the FastAPI backend
 - Date: 2026-08-29
 
 ## Context
@@ -51,6 +51,10 @@ Project states.
   no-applicable-actions, and zero-unlock remain normal results where specified.
 - Frontier results are deliberately one-action comparisons; multi-action
   sequencing remains the planner's responsibility.
+- The analyses have no current frontend surface and are deliberately outside
+  the separate community-role authorisation boundary.
+- Auth-created SQLite communities are not linked to the authoritative
+  fictional solver fixture.
 
 ## Rejected alternatives
 

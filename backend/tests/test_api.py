@@ -619,4 +619,11 @@ def test_openapi_contains_frozen_core_and_additive_technical_routes() -> None:
         "/api/health", "/api/demo", "/api/analyse", "/api/explain",
         "/api/unlock", "/api/plan", "/api/transition", "/api/projects/from-plan",
         "/api/stress-test", "/api/recompile", "/api/frontier",
+        "/api/auth/signup", "/api/auth/login", "/api/auth/session",
+        "/api/auth/logout", "/api/auth/password", "/api/auth/profile",
+        "/api/communities", "/api/communities/{community_id}/members",
+        "/api/communities/{community_id}/members/{user_id}",
+        "/api/communities/{community_id}/invitations",
+        "/api/communities/{community_id}/invitations/{invitation_id}/revoke",
+        "/api/invitations/accept", "/api/communities/{community_id}/audit-events",
     }

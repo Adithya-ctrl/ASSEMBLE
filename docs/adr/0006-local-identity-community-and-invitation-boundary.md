@@ -1,11 +1,11 @@
 # ADR 0006: Local identity, community and invitation boundary
 
-- Status: Accepted for Builder 2 implementation
+- Status: Accepted and integrated in the FastAPI backend
 - Date: 2026-08-29
 
 ## Context
 
-The accepted ASSEMBLE checkpoint has no accounts, sessions, community membership, role authorisation or persistence. The next authorised backend milestone needs those capabilities without changing the solver, Project derivation, current frontend, or the existing integrated application entry point. Local hackathon operation must remain deterministic and must not depend on an email or cloud provider.
+The earlier accepted ASSEMBLE checkpoint had no accounts, sessions, community membership, role authorisation or persistence. The next backend milestone needed those capabilities without changing solver or Project semantics or pretending that a frontend identity workflow already existed. Local hackathon operation had to remain deterministic and independent of an email or cloud provider.
 
 ## Decision
 
@@ -15,9 +15,9 @@ Hash passwords with `hashlib.scrypt` using a fresh 16-byte salt and the exact lo
 
 Persist users, sessions, communities, memberships, invitations, fixed-window rate counters and append-only audit events. Invitation rows bind the digest to community, role, inviter, normalized recipient, expiry and lifecycle state. Acceptance is a single transaction that checks token, state, expiry, recipient and existing membership before consuming the invitation and creating the membership.
 
-Use four community roles: `ADMINISTRATOR`, `COORDINATOR`, `MEMBER`, and `VIEWER`. Server-side permission checks are derived from the current persisted membership on every community request. Administrators alone create/revoke invitations, list invitation state, list members and change roles. The last Administrator cannot be demoted. Demoting another Administrator atomically revokes that inviter's pending grants in the community. All authenticated roles may read the community; planning and Project permissions are declared for later integration but this stream does not alter protected solver or Project routes.
+Use four community roles: `ADMINISTRATOR`, `COORDINATOR`, `MEMBER`, and `VIEWER`. Server-side permission checks are derived from the current persisted membership on every protected community-administration request. Administrators alone create/revoke invitations, list invitation state, list members and change roles. The last Administrator cannot be demoted. Demoting another Administrator atomically revokes that inviter's pending grants in the community. All authenticated roles may read the community; planning and Project permissions remain declarations only. The integrated solver, reasoning, Project and M7 routes are deliberately not role-gated at this checkpoint.
 
-Expose the slice through a registration function that installs a router and auth-specific handlers. Builder 2 does not edit `backend/app/main.py`; the control centre owns the eventual one-call integration.
+Expose the slice through a registration function that installs a router and auth-specific handlers. The shared application entry point performs that one-call registration after existing routes are declared. This installation does not add a frontend identity workflow.
 
 ## Consequences
 
@@ -27,5 +27,7 @@ Expose the slice through a registration function that installs a router and auth
 - POSIX state is created under a mode-0700 directory with mode-0600 database/WAL/SHM files; unsafe existing modes fail closed. Windows permissions remain a host-ACL responsibility.
 - The default local HTTP cookie cannot use `Secure`; production-like HTTPS operation must set `ASSEMBLE_AUTH_COOKIE_SECURE=1`.
 - `SameSite=Lax` is the hackathon browser boundary. A public deployment would additionally require an explicit origin/CSRF policy, TLS termination review, secret rotation, observability and a distributed rate limiter.
-- Unsafe JSON routes also reject a present origin outside the configured local browser allow-list and a present cross-site `Sec-Fetch-Site`; non-browser clients without those headers remain supported. This is a bounded local same-origin defence, not a complete public-deployment CSRF design.
-- Existing solver, planner, Project and frontend behavior remains untouched until separately integrated.
+- Unsafe JSON routes also reject a present origin outside the exact bounded canonical `ASSEMBLE_AUTH_ALLOWED_BROWSER_ORIGINS` allow-list and a present cross-site `Sec-Fetch-Site`; Host and forwarded headers cannot broaden the list, and non-browser clients without those headers remain supported. Auth namespace matching is segment-aware so lookalike routes retain ordinary 404 handling. This is a bounded local same-origin defence, not a complete public-deployment CSRF design.
+- Existing solver, planner, Project and frontend behavior remains unchanged by router registration.
+- Auth, community and invitation records persist; Projects, proof context and current task state remain in memory.
+- Auth-created SQLite communities are not linked to the solver's authoritative fictional fixture.

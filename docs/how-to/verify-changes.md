@@ -7,11 +7,15 @@ Run the earliest affected focused tests first, then the cumulative gates.
 From the repository root:
 
 ```bash
-backend/.venv/bin/pytest -q backend/tests/test_projects.py backend/tests/test_api.py
-backend/.venv/bin/pytest -q backend/tests
+auth_test_dir="$(mktemp -d)"
+chmod 700 "$auth_test_dir"
+ASSEMBLE_AUTH_DB_PATH="$auth_test_dir/auth.sqlite3" backend/.venv/bin/pytest -q backend/tests/auth
+ASSEMBLE_AUTH_DB_PATH="$auth_test_dir/auth.sqlite3" backend/.venv/bin/pytest -q backend/tests/test_resilience.py backend/tests/test_recompiler.py backend/tests/test_frontier.py backend/tests/test_technical_api.py backend/tests/test_api.py
+ASSEMBLE_AUTH_DB_PATH="$auth_test_dir/auth.sqlite3" backend/.venv/bin/pytest -q backend/tests/test_documentation.py
+ASSEMBLE_AUTH_DB_PATH="$auth_test_dir/auth.sqlite3" backend/.venv/bin/pytest -q backend/tests
 ```
 
-The first command is the current Project/API gate. The second is cumulative and must remain green for any backend change.
+The temporary directory is private and keeps verification out of the default persistent store. The commands cover auth, M7/API, documentation, and cumulative backend gates; the last must remain green for any backend change. Remove the temporary directory after the run if it is no longer needed.
 
 ## Frontend
 
@@ -40,6 +44,15 @@ Run the real FastAPI backend and the production Next.js build. Use a clean page 
 9. From Projects, follow **View Project proof**, then use browser Back and Forward. Confirm the same Project and exact proof survive all three client transitions without a fixture-reset announcement. Use the Inspector control and confirm it receives focus.
 10. Hard-refresh Project Proof and confirm the in-memory Project truthfully resets to its empty state rather than being restored from browser storage.
 11. Reset and confirm all downstream evidence, Project state, hashes, and relationship emphasis clear across Projects and Project Proof.
+
+The browser journey verifies the current frontend only. Confirm that the account control remains disabled and that no stress-test, recompile or frontier product route is claimed. Replay auth/community/invitation and M7 behavior through the real API separately; their existence in OpenAPI is not frontend acceptance.
+
+## Integrated backend API journeys
+
+- Restart two FastAPI applications against the same dedicated private SQLite file and replay signup → session → community creation → recipient-bound invitation → acceptance → membership/role check. Confirm revocation and role changes persist, secrets remain redacted, and the directory/file modes are `0700`/`0600` on POSIX.
+- Confirm auth/community routes reject missing sessions, wrong roles, non-JSON unsafe bodies, rejected browser origins, oversized actual request bytes and exceeded persisted rate limits with stable envelopes.
+- Confirm solver, reasoning, Project, stress-test, recompile and frontier routes remain callable without an auth session. This is the deliberate current boundary, not an authorisation guarantee.
+- Replay structural stress against a feasible authoritative path, recompile from one returned canonical perturbation ID, and run the one-action frontier. Confirm counterfactual IDs never appear as operational Project lineage, forged bases fail closed, and `UNKNOWN` is never counted as decisive evidence.
 
 ## Accessibility and resilience
 

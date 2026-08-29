@@ -1,17 +1,18 @@
 # Identity, community and invitation contract
 
-This page is the current contract for Builder 2's isolated backend slice. It is executable only after the control centre registers the router described in [`../how-to/integrate-auth-backend.md`](../how-to/integrate-auth-backend.md).
+This page is the current contract for the auth/community/invitation backend installed in the shared FastAPI application. The registration and local configuration are described in [`../how-to/integrate-auth-backend.md`](../how-to/integrate-auth-backend.md).
 
-## Ownership boundary
+## Integration and product boundary
 
-Builder 2 exclusively owns:
+The integrated implementation lives in:
 
 - `backend/app/auth/`;
 - `backend/tests/auth/`;
 - `contracts/auth-api.md`;
-- this reference, ADR 0006, the auth integration guide, and auth-specific additions to traceability, verification guidance and build status.
+- this reference, ADR 0006, the auth integration guide, and auth-specific traceability, verification and status claims;
+- `backend/app/main.py`, which performs the reviewed router registration.
 
-Builder 2 does not modify `backend/app/main.py`, solver/compiler/explain/interventions/planner/Project modules, or existing frontend files.
+Registration does not alter solver/compiler/explain/interventions/planner/Project/M7 semantics. Auth-created SQLite communities are not linked to the solver's authoritative fictional community fixture. Auth and persisted community-role checks protect only auth and community-administration routes. Solver, reasoning, Project, stress-test, recompile and frontier endpoints are deliberately not role-gated. The current frontend has no identity, membership or invitation workflow and its account control remains disabled. Only auth/community/invitation state persists; Projects and proof context remain in memory.
 
 ## Threat model
 
@@ -48,8 +49,8 @@ All timestamps are UTC epoch seconds. Usernames and emails compare case-insensit
 | Permission | Administrator | Coordinator | Member | Viewer |
 | --- | :---: | :---: | :---: | :---: |
 | Read community and membership-visible context | Yes | Yes | Yes | Yes |
-| Use planning and create a solver-derived Project once integrated | Yes | Yes | No | No |
-| Participate in an assigned Project once integrated | Yes | Yes | Yes | No |
+| Declared future planning/Project permission (not enforced) | Yes | Yes | No | No |
+| Declared future Project-participation permission (not enforced) | Yes | Yes | Yes | No |
 | List members | Yes | No | No | No |
 | Create/list/revoke invitations | Yes | No | No | No |
 | Change a membership role | Yes, except removing the last Administrator | No | No | No |
@@ -60,7 +61,9 @@ The latter two Project permissions are declarations for the control centre. This
 
 All request models reject unknown fields. Errors use the existing stable envelope `{"error":{"code":"STABLE_CODE","message":"Human-readable message.","details":{}}}`. Authentication is cookie-based; raw session tokens are never returned in JSON. The `assemble_session` cookie has an absolute seven-day lifetime; `now >= expires_at` is invalid and last-seen activity does not extend it. Successful signup, login and password change set a fresh cookie whose `Max-Age` and `Expires` match that persisted absolute expiry. Cookies are host-only, use path `/`, and omit `Domain`; logout clears the same name/path/security attributes even when the cookie is missing or stale. Auth and session responses use `Cache-Control: no-store`; the one-time invitation-token response also uses `Referrer-Policy: no-referrer`. Tokens never appear in URLs, logs or audit events.
 
-Unsafe cookie-authenticated routes require `application/json`. A present `Origin` must match the configured local browser origin or request origin, and a present `Sec-Fetch-Site` must be `same-origin` or `none`; absent browser headers remain valid for non-browser local clients. The client rate-limit identity is `request.client.host`. `X-Forwarded-For` is ignored until a separately reviewed trusted-proxy contract exists.
+Unsafe cookie-authenticated routes require `application/json`. A present `Origin` must equal one entry in the strict `ASSEMBLE_AUTH_ALLOWED_BROWSER_ORIGINS` HTTP(S) allow-list; it is never inferred from `Host` or forwarded headers. The comma-separated setting defaults to `http://localhost:3000,http://127.0.0.1:3000`, accepts no more than 32 unique canonical origins or 4096 UTF-8 bytes, supports explicit non-default frontend ports, and fails installation closed for empty, wildcard, credential-bearing, path/query/fragment-bearing, malformed, non-canonical or oversized values. A present `Sec-Fetch-Site` must be `same-origin` or `none`; absent browser headers remain valid for non-browser local clients. The client rate-limit identity is `request.client.host`. `X-Forwarded-For`, `X-Forwarded-Host` and `Host` never broaden the origin contract.
+
+The auth request boundary matches complete namespace segments. `/api/auth`, `/api/communities` and `/api/invitations` are scoped; lookalikes such as `/api/authentic`, `/api/communities-v2` and `/api/invitations-old` fall through to the ordinary `404 ROUTE_NOT_FOUND` response.
 
 | Method | Route | Success | Authentication and purpose |
 | --- | --- | --- | --- |
@@ -126,8 +129,8 @@ The slice records account creation, login success/failure, logout, password chan
 
 Demoting an Administrator atomically revokes that inviter's still-pending invitations in the same community and records `INVITER_NO_LONGER_AUTHORISED`. This prevents a removed Administrator's unaccepted grants remaining live. The last-Administrator invariant is checked in the same immediate transaction.
 
-On POSIX, a newly created auth database directory is mode `0700`; the database and any WAL/SHM files are mode `0600`. Startup fails closed when an existing configured database or its directory grants group/other access. Windows relies on the host ACL and requires a deployment-specific review. SQLite lock acquisition is bounded; a busy/locked store returns the stable `503 SERVICE_BUSY` envelope rather than leaking a driver exception.
+The default store is `backend/.data/auth.sqlite3`; `ASSEMBLE_AUTH_DB_PATH` selects a different file. On POSIX, a newly created auth database directory is mode `0700`; the database and any WAL/SHM files are mode `0600`. Startup fails closed when an existing configured database or its directory grants group/other access. Windows relies on the host ACL and requires a deployment-specific review. SQLite lock acquisition is bounded; a busy/locked store returns the stable `503 SERVICE_BUSY` envelope rather than leaking a driver exception.
 
 ## Current verification evidence
 
-Builder 2's current local gate is 63 focused auth tests and 207 cumulative backend tests. The auth gate includes two-connection/thread races, a genuinely fresh application opened against the same SQLite file, direct secret-at-rest inspection, exact expiry boundaries, cookie/header/origin replay, actual streamed-byte overflow, locked-store translation and POSIX mode checks. A separate one-process integration replay installs `install_auth_api(app)` into the unmodified accepted application and verifies both the existing health route and a new signup/session journey. The integration patch applies cleanly. This is builder evidence for control-centre acceptance, not frontend availability, public-deployment readiness or independent product acceptance.
+The current integrated local gate is 63 focused auth tests and 257 cumulative backend tests. The auth gate includes two-connection/thread races, a genuinely fresh application opened against the same SQLite file, direct secret-at-rest inspection, exact expiry boundaries, cookie/header/origin replay, actual streamed-byte overflow, locked-store translation and POSIX mode checks. The shared application imports and invokes `install_auth_api(app)` and its OpenAPI surface contains both existing and auth routes. This is backend integration evidence, not frontend identity availability, role-gating of non-auth routes, public-deployment readiness or independent product acceptance.

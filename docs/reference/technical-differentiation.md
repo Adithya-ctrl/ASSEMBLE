@@ -1,9 +1,14 @@
 # Technical differentiation reference
 
-ASSEMBLE exposes three backend-only counterfactual analyses. They reuse the
+ASSEMBLE exposes three integrated backend-only counterfactual analyses. They reuse the
 accepted deterministic compiler, solver, canonical witness validator, action
 effects, and Project trust boundary; they do not create Projects or
 operational successor states.
+
+The current frontend has no stress-test, recompile or frontier surface. These
+routes are deliberately not role-gated by the separate auth/community
+boundary, and auth-created SQLite communities are not linked to the
+authoritative fictional solver fixture.
 
 The normative field and invariant definitions are in the
 [`technical-differentiation-api.md`](../../contracts/technical-differentiation-api.md)

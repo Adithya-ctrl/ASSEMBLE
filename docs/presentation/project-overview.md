@@ -22,6 +22,9 @@ ASSEMBLE makes a declared capacity model inspectable, determines whether a selec
 6. Applies that action to a copied state, preserves S0, and requires a new solve.
 7. Creates a READY Project only after server-side replay and another feasible result.
 8. Exposes operational assignments, venue, time, resources, readiness, and a dedicated Project Proof route; exact solver/state internals remain discoverable through Judge Proof Mode and the Technical Inspector.
+9. Exposes backend-only structural stress, minimum-disruption recompilation and one-action capability-frontier APIs, plus local account/community/invitation persistence in FastAPI.
+
+Item 9 has no current frontend surface. The account control remains disabled, and the current product routes do not display M7 analyses.
 
 ## Truthful workflow
 
@@ -38,7 +41,7 @@ ASSEMBLE is neither a chat response nor generic project-management CRUD. Its dif
 
 ## Current scope and limits
 
-This is localhost hackathon software operating on one small fictional fixture and a finite action catalogue. It has no real-user validation, measured community impact, authentication, RBAC, persistence, tasks, project membership, notifications, external data ingestion, external LLM dependency, cloud deployment, or production claim. The minimum is bounded to the disclosed catalogue and planner limits; it is not a global recommendation over all real-world actions.
+This is localhost hackathon software operating on one small fictional fixture and a finite action catalogue. FastAPI has local accounts, cookie sessions, persisted community roles/invitations and backend-only M7 analyses. The frontend has no identity or M7 workflow; persisted roles do not gate solver, reasoning, Project or M7 endpoints; Projects and proof state remain in memory; and tasks, project membership, notifications, external data ingestion, external LLM dependency, cloud deployment and production claims are absent. There is no real-user validation or measured community impact. The minimum is bounded to the disclosed catalogue and planner limits; it is not a global recommendation over all real-world actions.
 
 ## One-sentence value proposition
 

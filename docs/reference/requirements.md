@@ -2,7 +2,7 @@
 
 ## Scope
 
-ASSEMBLE is a localhost civic capacity-and-intervention planner for a deterministic fictional fixture. It inventories declared capacity, solves initiative feasibility, explains blockers, compares disclosed catalyst actions, verifies immutable successors, and creates an executable Project from a fresh proof.
+ASSEMBLE is a localhost civic capacity-and-intervention planner for a deterministic fictional fixture. It inventories declared capacity, solves initiative feasibility, explains blockers, compares disclosed catalyst actions, verifies immutable successors, creates an executable Project from a fresh proof, and exposes backend-only structural resilience analyses. Its FastAPI boundary also provides local identity, persisted community membership and recipient-bound invitations.
 
 ## Assumptions and constraints
 
@@ -11,20 +11,23 @@ ASSEMBLE is a localhost civic capacity-and-intervention planner for a determinis
 - Catalyst planning is limited to depth two and at most 20 expanded states.
 - Project creation starts only from exact authoritative S0 and accepts an explicit path of 0–2 actions.
 - The interface and API run locally; the browser uses a same-origin Next.js proxy.
+- Local auth/community/invitation state uses file-backed SQLite. Those communities are not linked to the solver's fictional fixture and are separate from in-memory Project and proof state.
+- Community roles protect only auth and community-administration routes; solver, reasoning, Project and M7 routes are not role-gated.
 - Feasibility is a model result, not a guarantee of social success or real-world delivery.
 
 ## Non-goals and absent capabilities
 
 - Real community discovery, prediction, recommendation outside the catalogue, or impact measurement.
-- Authentication, accounts, sessions, RBAC, project membership, or personal data management.
-- Project persistence, generic CRUD, tasks, reassignment, collaboration, or notifications.
+- Frontend signup, login, session, profile, community-administration, membership, invitation, or M7 workflows.
+- Role-gating of solver, reasoning, Project or M7 routes; project membership or task authorisation.
+- Project/proof persistence, generic Project CRUD, tasks, reassignment, collaboration, or notifications.
 - Cloud services, OAuth, external LLMs, external data export, deployment, publication, or submission.
 
 ## Current interaction boundary
 
 The interface is organised as route-backed, single-purpose areas for Overview, Community, Initiatives, Initiative Proof, Projects, Project Proof, and Preferences. A shared shell and workflow provider preserve the proof context while users move between those areas. Progressive disclosure keeps raw identifiers, exact slots, hashes, solver statistics, and full trace facts out of normal task views; they remain available in selected detail, Judge Proof Mode, or the Technical Inspector.
 
-This modular navigation is presentation and workflow structure, not a permission system. Community Administrator, Coordinator, Member, and Viewer roles, authentication, membership, collaboration, and governance ownership are not implemented. The disabled account affordance states that boundary explicitly.
+This modular navigation is presentation and workflow structure, not a permission system. FastAPI implements local accounts plus Administrator, Coordinator, Member and Viewer memberships for community administration, but the frontend does not. The disabled account affordance states that boundary explicitly. Those persisted roles do not govern solver, reasoning, Project or M7 routes. Structural stress, recompilation and capability frontier are current API capabilities with no current frontend surface.
 
 ## Functional requirements
 
@@ -45,6 +48,12 @@ This modular navigation is presentation and workflow structure, not a permission
 - **FR-015 — Reset cleanly.** Reset shall restore authoritative S0 and clear analyses, explanation, unlock, plan, transition, verified result, Project form response, request errors, downstream hashes, inspector state, and relationship emphasis.
 - **FR-016 — Control appearance and access representation.** The Preferences route shall provide allow-listed theme, contrast, motion, and preferred inventory-view choices through native labelled controls. Those four values alone may persist in a versioned first-party cookie; invalid, oversized, or stale-version values fail to defaults. Judge Proof Mode is session-only. Icon-plus-text status shall remain authoritative.
 - **FR-017 — Announce the journey.** One dedicated live region shall concisely announce successful compile/analyse, blocker and shortfall, unlock and cost, successor pending proof, verification, view/contrast changes, reset, and Project creation.
+- **FR-018 — Manage a local account and session.** The API shall create strictly validated local accounts, authenticate without disclosing which credential failed, return the current user and memberships, update bounded profile metadata, change passwords only after current-password verification, rotate sessions on signup/login/password change, revoke earlier sessions after password change, and clear logout idempotently.
+- **FR-019 — Persist communities and current roles.** An authenticated user shall create and list communities backed by SQLite. The creator becomes `ADMINISTRATOR`; every protected community request shall load current membership from storage; Administrators alone list members and change roles; the last Administrator cannot be demoted; and demoting an Administrator shall revoke that inviter's pending grants atomically.
+- **FR-020 — Complete a recipient-bound invitation lifecycle.** An Administrator shall create, list and revoke bounded invitations. A raw local-delivery token shall be returned only once, only its digest shall persist, and acceptance shall atomically verify pending state, expiry, recipient, community role and non-membership before consuming the invitation and creating membership. Audit responses shall remain append-only, bounded and secret-free.
+- **FR-021 — Stress a proved plan structurally.** The stress API shall reconstruct an authoritative source from exact S0 plus a unique 0–2 action path, require a feasible baseline, generate the complete canonical witness-derived one-fact perturbation catalogue, enforce its 20-entry ceiling before scenario solving, and report `RESILIENT`, `DEGRADED`, `CRITICAL` or `UNKNOWN` outcomes with resilience computed only over decisive results.
+- **FR-022 — Recompile with minimum disruption.** Given one canonical stress perturbation ID, the recompiler shall prove the minimum changed role assignments only from an `OPTIMAL` Stage 1, then fix that scalar and minimise the unchanged normal burden objective in a fresh Stage 2. An unresolved Stage 1 shall expose no minimum or replacement witness, and every exposed feasible Stage 2 witness shall pass the normal canonical validator.
+- **FR-023 — Compare the one-action capability frontier.** The frontier API shall apply each applicable authoritative action independently from the same reconstructed source, solve every initiative before and after it, track gains, losses and unknowns, and rank or Pareto-compare only candidates with complete decisive coverage. It shall never present a one-action result as a sequenced operational successor.
 
 ## Non-functional requirements
 
@@ -59,6 +68,8 @@ This modular navigation is presentation and workflow structure, not a permission
 - **NFR-009 — Privacy and data boundary.** The current system shall use only the fictional fixture and user-submitted bounded JSON, shall not send it to an external LLM or analytics service, and shall not export or persist Project data.
 - **NFR-010 — Local reproducibility.** The backend tests, frontend typecheck/lint/build, and browser journeys shall run locally without a cloud subscription or OpenAI API key.
 - **NFR-011 — Full platform feature parity.** At 320 and 1440 CSS pixels, the interface shall expose the same controls, flows, editable fields, evidence, inventory facts, and Project capabilities. Only layout and label presentation may change.
+- **NFR-012 — Local identity security and durable lifecycle.** Passwords shall use bounded `scrypt-v1`; session and invitation bearer secrets shall use 256-bit random values with digest-only storage; auth bodies, fields and persisted rate buckets shall be bounded; unsafe requests shall enforce JSON and an exact bounded canonical browser-origin allow-list that cannot be widened by Host or forwarded headers; auth namespace matching shall be segment-aware; and restart shall preserve valid lifecycle, role, revocation, expiry, rate and audit state. On POSIX, the auth directory and database runtime files shall be `0700` and `0600`; unsafe existing modes fail closed.
+- **NFR-013 — Counterfactual integrity and boundedness.** Stress, recompilation and frontier shall accept no client-selected witness, objective, patch, perturbation body or action catalogue; reconstruct all analysis state from authoritative S0; use explicit solver-call and collection ceilings; preserve `UNKNOWN`; and issue domain-separated counterfactual receipts that cannot be consumed as operational state or Project lineage.
 
 ## User stories and acceptance criteria
 
@@ -140,6 +151,30 @@ As a mobile or desktop user, I want the complete workflow and evidence on either
 
 - **Given** the same journey state at 320 and 1440 CSS pixels, **when** I inspect and operate every product route, **then** both widths expose the same destinations, category/detail controls, flows, three editable Project fields, inventory facts, proof evidence, preferences, and Project capabilities; only layout and label presentation may differ.
 
+### US-014 — Keep a local account across restart
+
+As a local user, I want a bounded account and revocable session so community administration does not depend on a cloud identity provider. Maps to FR-018, NFR-012.
+
+- **Given** I submit valid signup details, **when** I restart the API against the same private SQLite file and present the unexpired cookie, **then** the API returns my user and memberships without exposing a raw session token or password material; logout or password change invalidates the applicable earlier session.
+
+### US-015 — Invite and govern community members
+
+As a Community Administrator, I want recipient-bound invitations and current persisted role checks so membership changes are explicit and auditable. Maps to FR-019, FR-020, NFR-012.
+
+- **Given** I administer a community and invite a registered recipient, **when** that recipient accepts the one-time token and I inspect membership, invitation and audit state, **then** one membership is created atomically, secrets remain redacted, the token cannot replay, current roles take effect immediately, and the last Administrator remains protected.
+
+### US-016 — Test and recover a fragile plan
+
+As a technical reviewer, I want canonical structural stress and minimum-disruption recompilation so resilience and recovery claims remain solver-verifiable. Maps to FR-021, FR-022, NFR-001, NFR-013.
+
+- **Given** an authoritative feasible source path, **when** I run stress and submit one returned canonical perturbation ID to recompile, **then** every one-fact scenario is accounted for, UNKNOWN remains explicit, and any replacement witness reports only a proved minimum assignment-change count plus validated normal-burden evidence.
+
+### US-017 — Compare one catalyst's capacity effect
+
+As a coalition planner, I want a one-action capability frontier so I can compare disclosed catalysts without confusing analytical receipts with operational successors. Maps to FR-023, NFR-002, NFR-013.
+
+- **Given** authoritative S0 and its action catalogue, **when** I request the frontier, **then** each applicable action is evaluated independently across all initiatives, incomplete coverage cannot produce a winner, and the returned counterfactual IDs cannot be used to create a Project.
+
 ## Demonstration mapping
 
 The presentation runbooks are evidence-navigation aids, not substitute acceptance tests.
@@ -153,3 +188,5 @@ The presentation runbooks are evidence-navigation aids, not substitute acceptanc
 | US-008, US-009 | READY Project and source proof | Create Clinic Project and open inspector |
 | US-010 | Trust-boundary close | Security/provenance close |
 | US-012 | Recording reset | Reset recovery path |
+| US-014, US-015 | API evidence only; no current frontend identity workflow | API evidence only; keep the disabled account boundary visible |
+| US-016, US-017 | API evidence only; no current M7 frontend surface | API evidence only; do not imply these analyses are on screen |

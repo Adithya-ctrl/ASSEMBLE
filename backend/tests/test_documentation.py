@@ -15,7 +15,7 @@ def _current_markdown_files() -> list[Path]:
     return [
         ROOT / "README.md",
         ROOT / "BUILD_STATUS.md",
-        ROOT / "contracts" / "api.md",
+        *sorted((ROOT / "contracts").glob("*.md")),
         *sorted(path for path in DOCS.rglob("*.md") if "adr" not in path.parts),
     ]
 
@@ -25,7 +25,7 @@ def test_current_documentation_has_no_broken_local_links() -> None:
     sources = [
         ROOT / "README.md",
         ROOT / "BUILD_STATUS.md",
-        ROOT / "contracts" / "api.md",
+        *sorted((ROOT / "contracts").glob("*.md")),
         *sorted(DOCS.rglob("*.md")),
     ]
     for source in sources:
@@ -45,6 +45,8 @@ def test_docs_index_exposes_diat_axis_and_governance_roles() -> None:
     for role in ("Constitution", "Map", "Status", "History"):
         assert role in index
     assert "UI_DIRECTION.md" in index
+    assert "identity-community-invitations.md" in index
+    assert "technical-differentiation.md" in index
 
 
 def test_api_reference_matches_current_openapi_routes() -> None:
@@ -56,15 +58,19 @@ def test_api_reference_matches_current_openapi_routes() -> None:
     documented_operations = {
         (method, route, success)
         for method, route, success in re.findall(
-            r"^\| (GET|POST) \| `(/api/[^`]+)` \| (\d{3}) \|",
+            r"^\| (GET|POST|PATCH) \| `(/api/[^`]+)` \| (\d{3}) \|",
             reference,
             flags=re.MULTILINE,
         )
     }
     openapi_operations = {
-        (method.upper(), route, "201" if route == "/api/projects/from-plan" else "200")
+        (
+            method.upper(),
+            route,
+            sorted(code for code in operation["responses"] if code.startswith("2"))[0],
+        )
         for route, operations in openapi["paths"].items()
-        for method in operations
+        for method, operation in operations.items()
     }
     assert documented_operations == openapi_operations
 
@@ -84,6 +90,22 @@ def test_api_reference_matches_current_openapi_routes() -> None:
         "METHOD_NOT_ALLOWED",
         "ANALYSER_CONTRACT_ERROR",
         "HTTP_ERROR",
+        "ACCOUNT_UNAVAILABLE",
+        "AUTHENTICATION_FAILED",
+        "AUTHENTICATION_REQUIRED",
+        "PERMISSION_DENIED",
+        "COMMUNITY_UNAVAILABLE",
+        "COMMUNITY_NOT_FOUND",
+        "MEMBERSHIP_NOT_FOUND",
+        "MEMBERSHIP_EXISTS",
+        "PENDING_INVITATION_EXISTS",
+        "INVITATION_NOT_AVAILABLE",
+        "INVITATION_NOT_PENDING",
+        "LAST_ADMINISTRATOR_REQUIRED",
+        "RATE_LIMITED",
+        "SERVICE_BUSY",
+        "UNSUPPORTED_MEDIA_TYPE",
+        "BROWSER_ORIGIN_REJECTED",
     }
     assert stable_codes <= set(re.findall(r"^\| `([A-Z_]+)` \|", reference, flags=re.MULTILINE))
 
@@ -96,7 +118,7 @@ def test_project_security_contract_and_current_status_are_documented() -> None:
         assert code in project
         assert code in security
     assert "P0-A Project and integrity hardening is independently accepted" in status
-    assert "145 passed" in status
+    assert "257 passed" in status
 
     for ceiling in (
         "Organisations in a community | 32",
@@ -123,7 +145,15 @@ def test_conventional_commit_and_same_change_docs_policy_are_documented() -> Non
 
 def test_current_docs_do_not_preserve_known_superseded_contract_history() -> None:
     combined = "\n".join(path.read_text(encoding="utf-8") for path in _current_markdown_files())
-    for stale_marker in ("Frozen API contract — M0", "/api/reassemble", "## 3. Explored directions", "candidate_subsets_evaluated"):
+    for stale_marker in (
+        "Frozen API contract — M0",
+        "/api/reassemble",
+        "## 3. Explored directions",
+        "candidate_subsets_evaluated",
+        "Authentication and role-based access control are not current capabilities",
+        "It is executable only after the control centre registers the router",
+        "After reviewing and accepting the isolated slice",
+    ):
         assert stale_marker not in combined
 
 
@@ -131,9 +161,9 @@ def test_numbered_requirements_are_consecutive_mapped_and_traceable() -> None:
     requirements = (DOCS / "reference" / "requirements.md").read_text(encoding="utf-8")
     traceability = (DOCS / "TRACEABILITY.md").read_text(encoding="utf-8")
 
-    expected_fr = [f"FR-{number:03d}" for number in range(1, 18)]
-    expected_nfr = [f"NFR-{number:03d}" for number in range(1, 12)]
-    expected_us = [f"US-{number:03d}" for number in range(1, 14)]
+    expected_fr = [f"FR-{number:03d}" for number in range(1, 24)]
+    expected_nfr = [f"NFR-{number:03d}" for number in range(1, 14)]
+    expected_us = [f"US-{number:03d}" for number in range(1, 18)]
     assert re.findall(r"^- \*\*(FR-\d{3})", requirements, flags=re.MULTILINE) == expected_fr
     assert re.findall(r"^- \*\*(NFR-\d{3})", requirements, flags=re.MULTILINE) == expected_nfr
     assert re.findall(r"^### (US-\d{3})", requirements, flags=re.MULTILINE) == expected_us
@@ -192,7 +222,14 @@ def test_presentation_package_is_linked_timed_and_bounded() -> None:
         assert heading in questions
 
     combined = "\n".join((overview, video, live_demo, questions)).lower()
-    for boundary in ("fictional", "bounded", "no authentication", "not persisted", "production deployment"):
+    for boundary in (
+        "fictional",
+        "bounded",
+        "frontend has no identity or m7 workflow",
+        "not role-gated",
+        "projects and proof state remain in memory",
+        "production deployment",
+    ):
         assert boundary in combined
     for overclaim in ("assemble is production-ready", "assemble is deployed", "guaranteed real-world impact"):
         assert overclaim not in combined
@@ -263,3 +300,36 @@ def test_modular_interface_contract_is_current_and_traceable() -> None:
         "multi-page product experience are the next",
     ):
         assert stale_claim not in combined
+
+
+def test_integrated_auth_and_m7_boundaries_are_current_and_traceable() -> None:
+    requirements = (DOCS / "reference" / "requirements.md").read_text(encoding="utf-8")
+    traceability = (DOCS / "TRACEABILITY.md").read_text(encoding="utf-8")
+    architecture = (DOCS / "explanation" / "architecture.md").read_text(encoding="utf-8")
+    security = (DOCS / "reference" / "security-validation.md").read_text(encoding="utf-8")
+    auth = (DOCS / "reference" / "identity-community-invitations.md").read_text(encoding="utf-8")
+    m7 = (DOCS / "reference" / "technical-differentiation.md").read_text(encoding="utf-8")
+    guide = (DOCS / "how-to" / "integrate-auth-backend.md").read_text(encoding="utf-8")
+    status = (ROOT / "BUILD_STATUS.md").read_text(encoding="utf-8")
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    combined = "\n".join((requirements, traceability, architecture, security, auth, m7, guide, status))
+
+    for contract in (
+        "backend/.data/auth.sqlite3",
+        "ASSEMBLE_AUTH_ALLOWED_BROWSER_ORIGINS",
+        "0700",
+        "0600",
+        "not linked to the solver",
+        "not role-gated",
+        "no current frontend",
+        "remain in memory",
+        "counterfactual",
+    ):
+        assert contract in combined
+    assert "backend/.data/" in gitignore
+    for route in ("/api/auth/signup", "/api/stress-test", "/api/recompile", "/api/frontier"):
+        assert route in app.openapi()["paths"]
+
+    assert "Do not apply it again" in guide
+    assert "at most 32 unique entries and 4096 UTF-8 bytes" in guide
+    assert "/api/authentic" in guide and "ordinary application 404" in guide

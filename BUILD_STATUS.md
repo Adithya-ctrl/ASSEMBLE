@@ -14,12 +14,16 @@ This page records current health only. Architectural history and superseded deci
 | Living current documentation | Accepted | Independent Diátaxis navigation, current-state semantics, traceability and automated drift gate |
 | M6 route-backed modular interface | Accepted | Independent frozen-source production replay passed across routes, proof journeys, preferences, responsive layouts and accessibility checks |
 | M6 documentation reconciliation | Accepted | Current architecture, requirements, traceability, tutorials and presentation guidance passed the independent current-state audit |
+| Local identity, community membership and invitations | Integrated backend; frontend absent | Auth router is registered in the shared FastAPI app; focused lifecycle, persistence, restart, security, permission and race tests pass, but no identity workflow has been independently accepted in the product UI |
+| M7 structural resilience, recompilation and capability frontier | Integrated backend; frontend absent | All three routes are in the shared OpenAPI surface and have API/runtime plus focused deterministic evidence; no current frontend surface demonstrates them |
 
 Builder evidence must not be relabelled as independent acceptance.
 
 ## Current cumulative evidence
 
-- Backend: `145 passed`; one upstream Starlette `httpx` deprecation warning.
+- Backend: `257 passed`; one upstream Starlette `httpx` deprecation warning. The suite runs against a private temporary `ASSEMBLE_AUTH_DB_PATH`, not the default persistent file.
+- Auth: `63 passed` in `backend/tests/auth`; signup/session/logout, password rotation, persisted community roles, invitation lifecycle, restart, secret-at-rest, origin/body/rate bounds, concurrency, and POSIX permission checks are covered.
+- Structural resilience: stress-test, minimum-disruption recompile and capability-frontier API/runtime suites pass as part of the cumulative gate. Their counterfactual receipts are not operational Project states.
 - Latest ordered-path/API focused gate: `53 passed`.
 - Interface: TypeScript check passes; ESLint passes with zero warnings; Next.js 16.3.3 production build passes.
 - Modular routes: Overview, Community, Initiatives, dynamic Initiative Proof, Projects, Project Proof, and Preferences resolve as real product routes under a shared workflow provider. Unknown and malformed Initiative Proof paths fail visibly without selecting a fallback initiative.
@@ -31,20 +35,22 @@ Builder evidence must not be relabelled as independent acceptance.
 - Accessibility: category/detail graph-list parity; one journey announcement; dedicated Project proof and Inspector focus; system/light/dark and high contrast; opaque focus; reduced motion; 1440, 768, 390 and 320 layouts plus 200% reflow equivalent; no visible target below 44px; no browser console warning/error. Builder Lighthouse snapshots scored 100 accessibility with 34 passed and zero failed audits on desktop and mobile; this is not formal conformance.
 - Full platform parity: independent replay confirmed all five navigation destinations, four Community categories, all eight entities, six proof actions, three editable Project fields, complete Project/Project-proof capability, Preferences, Judge Proof Mode, and the truthful account boundary at 320 and 1440, with no document/navigation overflow or visible sub-44px target.
 - Preferences and layout checks: four frontend unit checks pass. The versioned `assemble_ui_preferences` cookie contains only theme, contrast, motion, and preferred inventory view; invalid, oversized, and stale-version values fail closed. Judge Proof Mode is session-only.
-- Documentation: current requirements, user stories, traceability, two-layer drift audit, exact 3:00 video, exact 4:00 live-demo runbook, and bounded judge Q&A are structurally gated and require human semantic replay.
+- Documentation: current requirements through FR-023, NFR-013 and US-017, traceability, two-layer drift audit, exact 3:00 video, exact 4:00 live-demo runbook, and bounded judge Q&A are structurally gated and require human semantic replay.
 - Integrity: feasible witnesses are canonically replayed; malformed feasible analyser output fails with `ANALYSER_CONTRACT_ERROR`; missing referenced resources remain infeasible under every permitted relaxation; non-feasible/UNKNOWN solver results cannot carry an objective or witness; explicit collection ceilings return 422; no-op transitions and already-feasible unlocks are rejected.
 
 ## Current checkpoint
 
 P0-A Project and integrity hardening is independently accepted. M6's route-backed modular product presentation, progressive disclosure, Community category/detail experience, dedicated Project surfaces, appearance preferences, and responsive navigation are also independently accepted after frozen-source static and production-browser replay.
 
-Authentication, invitations, community roles, membership, and persistence remain outside this checkout's accepted product surface. The account control truthfully reports that identity is unavailable; no role-specific behavior is claimed.
+The current integration checkpoint adds local authentication, invitations, community roles, membership and their SQLite persistence to FastAPI. Those auth-created communities are not linked to the solver's authoritative fictional fixture. It also adds backend-only M7 stress, recompilation and capability-frontier analyses. These are current API capabilities, not claims about the accepted M6 interface: there is no frontend identity or M7 workflow, the account control still truthfully reports identity as unavailable, and no browser role-specific behavior is claimed. Reasoning, Project and M7 endpoints are deliberately not wrapped by the new community-role permissions. Projects, Project proof and task state remain in memory and are not restored after refresh or restart.
 
 ## Intentionally absent
 
 The current product does not include:
 
-- authentication, accounts, sessions, or role-based access control;
+- frontend signup, login, logout, profile, community administration, membership or invitation workflows;
+- role-gating for solver, reasoning, Project or M7 endpoints, despite persisted roles and declared future planning permissions;
+- a frontend surface for structural stress testing, recompilation or capability-frontier analysis;
 - generic Project CRUD, tasks, manual assignment, project membership, or persistence;
 - cloud services, OAuth, LLM dependence, or external data ingestion;
 - deployment, publication, public repository visibility, or submission.

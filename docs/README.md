@@ -25,6 +25,7 @@ These pages describe the software as it behaves now. Historical decisions and su
 ## Complete a task
 
 - [`how-to/run-locally.md`](how-to/run-locally.md): run the API and interface locally.
+- [`how-to/integrate-auth-backend.md`](how-to/integrate-auth-backend.md): inspect the completed auth registration and configure its local SQLite boundary.
 - [`how-to/verify-changes.md`](how-to/verify-changes.md): run cumulative backend, frontend, browser, accessibility, and security gates.
 - [`how-to/audit-documentation.md`](how-to/audit-documentation.md): apply the automated and human documentation-drift gate.
 - [`how-to/contributing.md`](how-to/contributing.md): change the system without breaking its evidence chain.
@@ -34,6 +35,8 @@ These pages describe the software as it behaves now. Historical decisions and su
 - [`reference/api.md`](reference/api.md): HTTP routes, statuses, and stable errors.
 - [`reference/requirements.md`](reference/requirements.md): numbered functional, non-functional, and user-story acceptance requirements.
 - [`reference/project-contract.md`](reference/project-contract.md): Project creation trust boundary and returned fields.
+- [`reference/identity-community-invitations.md`](reference/identity-community-invitations.md): installed local account, session, role, invitation, persistence, and security contract.
+- [`reference/technical-differentiation.md`](reference/technical-differentiation.md): backend-only stress-test, recompilation, and capability-frontier behavior.
 - [`reference/accessibility.md`](reference/accessibility.md): semantic, keyboard, contrast, motion, zoom, and parity requirements.
 - [`reference/security-validation.md`](reference/security-validation.md): current validation and fail-closed behavior.
 - [`UI_DIRECTION.md`](UI_DIRECTION.md): current civic interface and browser-acceptance direction.
@@ -44,6 +47,10 @@ These pages describe the software as it behaves now. Historical decisions and su
 - [`explanation/architecture.md`](explanation/architecture.md): current component and data flow.
 - [`explanation/problem-and-purpose.md`](explanation/problem-and-purpose.md): current problem, purpose, audiences, and jobs to be done.
 - [`explanation/proof-chain.md`](explanation/proof-chain.md): how solver evidence becomes an executable Project.
+
+## Current surface boundary
+
+The FastAPI application exposes local auth/community/invitation persistence and the three M7 counterfactual analyses. The current frontend exposes neither capability: its account control remains disabled, M7 has no product route, and solver, reasoning, Project and M7 endpoints are deliberately not role-gated. Projects and browser proof context remain in memory. See [`../BUILD_STATUS.md`](../BUILD_STATUS.md) for the current acceptance boundary.
 
 ## Documentation update rule
 

@@ -11,10 +11,17 @@ This table maps current behavior to its implementation and verification owner. U
 | Minimum disclosed ordered depth-two unlock and matching plan | `backend/app/interventions.py`, `backend/app/planner.py` | 16-path and dependent `Z_TRAIN` → `A_RESOURCE` cases in `backend/tests/test_unlock.py`, `backend/tests/test_planner.py` |
 | Immutable, idempotency-safe transition | `backend/app/interventions.py` | `backend/tests/test_unlock.py`, `backend/tests/test_api.py` |
 | Stable validation/domain/framework error envelope | `backend/app/main.py` | `backend/tests/test_api.py` |
+| Local account, session, profile and password lifecycle | `backend/app/auth/models.py`, `backend/app/auth/crypto.py`, `backend/app/auth/service.py`, `backend/app/auth/api.py` | `backend/tests/auth/test_models.py`, `backend/tests/auth/test_crypto.py`, `backend/tests/auth/test_service.py`, `backend/tests/auth/test_api.py`, `backend/tests/auth/test_adversarial.py` |
+| Persistent community roles, invitations and audit evidence | `backend/app/auth/migrations.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | `backend/tests/auth/test_storage.py`, `backend/tests/auth/test_service.py`, `backend/tests/auth/test_adversarial.py` |
+| Auth body/origin/cookie/rate/permission and segment-scope boundary | `backend/app/auth/boundary.py`, `backend/app/auth/config.py`, `backend/app/auth/api.py` | `backend/tests/auth/test_boundary.py`, `backend/tests/auth/test_config.py`, `backend/tests/auth/test_contract.py`, `backend/tests/auth/test_api.py`, `backend/tests/auth/test_adversarial.py` |
+| Installed auth router with non-auth routes deliberately outside role-gating | `backend/app/main.py`, `backend/app/auth/api.py` | integrated OpenAPI/API checks in `backend/tests/test_api.py` and `backend/tests/auth/test_api.py` |
 | Project creation from explicit 0–2 path | `backend/app/project_models.py`, `backend/app/projects.py`, `backend/app/main.py` | `backend/tests/test_projects.py`, `backend/tests/test_api.py` |
 | Authoritative base-state provenance | `backend/app/projects.py` | forged capability/quantity/availability/lineage cases in `backend/tests/test_api.py` |
 | Normalized Project metadata and content-bound identity | `backend/app/project_models.py`, `backend/app/projects.py` | identity and whitespace cases in `backend/tests/test_projects.py` and `backend/tests/test_api.py` |
 | Server-derived assignments, readiness, venue, time and resources | `backend/app/projects.py` | `backend/tests/test_projects.py` and both real Project journeys |
+| Canonical one-fact structural stress and resilience | `backend/app/analysis_state.py`, `backend/app/resilience.py` | `backend/tests/test_resilience.py`, `backend/tests/test_technical_api.py` |
+| Two-stage minimum-disruption recompilation | `backend/app/recompiler.py`, `backend/app/compiler.py` | `backend/tests/test_recompiler.py`, `backend/tests/test_technical_api.py` |
+| Complete-coverage one-action capability frontier | `backend/app/frontier.py` | `backend/tests/test_frontier.py`, `backend/tests/test_technical_api.py` |
 | Route-backed single-purpose product areas and shared proof context | `frontend/app/layout.tsx`, `frontend/app/(product)/`, `frontend/components/shell/AppShell.tsx`, `frontend/lib/workflow-context.tsx` | provider-boundary unit check; direct URL, Link, Projects → Project Proof → back/forward, hard-refresh, valid/unknown/malformed-route browser replay |
 | Six-action truth-preserving interface | `frontend/app/(product)/initiatives/[initiativeId]/proof/page.tsx`, `frontend/components/AssemblyProduct.tsx`, `frontend/lib/api.ts` | production browser Clinic journey |
 | Basic empty-path and Clinic successor-path Project forms | `frontend/app/(product)/initiatives/[initiativeId]/proof/page.tsx`, `frontend/components/AssemblyProduct.tsx` | production browser Basic and Clinic journeys |
@@ -51,6 +58,12 @@ The normative wording and acceptance criteria live in [`reference/requirements.m
 | FR-015 | `frontend/lib/workflow-context.tsx`, `frontend/components/shell/AppShell.tsx` | browser Reset replay after completed Clinic Project and stale-response delay |
 | FR-016 | `frontend/lib/preferences.ts`, `frontend/lib/preferences.test.ts`, `frontend/app/(product)/preferences/page.tsx`, `frontend/app/globals.css` | cookie fallback/persistence, keyboard, contrast/theme/motion, status, and target checks |
 | FR-017 | `frontend/lib/workflow-context.tsx`, `frontend/components/shell/AppShell.tsx` | single live-region journey announcement replay |
+| FR-018 | `backend/app/auth/models.py`, `backend/app/auth/crypto.py`, `backend/app/auth/service.py`, `backend/app/auth/api.py` | account/session/profile/password lifecycle, rotation and adversarial tests in `backend/tests/auth/` |
+| FR-019 | `backend/app/auth/migrations.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | persisted membership, immediate demotion, cross-community and last-Administrator tests |
+| FR-020 | `backend/app/auth/models.py`, `backend/app/auth/service.py`, `backend/app/auth/storage.py` | recipient binding, single-use/revoke/expiry races, restart, redaction and audit tests |
+| FR-021 | `backend/app/analysis_state.py`, `backend/app/resilience.py`, `backend/app/main.py` | `backend/tests/test_resilience.py`, stress cases in `backend/tests/test_technical_api.py` |
+| FR-022 | `backend/app/recompiler.py`, `backend/app/compiler.py`, `backend/app/main.py` | `backend/tests/test_recompiler.py`, recompile cases in `backend/tests/test_technical_api.py` |
+| FR-023 | `backend/app/frontier.py`, `backend/app/main.py` | `backend/tests/test_frontier.py`, frontier cases in `backend/tests/test_technical_api.py` |
 | NFR-001 | solver, reasoning, transition, Project, and inspector evidence chain | cumulative backend tests and real-browser proof replay |
 | NFR-002 | `backend/app/solver.py`, `backend/app/explain.py`, `backend/app/planner.py` | deterministic fixture matrix and bounded-search tests |
 | NFR-003 | strict bounded backend models and `backend/app/projects.py` | invalid type/ID/extra-field/collection-overflow/forged-state/path/status tests |
@@ -62,6 +75,8 @@ The normative wording and acceptance criteria live in [`reference/requirements.m
 | NFR-009 | local fixture/runtime boundaries | dependency/configuration inspection and absent-capability audit |
 | NFR-010 | local backend/frontend commands | full pytest, typecheck, lint, build, and browser journeys |
 | NFR-011 | `frontend/app/(product)/`, `frontend/components/`, `frontend/app/globals.css` | 320/1440 all-route parity: five destinations, four Community categories, all eight entities, six proof actions, 3 Project fields, complete Project/proof/Preferences capability, no overflow or sub-44px target |
+| NFR-012 | `backend/app/auth/config.py`, `backend/app/auth/crypto.py`, `backend/app/auth/boundary.py`, `backend/app/auth/storage.py`, `backend/app/auth/service.py` | secret-at-rest, fixation/rotation, persisted rate, streamed-byte, exact bounded origin allow-list, segment scope, restart, lock and POSIX mode tests in `backend/tests/auth/` |
+| NFR-013 | `backend/app/analysis_state.py`, `backend/app/resilience.py`, `backend/app/recompiler.py`, `backend/app/frontier.py` | forged-base, mutation, ceiling, UNKNOWN, receipt-identity, witness and solver-call tests in `backend/tests/test_resilience.py`, `backend/tests/test_recompiler.py`, `backend/tests/test_frontier.py`, `backend/tests/test_technical_api.py` |
 
 ## User-story demonstration coverage
 
@@ -74,3 +89,7 @@ The normative wording and acceptance criteria live in [`reference/requirements.m
 | US-008, US-009 | Clinic one-action HTTP 201 Project and focused source inspector | both Project/source-proof segments |
 | US-010 | adversarial Project API suite and stable error envelopes | trust-boundary close and judge Q&A |
 | US-012 | completed-journey Reset replay | 4-minute Reset recovery and close |
+| US-014 | fresh-application restart, cookie/session rotation and secret-at-rest auth tests | API evidence only; disabled frontend account remains truthful |
+| US-015 | complete invitation accept/revoke/expiry, persisted role and audit tests | API evidence only; no current frontend workflow |
+| US-016 | production-fixture stress/recompile runtime tests and counterfactual identity checks | API evidence only; no current M7 frontend surface |
+| US-017 | S0 and trained-source frontier tests, incomplete-coverage ambiguity and Pareto evidence | API evidence only; no current M7 frontend surface |

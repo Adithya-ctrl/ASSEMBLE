@@ -39,7 +39,7 @@ The server derives:
 - readiness checks, evidence, and missing items;
 - equal `created_at` and `updated_at` timestamps at creation.
 
-There are no Project mutation, list, generic CRUD, task, account, authentication, or project-role endpoints in the current product.
+There are no Project mutation, list, generic CRUD, task, project-membership, or project-role endpoints. Separate local account/community/invitation endpoints exist in FastAPI, but they do not role-gate this Project endpoint, are not linked to the solver fixture, and do not persist Projects.
 
 ## Identity
 

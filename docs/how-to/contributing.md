@@ -8,7 +8,7 @@
 4. Verify the current implementation and tests; documentation is evidence and navigation, not executable authority.
 5. Read [`audit-documentation.md`](audit-documentation.md) before declaring a milestone complete.
 
-The event execution packet remains the product authority. Do not silently add authentication, generic project management, cloud services, deployment, publication, or submission behavior.
+The event execution packet remains the product authority. Do not silently add frontend identity behavior, extend community roles onto solver/reasoning/Project/M7 routes, persist Projects or proof state, or add generic project management, cloud services, deployment, publication, or submission behavior.
 
 ## Change rule
 
@@ -67,6 +67,8 @@ Create a local Conventional Commit only at an accepted milestone after the requi
 - Treat all client fields as untrusted and validate at the backend boundary.
 - Derive feasibility, assignments, status, readiness, venue, time, and resources from authoritative data and the solver.
 - Fail closed when state provenance, references, or proof completeness cannot be established.
+- Keep raw passwords, session tokens, invitation tokens/digests and private database material out of logs, docs and Git. The default auth store belongs under ignored `backend/.data/` with POSIX directory/file modes `0700`/`0600`.
+- Do not infer Project persistence or route authorisation from the separate SQLite-backed identity/community/invitation boundary.
 
 ## Completion
 

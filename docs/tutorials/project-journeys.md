@@ -2,6 +2,8 @@
 
 This tutorial uses the deterministic fictional demo fixture.
 
+It covers the current frontend Project journey only. The installed FastAPI account/community/invitation store is not linked to this solver fixture, the account control remains disabled, community roles do not gate the reasoning or Project routes, and Projects/proof state remain in memory. The backend-only stress-test, recompile and frontier APIs also have no steps in this interface tutorial.
+
 ## Basic Workshop: no catalyst required
 
 1. Open **Initiatives**, choose **Basic Digital Workshop**, then open its **Initiative Proof** workspace.

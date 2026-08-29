@@ -16,7 +16,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Direct:** The demonstrated jobs belong to community coordinators and coalition planners; members, participants, and reviewers need the evidence to remain understandable and auditable.
 - **Deeper:** The interface prioritizes a guided capacity-to-Project workflow rather than a generic administration dashboard.
 - **Evidence to show:** focused Community categories/detail, labelled Initiative Proof actions, Project detail, and Project Proof.
-- **Honest boundary:** There are no accounts, project roles, or multi-user workflows in the current build.
+- **Honest boundary:** Local accounts and community roles exist in FastAPI, but there is no frontend identity workflow, project membership, or role-specific product experience.
 
 ### What is novel about ASSEMBLE, and how does it fit the theme?
 
@@ -30,7 +30,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Direct:** Generic project management starts after people already know what to do. ASSEMBLE first proves whether the declared community can execute an initiative and derives a Project from that proof.
 - **Deeper:** It has no generic CRUD, task board, arbitrary assignment, comments, or collaboration layer.
 - **Evidence to show:** Project creation stays absent until a real feasible proof; assignments/readiness are server-derived.
-- **Honest boundary:** Persistence, tasks, reassignment, and collaboration are future work, not hidden features.
+- **Honest boundary:** Auth/community/invitation records persist separately; Projects, proof state, tasks, reassignment, and collaboration do not.
 
 ### What should we notice in the Project?
 
@@ -102,7 +102,14 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Direct:** No. The client submits authoritative S0, an initiative, explicit path, and normalized metadata; the server validates S0, replays the path, solves again, and derives status and execution fields.
 - **Deeper:** Canonical content hashes bind the source plan; INFEASIBLE and UNKNOWN emit no Project.
 - **Evidence to show:** Project request/response, source-plan ID, forged capability/quantity/availability/lineage rejections.
-- **Honest boundary:** This is strong request validation for the local fixture, not a substitute for authentication or production threat controls.
+- **Honest boundary:** Local authentication exists, but this Project endpoint is deliberately not role-gated and the controls are not a production threat model.
+
+### What do the structural-resilience APIs prove?
+
+- **Direct:** They test every canonical witness-derived one-fact loss, keep UNKNOWN explicit, and can prove the minimum assignment changes needed for a replacement before optimising normal burden.
+- **Deeper:** Stress receipts are server-generated counterfactuals; recompilation accepts one canonical perturbation ID; the one-action frontier ranks only complete decisive coverage.
+- **Evidence to show:** real `/api/stress-test`, `/api/recompile`, and `/api/frontier` responses plus M7 tests/reference.
+- **Honest boundary:** These analyses are backend-only, bounded to the fixture and catalogues, absent from the current UI, and never operational Project successors.
 
 ### What happens when resources compete independently?
 
@@ -127,10 +134,10 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 ### How do privacy and security work?
 
-- **Direct:** The current build uses fictional fixture data, strict backend models, rejected unknown fields, authoritative catalogue/state validation, stable errors, and no external LLM, analytics export, or cloud service.
-- **Deeper:** Project status and readiness are server-derived; forged states, unsafe extra fields, blank normalized metadata, invalid paths, UNKNOWN, and INFEASIBLE fail closed.
-- **Evidence to show:** adversarial tests and security reference.
-- **Honest boundary:** There is no authentication, RBAC, encrypted persistence, production deployment hardening, or authorization boundary because the app is localhost-only.
+- **Direct:** The build uses fictional planning data and a local SQLite identity store. Passwords use bounded scrypt; bearer secrets are digest-only; requests, origins, roles, invitations, rate limits and POSIX file modes fail closed under tested local contracts.
+- **Deeper:** Auth/community routes load current persisted membership; Project status/readiness and M7 inputs remain server-derived from authoritative state.
+- **Evidence to show:** auth adversarial/restart/permission tests, Project adversarial tests, M7 trust-boundary tests, and the security reference.
+- **Honest boundary:** The frontend has no identity workflow; community roles do not gate solver/reasoning/Project/M7 routes; there is no email verification, MFA, OAuth, encrypted application-level database, or public-deployment hardening.
 
 ### Is accessibility just responsive styling?
 
@@ -141,14 +148,14 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 ### What is not implemented?
 
-- **Direct:** Authentication, RBAC, persisted Projects, tasks, project membership, reassignment, notifications, external data, deployment, and public operation are absent.
-- **Deeper:** Those capabilities were kept out so the solver-to-Project trust chain could be completed and tested first.
+- **Direct:** Frontend identity/community/invitation and M7 workflows, role-gating outside community administration, persisted Projects/proof, tasks, project membership, reassignment, notifications, external data, deployment, and public operation are absent.
+- **Deeper:** FastAPI has local account/community/invitation persistence and backend-only M7 analyses, but those must not be mistaken for product-surface or production completion.
 - **Evidence to show:** BUILD_STATUS and requirements non-goals.
 - **Honest boundary:** Do not describe roadmap items as partially available.
 
 ### What comes next?
 
-- **Direct:** First, test the declared-data and explanation workflow with real community stakeholders. Then add provenance-aware inventory capture and persistence before project-level roles, reassignment, tasks, or larger portfolio solving.
+- **Direct:** First, test the declared-data and explanation workflow with real community stakeholders. Then connect the accepted local identity boundary to a truthful frontend and decide whether role-gating, Project persistence, tasks or larger portfolio solving is actually needed.
 - **Deeper:** Each addition should preserve strict validation, source identity, explainability, accessibility/full parity, and cumulative gates.
 - **Evidence to show:** current non-goals and traceability process.
 - **Honest boundary:** This is a proposed sequence, not committed scope, funding, or delivery timing.
@@ -159,7 +166,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **Why not ChatGPT?** “The core question is whether every hard constraint can be satisfied. CP-SAT returns an explicit status and witness; an LLM is not in the runtime proof chain.”
 - **What is the key demo?** “Clinic needs three digital helpers but has one. Training two existing helpers costs two, creates an immutable successor, and only a fresh verification unlocks Project creation.”
 - **Can we trust it?** “Within the fixture, important claims are server-derived, content-bound, replayed, and inspectable; forged or non-feasible Project requests fail closed.”
-- **Is it production-ready?** “No. It is a bounded fictional hackathon build with local gates; auth, persistence, real-user validation, scale evidence, and deployment are future work.”
+- **Is it production-ready?** “No. It has local backend auth persistence and deterministic analysis gates, but no frontend identity/M7 workflow, production authorisation boundary, real-user validation, scale evidence, or deployment hardening.”
 - **Is mobile equivalent?** “The requirement is full parity: the same destinations, Community categories and details, proof flow, fields, evidence, preferences, and Project capability at 320 and 1440, with only layout or label presentation changing.”
 
 ## Bridge phrases

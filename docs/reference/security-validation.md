@@ -1,6 +1,6 @@
 # Security and validation reference
 
-ASSEMBLE is currently a localhost, deterministic fixture application. It does not provide accounts, sessions, cloud persistence, OAuth, deployment, or external data ingestion.
+ASSEMBLE is currently a localhost, deterministic fixture application. Its FastAPI backend provides local accounts, cookie sessions, persisted community roles and recipient-bound invitations in a private SQLite store. It does not provide frontend identity workflows, OAuth, cloud persistence, deployment, or external data ingestion. Authentication does not wrap solver, reasoning, Project or M7 routes.
 
 ## Trust boundaries
 
@@ -12,6 +12,11 @@ ASSEMBLE is currently a localhost, deterministic fixture application. It does no
 | Project catalyst path | Required, ordered, unique, known, and bounded to 0–2 actions |
 | Project metadata | Trimmed and length-validated; extra fields rejected |
 | Assignments/readiness/status | Never trusted from the client; always derived server-side |
+| Auth request body | Actual received bytes bounded to 16 KiB; unsafe routes require JSON and strict models |
+| Password/session/invitation secrets | Scrypt password hashes and digest-only bearer storage; raw secrets excluded from persistence and ordinary responses |
+| Community permissions | Reload current persisted membership for every protected community-administration request; preserve the last Administrator |
+| Browser cookie boundary | HttpOnly, SameSite=Lax host-only cookie; present Origin must exactly match the bounded canonical allow-list; Host and forwarded headers never broaden it |
+| Counterfactual analysis | Reconstruct from authoritative S0 and action catalogue; accept no client witness, patch, perturbation body or catalogue |
 
 ## Explicit collection ceilings
 
@@ -33,6 +38,8 @@ Requests fail with `422 INVALID_REQUEST` before reasoning when they exceed these
 
 Unlock and planning are further restricted to unique non-repeating paths of one or two actions. With the authoritative four-action fixture, this is 16 ordered candidates.
 
+Auth request bodies are capped at 16 KiB of actual received bytes. Username, email, password, profile, community, invitation and audit-list field limits are specified in [`identity-community-invitations.md`](identity-community-invitations.md). Stress-test catalogues contain at most 20 server-generated perturbations; the published solver-call ceilings are 601 for stress, 32 for recompile and 1056 for frontier.
+
 ## Fail-closed behavior
 
 - Missing referenced initiative resources remain non-relaxable integrity failures.
@@ -42,11 +49,18 @@ Unlock and planning are further restricted to unique non-repeating paths of one 
 - A forged base state returns `409 COMMUNITY_STATE_MISMATCH` before Project transition or solving.
 - Reapplying an already-present additive effect returns a stable conflict instead of a false successful transition.
 - Framework and domain failures use stable error envelopes.
+- Missing/expired/revoked sessions and persisted role failures return stable auth errors; password changes rotate the current session and revoke earlier sessions.
+- Invitation acceptance is recipient-bound and single-transaction; public token failures are deliberately indistinguishable.
+- Rate counters persist across restart and bound signup, login, password-change and invitation-acceptance attempts before expensive verification.
+- Forged auth database hash parameters, unsafe POSIX database permissions, oversized streamed bodies, non-JSON unsafe auth requests and invalid or rejected exact browser origins fail closed. Auth namespace scope is segment-aware, so lookalike paths fall through to ordinary 404 handling.
+- Counterfactual IDs are domain-separated from operational state IDs and cannot become Project lineage. `UNKNOWN` is explicit and excluded from decisive stress/frontier claims.
 
 ## Current adversarial coverage
 
-Tests cover forged capabilities, resource quantity, space availability and lineage under the same `S0` label; whitespace-only metadata; omitted and extra fields; unknown, duplicate, overlong, insufficient, and already-applied paths; unsafe status/witness combinations and adversarial trace/objective facts; missing referenced IDs; collection overflow; numeric booleans and strings; wrong methods; and unknown routes.
+Tests cover forged capabilities, resource quantity, space availability and lineage under the same `S0` label; whitespace-only metadata; omitted and extra fields; unknown, duplicate, overlong, insufficient, and already-applied paths; unsafe status/witness combinations and adversarial trace/objective facts; missing referenced IDs; collection overflow; numeric booleans and strings; wrong methods; and unknown routes. Auth coverage adds session fixation, rotation/revocation, secret-at-rest scans, recipient-bound invitation replay/races, last-Administrator and cross-community boundaries, persisted rate limits, restart recovery, locked-store translation, origin/fetch metadata, streamed-byte limits, and POSIX `0700`/`0600` enforcement. M7 coverage adds authoritative reconstruction, one-fact delta assertions, catalogue bounds, two-stage recompile invariants, incomplete-coverage frontier ambiguity and non-operational counterfactual identity.
 
-## Deliberately absent
+## Persistence and authorisation boundary
 
-Authentication and role-based access control are not current capabilities. Do not describe the application as multi-user, authenticated, private, or deployment-ready. A future security mission requires a new current contract, threat model, tests, and documentation update before implementation.
+The default auth store is `backend/.data/auth.sqlite3`, ignored by Git; `ASSEMBLE_AUTH_DB_PATH` overrides it. On POSIX its directory is mode `0700` and database/WAL/SHM files are mode `0600`. Auth/community/invitation records are the only persistent application state. Auth-created SQLite communities are not linked to the solver's authoritative fictional fixture. Projects, proof context and current task state remain in memory.
+
+Do not describe the current frontend as authenticated or multi-user: signup, login, session, profile, community administration and invitation acceptance have no current UI. Do not describe solver, reasoning, Project, stress-test, recompile or frontier routes as authorised by community roles; they are deliberately not role-gated. There is no project membership, task authorisation, account recovery, email ownership verification, MFA, OAuth, public-deployment CSRF design, distributed rate limiter, deployment hardening or encrypted application-level database. The local controls are not a production-security or privacy certification.
