@@ -15,13 +15,13 @@ ASSEMBLE makes a declared capacity model inspectable, determines whether a selec
 ## What it does now
 
 1. Loads one deterministic fictional community fixture.
-2. Shows equivalent graph and list representations of its inventory.
-3. Compiles and solves Basic Workshop or Multilingual Clinic with local CP-SAT.
+2. Separates Community capacity into Overview, People, Places, and Resources, with equivalent graph and list representations and focused detail.
+3. Uses dedicated Initiatives and Initiative Proof areas to compile and solve Basic Workshop or Multilingual Clinic with local CP-SAT.
 4. Explains Clinic's digital-support shortfall: three required, one available, shortfall two.
 5. Finds the lowest-cost sufficient disclosed catalyst: train two existing helpers at cost 2.
 6. Applies that action to a copied state, preserves S0, and requires a new solve.
 7. Creates a READY Project only after server-side replay and another feasible result.
-8. Exposes operational assignments, venue, time, resources, readiness, state provenance, and source proof.
+8. Exposes operational assignments, venue, time, resources, readiness, and a dedicated Project Proof route; exact solver/state internals remain discoverable through Judge Proof Mode and the Technical Inspector.
 
 ## Truthful workflow
 

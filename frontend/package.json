@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit --incremental false",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:preferences": "node --import tsx --test lib/preferences.test.ts lib/navigation-persistence.test.ts lib/community-focus.test.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "2.1.10",
@@ -22,6 +23,7 @@
     "@types/react-dom": "19.2.5",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.3",
+    "tsx": "^4.20.6",
     "typescript": "6.0.3"
   }
 }

@@ -8,7 +8,7 @@ The demo fixture is fictional. Results apply only to the declared bounded model 
 
 Start at [`docs/README.md`](docs/README.md). It separates current tutorials, how-to guides, references, and explanations from historical architectural decision records. [`BUILD_STATUS.md`](BUILD_STATUS.md) is the canonical current gate status, and [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md) maps requirements to code and evidence.
 
-The numbered current requirements are in [`docs/reference/requirements.md`](docs/reference/requirements.md). Factual presentation materials live under [`docs/presentation/`](docs/presentation/project-overview.md) and remain bounded to the deterministic fictional fixture.
+The numbered current requirements are in [`docs/reference/requirements.md`](docs/reference/requirements.md). The interface is organised into route-backed Overview, Community, Initiatives, Initiative Proof, Projects, Project Proof, and Preferences areas; the same proof context is preserved during in-app navigation. Factual presentation materials live under [`docs/presentation/`](docs/presentation/project-overview.md) and remain bounded to the deterministic fictional fixture.
 
 Contributions use [Conventional Commits](docs/how-to/contributing.md#conventional-commits). Documentation, traceability, tests, and current gate evidence must be updated in the same change as behavior.
 

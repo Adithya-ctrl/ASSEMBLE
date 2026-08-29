@@ -12,6 +12,7 @@ import type {
 } from "./types";
 
 const apiBaseUrl = "";
+const API_TIMEOUT_MS = 12_000;
 
 export class ApiRequestError extends Error {
   code: string;
@@ -29,10 +30,13 @@ export class ApiRequestError extends Error {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
+  const timeoutSignal = AbortSignal.timeout(API_TIMEOUT_MS);
+  const signal = init?.signal ? AbortSignal.any([init.signal, timeoutSignal]) : timeoutSignal;
 
   try {
     response = await fetch(`${apiBaseUrl}${path}`, {
       ...init,
+      signal,
       headers: {
         Accept: "application/json",
         ...(init?.body ? { "Content-Type": "application/json" } : {}),
@@ -42,6 +46,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      throw new ApiRequestError("The planning service did not respond in time.", 0, "SERVICE_TIMEOUT");
+    }
     throw new ApiRequestError("The planning service could not be reached.", 0, "SERVICE_UNAVAILABLE");
   }
 

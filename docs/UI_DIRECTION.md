@@ -1,6 +1,6 @@
 # ASSEMBLE UI Direction and Acceptance Contract
 
-Status: frozen direction for the event-day redesign. This document adapts premium commercial-design methods to a civic planning application. It is not a landing-page brief.
+Status: current interface direction and browser-acceptance contract. This document adapts premium commercial-design methods to a civic planning application. It is not a landing-page brief.
 
 ## 1. Product truth
 
@@ -54,16 +54,19 @@ Explicit negative reference: generic gradient SaaS dashboards with soft identica
 
 ## 4. Application architecture
 
-The core is a single judge-ready planning workspace followed by a proof-derived Project surface, not a sales homepage or disconnected project-management product.
+The core is a route-backed product with a shared proof context, not a sales homepage, dense all-in-one dashboard, or disconnected project-management product. Every route has one primary job and no more than three simultaneous primary tasks.
 
-### Persistent shell
+### Persistent shell and product routes
 
-- compact top bar: ASSEMBLE identity, state indicator (`S0` or `S1`), reset control, and inspector disclosure;
-- community canvas: organisations, people, capabilities, resources, spaces, and real relationship seams;
-- initiative rail: Basic Workshop, Multilingual Clinic, and Repair Skill-Share with status and requirement sockets;
-- decision workspace: assignment, blocker evidence, candidate interventions, applied catalyst, and successor proof;
-- technical inspector: collapsed by default, containing variable/constraint counts, solve status, objective, trace, state identifier, and exact state diff.
-- executable Project: appears only after a real feasible base proof or verified successor proof; contains editable metadata and server-derived operational detail.
+- compact shell: ASSEMBLE identity, five always-discoverable product destinations, reset, Judge Proof Mode, truthful unavailable-account status, and inspector disclosure;
+- Overview: bounded purpose, current state, and the next useful route;
+- Community: Overview, People, Places, or Resources one category at a time, with a saved Graph/List view and one selected detail surface;
+- Initiatives: choose and understand one declared brief;
+- Initiative Proof: one current action, collapsed completed-action timeline, stage evidence, and the exact six-action sequence;
+- Projects: complete server-returned Project truth after creation;
+- Project Proof: Project identity/status, source initiative, fresh verification, path, lineage, catalyst outputs, and Inspector focus;
+- Preferences: theme, contrast, motion, and preferred Community view only;
+- technical inspector: collapsed by default, containing variable/constraint counts, solve status, objective, trace, exact identifiers, and state diff.
 
 ### Judge journey
 
@@ -82,23 +85,22 @@ After the six-action journey, `CREATE PROJECT` is a separate labelled form actio
 
 ### Desktop, 1280px and above
 
-- 12-column grid with restrained 20-24px outer gutters;
-- community canvas spans seven columns;
-- initiative rail and decision workspace span five columns;
-- inspector spans the full content width below or opens as a full-width drawer;
-- avoid a dashboard of equally elevated containers: only the selected decision surface receives meaningful elevation;
-- use grouping, alignment, hairlines, and whitespace before introducing another box.
+- persistent shell navigation and a restrained content column;
+- Community inventory and its selected detail may share the available width without exposing every category simultaneously;
+- proof evidence uses one current-action surface and a compact completed timeline;
+- inspector spans the content width below the current route;
+- avoid a dashboard of equally elevated containers: use grouping, alignment, hairlines, and whitespace before introducing another box.
 
 ### Tablet, 768-1023px
 
-- community canvas first, initiative selector second, decision workspace third;
-- preserve a compact two-column arrangement inside organisation zones where readable;
+- preserve the same route and navigation capabilities in a compact shell;
+- selected detail follows the current list/canvas when two columns no longer fit;
 - inspector becomes an accordion;
 - no horizontal scrolling.
 
 ### Mobile, 320-767px
 
-- one semantic column in task order;
+- one semantic column in task order and a navigation layout that exposes every destination without horizontal scrolling;
 - initiative choices become full-width rows or a labelled segmented control when all labels remain readable;
 - SVG seams may disappear, but every relationship must remain available as text rows;
 - sticky action area is allowed only when it does not cover content or browser controls;
@@ -131,14 +133,14 @@ Authoritative palette:
 
 Material rules:
 
-- 12px corners on blocks and panels, 10px on controls, full pills only for compact status tags;
+- subtle 4–8px corners only where they communicate grouping or affordance; full pills only for compact semantic status tags;
 - 1px quiet borders and a single restrained shadow on the active decision surface;
 - no gradients, glass, glow, neon, decorative grain, dark cyber styling, or fake paper/wood texture;
 - icon plus label plus colour for states; colour alone is never authoritative.
 
 ### Block grammar
 
-- person: circular shape cue plus person icon, name, capability line, organisation, and availability;
+- person: person icon, name, organisation or availability, with full capabilities in selected detail;
 - capability: certificate/spark shape cue plus explicit capability text;
 - resource: equipment shape cue plus quantity and available quantity;
 - space: building shape cue plus capacity and accessibility/availability;
@@ -146,8 +148,8 @@ Material rules:
 
 ### Connection and requirement grammar
 
-- neutral stitched seam: known relationship not yet solver-validated;
-- cobalt seam: relationship used or validated in the current result;
+- neutral quiet relation: known relationship not yet solver-validated;
+- cobalt relation: relationship used or validated in the current result;
 - open socket: missing requirement, always labelled;
 - closed socket: satisfied requirement after a verified result;
 - blocker proof row: `required`, `available`, `shortfall`, source constraint, and solver-run count when applicable;
@@ -228,7 +230,7 @@ Every UI sprint ends with a real-browser replay. A green build alone is insuffic
 
 At minimum, exercise these as a user:
 
-1. load and refresh the application;
+1. load and refresh the application, then open every route directly and through shell navigation;
 2. open and close the technical inspector;
 3. `COMPILE COMMUNITY`;
 4. select Basic Workshop and `ASSEMBLE NOW`;
@@ -239,10 +241,12 @@ At minimum, exercise these as a user:
 9. `VERIFY NEW STATE` and confirm the clinic is feasible only in `S1`;
 10. confirm Project creation is now available, create the Clinic Project, and open its source proof;
 11. separately create Basic Workshop from explicit `[]` after its real S0 proof;
-12. compare Graph View and List View for equivalent community facts;
+12. compare Graph View and List View in every Community category, select all eight entities, and confirm equivalent facts and technical disclosure;
 13. reset to `S0` and verify the initial state is restored;
 14. test invalid action/state handling where the UI exposes it;
-15. navigate every control with keyboard, including Project fields, contrast, view choice, source proof, and focus return from the inspector.
+15. navigate every control with keyboard, including mobile navigation, Community categories/detail, Project fields, appearance choices, source proof, and focus return from the inspector;
+16. verify malformed and unknown Initiative Proof paths show a truthful not-found state and never analyse a fallback initiative;
+17. verify invalid, oversized, and stale-version preference cookies fail closed, while valid appearance preferences survive refresh and Judge Proof Mode does not.
 
 ### Viewport replay
 

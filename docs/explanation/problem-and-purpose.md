@@ -58,10 +58,10 @@ Needs to replay the complete journey, inspect solver and state evidence, disting
 
 | Situation | Job | Current evidence of completion |
 | --- | --- | --- |
-| Capacity is distributed | See one coherent inventory | Equivalent graph and list views |
+| Capacity is distributed | Inspect one relevant category or entity at a time | Overview/People/Places/Resources categories, focused detail, and equivalent graph/list views |
 | An initiative appears plausible | Test exact feasibility | Solver status, assignment, objective, and trace |
 | The initiative is blocked | Understand the smallest factual blocker | Required, available, shortfall, source facts, solver-run count |
 | Several actions are possible | Find a sufficient minimum | Disclosed catalogue comparison and total cost |
 | A catalyst is selected | Preserve provenance | Immutable successor ID, parent ID, and machine-readable diff |
 | A successor looks feasible | Prove it independently | Separate verification response |
-| A plan is proved | Make execution explicit | Server-derived Project and source-proof control |
+| A plan is proved | Make execution explicit | Server-derived Project, dedicated Project Proof, and Inspector control |

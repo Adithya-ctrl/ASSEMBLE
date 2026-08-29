@@ -96,7 +96,7 @@ def test_project_security_contract_and_current_status_are_documented() -> None:
         assert code in project
         assert code in security
     assert "P0-A Project and integrity hardening is independently accepted" in status
-    assert "144 passed" in status
+    assert "145 passed" in status
 
     for ceiling in (
         "Organisations in a community | 32",
@@ -217,5 +217,49 @@ def test_documentation_audit_and_full_parity_are_wired() -> None:
     assert "must not be accepted, committed, or pushed" in contributing
 
     parity_sources = "\n".join((requirements, accessibility, audit))
-    for evidence in ("320", "1440", "23 controls", "three editable", "26 evidence items", "seven selected-team facts"):
+    for evidence in (
+        "320",
+        "1440",
+        "three editable",
+        "all eight",
+        "Community categories",
+        "Project capabilities",
+        "navigation",
+    ):
         assert evidence in parity_sources
+
+
+def test_modular_interface_contract_is_current_and_traceable() -> None:
+    requirements = (DOCS / "reference" / "requirements.md").read_text(encoding="utf-8")
+    architecture = (DOCS / "explanation" / "architecture.md").read_text(encoding="utf-8")
+    accessibility = (DOCS / "reference" / "accessibility.md").read_text(encoding="utf-8")
+    traceability = (DOCS / "TRACEABILITY.md").read_text(encoding="utf-8")
+    status = (ROOT / "BUILD_STATUS.md").read_text(encoding="utf-8")
+    combined = "\n".join((requirements, architecture, accessibility, traceability, status))
+
+    for route in (
+        "Overview",
+        "Community",
+        "Initiatives",
+        "Initiative Proof",
+        "Projects",
+        "Project Proof",
+        "Preferences",
+    ):
+        assert route in combined
+    for contract in (
+        "assemble_ui_preferences",
+        "Judge Proof Mode",
+        "session-only",
+        "invalid, oversized, or stale-version",
+        "all eight",
+        "independently accepted",
+    ):
+        assert contract in combined
+
+    for stale_claim in (
+        "app/page.tsx",
+        "None of these future roles, navigation changes",
+        "multi-page product experience are the next",
+    ):
+        assert stale_claim not in combined

@@ -15,7 +15,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 - **Direct:** The demonstrated jobs belong to community coordinators and coalition planners; members, participants, and reviewers need the evidence to remain understandable and auditable.
 - **Deeper:** The interface prioritizes a guided capacity-to-Project workflow rather than a generic administration dashboard.
-- **Evidence to show:** Assembly Table, labelled journey actions, Project detail, source proof.
+- **Evidence to show:** focused Community categories/detail, labelled Initiative Proof actions, Project detail, and Project Proof.
 - **Honest boundary:** There are no accounts, project roles, or multi-user workflows in the current build.
 
 ### What is novel about ASSEMBLE, and how does it fit the theme?
@@ -36,7 +36,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 - **Direct:** READY is derived from a fresh replayed solve, not typed by the browser. The Project carries assignments, actual and matched team facts, venue, schedule, resources, readiness checks, state identities, and source-plan identity.
 - **Deeper:** Metadata affects Project identity, while the source-plan identity binds canonical state content and catalyst path.
-- **Evidence to show:** Clinic Project detail and View source proof.
+- **Evidence to show:** Clinic Project detail, dedicated Project Proof, and Inspector focus.
 - **Honest boundary:** The returned Project exists only in the current browser/API response; it is not persisted.
 
 ## Technical and adversarial questions
@@ -136,8 +136,8 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 
 - **Direct:** No. The interface includes native controls, keyboard operation, opaque focus, icon-plus-text status, one scoped live region, 44-pixel targets, reduced motion, high contrast, 200% reflow, and graph/list equivalence.
 - **Deeper:** Full platform parity requires the same controls, flows, fields, inventory facts, evidence, and Project capabilities at 320 and 1440; only layout or label presentation may change.
-- **Evidence to show:** width toggle/captures, keyboard focus, list view, live status, source inspector focus. Independent replay found the same visible controls, three editable fields and complete Project-proof rows at both widths; Builder replay additionally compared 26 evidence items plus seven selected-team facts.
-- **Honest boundary:** These are WCAG-oriented local implementation checks, not a formal conformance audit with disabled users.
+- **Evidence to show:** all five destinations, four Community categories, all eight entities, keyboard focus, graph/list detail, live status, Project Proof/Inspector focus, and the same proof/preferences capability at 320 and 1440. Builder desktop and mobile Lighthouse snapshots scored 100 accessibility with 34 passed and zero failed audits.
+- **Honest boundary:** These are WCAG-oriented local Builder checks, not independent M6 acceptance or a formal conformance audit with disabled users.
 
 ### What is not implemented?
 
@@ -160,7 +160,7 @@ Use the direct answer first. Offer the deeper answer only if invited, show the n
 - **What is the key demo?** “Clinic needs three digital helpers but has one. Training two existing helpers costs two, creates an immutable successor, and only a fresh verification unlocks Project creation.”
 - **Can we trust it?** “Within the fixture, important claims are server-derived, content-bound, replayed, and inspectable; forged or non-feasible Project requests fail closed.”
 - **Is it production-ready?** “No. It is a bounded fictional hackathon build with local gates; auth, persistence, real-user validation, scale evidence, and deployment are future work.”
-- **Is mobile equivalent?** “The requirement is full parity: the same controls, flows, fields, evidence, and Project capability at 320 and 1440, with only layout or label presentation changing.”
+- **Is mobile equivalent?** “The requirement is full parity: the same destinations, Community categories and details, proof flow, fields, evidence, preferences, and Project capability at 320 and 1440, with only layout or label presentation changing.”
 
 ## Bridge phrases
 

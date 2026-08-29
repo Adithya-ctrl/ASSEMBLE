@@ -18,7 +18,7 @@ The deterministic documentation gate checks:
 - required consecutive `FR-###`, `NFR-###`, and `US-###` identifiers;
 - user-story mapping to existing requirements;
 - current requirements represented in traceability;
-- full-feature-parity requirements and evidence at 320 and 1440 CSS pixels;
+- route-backed modular architecture, progressive-disclosure, preference-cookie, and full-feature-parity requirements at 320 and 1440 CSS pixels;
 - current BUILD_STATUS evidence and hold language;
 - Conventional Commit and same-change policy wiring;
 - required problem, purpose, user, success-criteria, video, and claim-boundary sections;
@@ -39,7 +39,7 @@ Run the production-like interface and real API, then compare observed behavior a
 - [`../presentation/project-overview.md`](../presentation/project-overview.md), the timed video and live-demo runbooks, and the judge Q&A;
 - [`../../BUILD_STATUS.md`](../../BUILD_STATUS.md).
 
-Replay both Basic empty-path and Clinic successor-path Project journeys. Check every displayed number, status, action, error code, accessibility behavior, absent capability, and presentation statement against the running software. At both 320 and 1440 CSS pixels, compare controls, flows, three editable fields, inventory facts, proof evidence, and Project capabilities; only layout or label presentation may differ. Confirm current pages contain no superseded behavior; architectural history belongs only in ADRs.
+Replay both Basic empty-path and Clinic successor-path Project journeys. Check every displayed number, status, action, error code, accessibility behavior, absent capability, and presentation statement against the running software. Open every product route directly and through navigation; verify valid, unknown, and malformed Initiative Proof paths. At both 320 and 1440 CSS pixels, compare visible navigation, Community categories and all eight entities, graph/list detail, flows, three editable fields, proof evidence, appearance preferences, account boundary, and Project capabilities; only layout or label presentation may differ. Confirm valid preference-cookie refresh behavior and invalid/oversized/stale-version fallback, session-only Judge Proof Mode, no normal-view identifier leakage, and no superseded behavior. Architectural history belongs only in ADRs.
 
 ## Gate result
 

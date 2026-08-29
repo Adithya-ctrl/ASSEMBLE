@@ -3,7 +3,7 @@
 ## Semantics and keyboard
 
 - The interface uses `main`, header, sections, regions, complementary content, headings, lists, forms, labels, details/summary, and native buttons.
-- All six solver actions, initiative choices, community blocks, graph/list control, contrast control, reset, inspector, form fields, Project creation, and source-proof control are keyboard accessible.
+- Product navigation, all six solver actions, initiative choices, Community category tabs and entity rows, graph/list control, appearance choices, reset, Inspector, form fields, Project creation, and source-proof controls are keyboard accessible.
 - Visible interactive targets are at least 44 by 44 CSS pixels.
 - Focus uses an opaque cobalt outline in normal and high-contrast modes.
 
@@ -15,7 +15,7 @@ The Clinic must not show Project creation or buildable successor status before a
 
 ## Graph and list parity
 
-Graph View and List View are a labelled semantic group. Both expose the same data from the same community object:
+Graph View and List View are a labelled semantic group inside the selected Community category. Both derive from the same community object. Human summaries are visible first; a single selected detail surface carries useful full facts, while exact IDs and slots appear only in its Technical details disclosure, Judge Proof Mode, or the Inspector. Across those layers both representations expose the same:
 
 - organisation, person, space, and resource IDs;
 - capabilities and languages;
@@ -27,7 +27,8 @@ SVG connection lines are decorative and hidden from assistive technology. Text r
 
 ## Visual resilience
 
-- Normal and high-contrast token modes are available.
+- System, light, dark, standard-contrast, and high-contrast token modes are available.
+- Only theme, contrast, motion, and preferred inventory view persist in the strict versioned `assemble_ui_preferences` cookie. Judge Proof Mode resets with the browser session and is never stored as account or security data.
 - Reduced-motion preference clamps animations and transitions and stops the loading spinner animation without hiding its label.
 - Long state, Project, and source-plan IDs wrap.
 - Content reflows at 200% zoom without two-dimensional document scrolling.
@@ -38,6 +39,6 @@ SVG connection lines are decorative and hidden from assistive technology. Text r
 
 At 320 and 1440 CSS pixels, the same controls, flows, editable fields, evidence, and Project capabilities must remain available. Layout and shortened label presentation may change; capability and evidence may not.
 
-Independent browser replay observed the same visible sequence of 23 controls, three editable Project fields, and complete Project-proof rows at both widths, with no horizontal document overflow and no visible interactive target below 44 by 44 CSS pixels. The Builder replay additionally compared 26 evidence items from the completed Project plus seven selected-team facts at each width. These are local implementation checks, not a formal conformance audit or a user-impact claim.
+The current Builder replay traversed every route at 320 and 1440, reached all five primary navigation destinations, all eight Community entities, the same category/detail and graph/list capabilities, all six proof actions, three editable Project fields, complete Project detail and source proof, Preferences, Judge Proof Mode, and the account-boundary status. It found no document or mobile-navigation overflow and no visible interactive target below 44 by 44 CSS pixels. Desktop and mobile Lighthouse accessibility snapshots scored 100 with 34 passed audits and no failed audits. These are local implementation checks, not formal WCAG conformance, independent M6 acceptance, real-user validation, or an impact claim.
 
 Use [`../how-to/verify-changes.md`](../how-to/verify-changes.md) for the browser acceptance procedure.

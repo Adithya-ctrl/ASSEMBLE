@@ -31,8 +31,15 @@ Browser
 
 - `lib/types.ts`: HTTP contract mirror.
 - `lib/api.ts`: same-origin typed client.
-- `app/page.tsx`: the evidence-first six-action workspace and post-proof Project flow.
-- `app/globals.css`: civic visual system, responsive layout, high-contrast tokens, focus, reduced motion, and overflow protection.
+- `app/layout.tsx` and `lib/workflow-context.tsx`: one root-mounted provider owns shared proof state, provenance binding, workflow generations, abort controllers, Project nonce gating, announcements, preferences, and reset behavior across all client-side product navigation.
+- `lib/preferences.ts`: strict versioned cookie encoding for theme, contrast, motion, and preferred inventory view only.
+- `app/(product)/layout.tsx` and `components/shell/AppShell.tsx`: the provider-free product shell owns persistent navigation, account boundary, Judge Proof Mode, Inspector, and live status. Keeping the sole provider above this route-group boundary prevents Project evidence from remounting between `/projects` and `/projects/proof`.
+- `app/(product)/**/page.tsx`: substantive Overview, Community, Initiatives, Initiative Proof, Projects, Project Proof, and Preferences routes.
+- `components/community/CommunityInventory.tsx`: category-scoped graph/list inventory and focused detail surface.
+- `components/AssemblyProduct.tsx`: initiative proof actions, progressive evidence panels, Project form, and Technical Inspector.
+- `components/project/`: server-returned Project detail and dedicated source-proof presentation.
+- `proxy.ts`: fail-visible normalization for malformed dynamic Initiative Proof paths before route handling.
+- `app/globals.css`: shared civic visual grammar, responsive layout, contrast/theme tokens, focus, reduced motion, and overflow protection.
 
 The interface does not calculate feasibility or readiness. It presents backend results and gates Project creation on a provenance-bound proof context. The backend independently replays and solves again when creating the Project.
 
@@ -40,6 +47,8 @@ The interface does not calculate feasibility or readiness. It presents backend r
 
 S0 is the authoritative demo state. A catalyst creates a copied successor with a canonical content-derived ID and `parent_state_id`. Switching initiatives or starting a fresh compile returns the interface to the authoritative base and clears successor proof. The predecessor remains unchanged.
 
-## Next-milestone design input — not implemented
+## Modular presentation boundary
 
-The next separately authorised product milestone should keep backend capabilities in modular domains and present them through progressive disclosure: one clear job per screen or component, no feature dumping into the main dashboard, and the same capabilities on mobile and desktop. Interaction-level references include the calm app shells, predictable detail views, restrained density, and strong onboarding/empty states found in Immich and Outline. ASSEMBLE must not copy their branding or compositions, and this guidance does not imply that a new navigation model, authentication, collaboration, or redesign already exists.
+Each current route has one primary job and no more than three simultaneous primary tasks. The single root provider carries the authoritative in-browser proof context across ordinary Link, back, and forward navigation, including Projects to Project Proof and back; a hard refresh reloads authoritative S0. Human summaries lead, one selected detail surface reveals task-relevant facts, and technical identifiers move to explicit disclosure, Judge Proof Mode, or the Inspector. Mobile and desktop expose the same destinations and capabilities.
+
+This structure does not implement accounts, identity, Community roles, collaboration, or persistence. The account control is deliberately disabled and labelled unavailable until a separately accepted identity integration exists.
